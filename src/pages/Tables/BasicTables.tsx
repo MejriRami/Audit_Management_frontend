@@ -125,11 +125,59 @@ export default function BasicTables() {
       return matchesSearch && matchesType && matchesParent;
     });
   }, [entities, entityFilters]);
+  //   // ---------- Export data as CSV ----------
+  //   const handleExport = () => {
+  //     const dataToExport =
+  //       activeTab === "audits" ? audits : filteredEntities;
+
+  //     if (!dataToExport || dataToExport.length === 0) {
+  //       alert("No data available to export.");
+  //       return;
+  //     }
+
+  //     // Get headers (keys of first object)
+  //     const headers = Object.keys(dataToExport[0]);
+
+  //     // Create CSV rows
+  //     const csvRows: string[] = [];
+  //     csvRows.push(headers.join(",")); // header row
+
+  //     for (const row of dataToExport) {
+  //       const rowRecord = row as unknown as Record<string, unknown>;
+  // const values = headers.map((header) =>
+  //   JSON.stringify(rowRecord[header] ?? "")
+  // );
+
+  //       csvRows.push(values.join(","));
+  //     }
+
+  //     // Generate CSV string
+  //     const csvContent = csvRows.join("\n");
+
+  //     // Add UTF-8 BOM for Excel compatibility
+  //     const csvWithBOM = "\uFEFF" + csvContent;
+
+  //     // Create a Blob and download
+  //     const blob = new Blob([csvWithBOM], { type: "text/csv;charset=utf-8;" });
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement("a");
+
+  //     const timestamp = new Date().toISOString().split("T")[0];
+  //     const filename =
+  //       activeTab === "audits"
+  //         ? `audits_export_${timestamp}.csv`
+  //         : `entities_export_${timestamp}.csv`;
+
+  //     link.href = url;
+  //     link.setAttribute("download", filename);
+  //     link.click();
+  //     window.URL.revokeObjectURL(url);
+  //   };
 
   return (
     <>
       <PageMeta
-        title="Audit & Entity Tables | Admin Dashboard"
+        title="Audit & Entity Tables"
         description="List and filter audits and entities"
       />
       <PageBreadcrumb pageTitle="Audit & Entity list" />
@@ -165,9 +213,10 @@ export default function BasicTables() {
               />
 
               <button
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 
-                bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm 
-                hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                // className="inline-flex items-center gap-2 rounded-lg border border-gray-300
+                // bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm
+                // hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
                 onClick={() => setShowFilters(!showFilters)}
               >
                 {showFilters ? "Hide Filters" : "Filters"}
@@ -175,12 +224,16 @@ export default function BasicTables() {
             </div>
 
             <div className="flex gap-2">
-              <button className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+              {/* <button
+                // onClick={handleExport}
+                // className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
+              >
                 Export Data
-              </button>
-              <button className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]">
+              </button> */}
+              {/* <button className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]">
                 Generate Report
-              </button>
+              </button> */}
             </div>
           </div>
 

@@ -82,21 +82,31 @@ export function useAudits(filters: AuditFilters) {
     }
 
     // Date range filter (based on sessions)
-    if (filters.dateFrom || filters.dateTo) {
-      result = result.filter((a) => {
-        if (!a.sessions || a.sessions.length === 0) return false;
+ if (filters.dateFrom || filters.dateTo) {
+  const fromDate = filters.dateFrom
+    ? new Date(`${filters.dateFrom}T00:00:00`) // start of day local
+    : null;
+  const toDate = filters.dateTo
+    ? new Date(`${filters.dateTo}T23:59:59`) // end of day local
+    : null;
 
-        const hasValidSession = a.sessions.some((session) => {
-          const start = new Date(session.start_time);
-          const from = filters.dateFrom ? new Date(filters.dateFrom) : null;
-          const to = filters.dateTo ? new Date(filters.dateTo) : null;
+  result = result.filter((audit) => {
+    if (!audit.sessions || audit.sessions.length === 0) return false;
 
-          return (!from || start >= from) && (!to || start <= to);
-        });
+    // Check if any session overlaps range
+    return audit.sessions.some((session) => {
+      const start = new Date(session.start_time);
+      const end = new Date(session.end_time);
 
-        return hasValidSession;
-      });
-    }
+      // Audit is included if any session overlaps the range
+      const startsAfterFrom = !fromDate || end >= fromDate;
+      const endsBeforeTo = !toDate || start <= toDate;
+
+      return startsAfterFrom && endsBeforeTo;
+    });
+  });
+}
+
 
     setFilteredAudits(result);
   }, [filters, allAudits]);

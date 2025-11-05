@@ -8,10 +8,9 @@ export default function SidebarWidget() {
         Welcome to trackAudit Viewer!
       </h3>
       <p className="mb-4 text-gray-500 text-theme-sm dark:text-gray-400">
-        Here where you can find audits, findings, generate reports and more
-        stuff
+        Here where you can find audits, findings
       </p>
-      <a
+      {/* <a
         href="/basic-tables"
         // target="_blank"
         rel="nofollow"
@@ -19,7 +18,7 @@ export default function SidebarWidget() {
         style={{ backgroundColor: "#0584CE" }}
       >
         View audit list
-      </a>
+      </a> */}
     </div>
   );
 }
