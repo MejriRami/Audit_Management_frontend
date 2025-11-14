@@ -18,7 +18,9 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-
+import Framework from "./pages/Framework/Framework";
+import Questionnaire from "./pages/Questionnaire/Questionnaire";
+// import QuestionnairePage from "./pages/Questionnaire/QuestionnairePage";
 export default function App() {
   return (
     <>
@@ -27,7 +29,8 @@ export default function App() {
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            {/* <Route index path="/" element={<Home />} /> */}
+            <Route index path="/" element={<BasicTables />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -36,6 +39,11 @@ export default function App() {
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
+            <Route path="/questionnaire" element={<Questionnaire />} />
+            {/* <Route path="/x" element={<QuestionnairePage />} /> */}
+
+            {/* Add Framework */}
+            <Route path="/framework" element={<Framework />} />
 
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />

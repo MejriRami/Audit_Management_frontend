@@ -47,3 +47,62 @@ export interface Entity {
     code: string;
   } | null;
 }
+
+export interface Framework {
+  id: number;
+  label: string;
+  code: string;
+}
+interface email{
+  email:string;
+}
+
+export interface Questionnaire {
+  id: number;
+  questionnaire_id: number;
+  version_no: number;
+  status: string;
+  target_duration: string;
+  score_calculation?: string;
+  guideline_file?: string;
+  type: string;
+  framework: string;
+  name: string;
+  auditors: email[];
+  questions:Question[];
+}
+
+
+export interface Auditor {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface QuestionnaireVersionUpdate {
+  name?: string;
+  framework?: string;
+  type?: string;
+  version_no?: number;
+  status?: string;
+  target_duration?: string;  // send as "HH:MM:SS"
+  guideline_file?: string;
+  auditor_emails?: string[];
+  score_calculation?: string;
+}
+
+export interface Question {
+  id: number;
+  description: string;
+  status: string;
+  chapter: string;
+  qNumber: number;
+  weight: number;
+  value?: number;
+  fail?: number;
+  improve?: number;
+  pass?: number;
+  criticalSuccess?: number;
+  score?: number;
+  type?: string;
+}

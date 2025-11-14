@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
   // },
   // {
   //   icon: <CalenderIcon />,
-  //   name: "Calendar",
+  //   name: "Plan for Audit",
   //   path: "/calendar",
   // },
   // {
@@ -51,6 +51,18 @@ const navItems: NavItem[] = [
     name: "Audits",
     icon: <TableIcon />,
     path: "/basic-tables",
+    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  },
+  {
+    name: "Framework",
+    icon: <TableIcon />,
+    path: "/framework",
+    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  },
+  {
+    name: "Questionnaire",
+    icon: <TableIcon />,
+    path: "/questionnaire",
     // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
   },
   // {
@@ -339,11 +351,11 @@ const AppSidebar: React.FC = () => {
           </nav>
         </div>
         {/* Sidebar widget fixed at bottom */}
-        {(isExpanded || isHovered || isMobileOpen) && (
+        {/* {(isExpanded || isHovered || isMobileOpen) && (
           <div className="mt-4">
             <SidebarWidget />
           </div>
-        )}
+        )} */}
       </div>
     </aside>
   );

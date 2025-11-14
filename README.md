@@ -2,11 +2,11 @@
 
 project for audit management
 
-![TailAdmin React.js Dashboard Preview](./banner.png)
+![TrackAudit](./banner.png)
 
 ## Overview
 
-TailAdmin provides essential UI components and layouts for managing audits, using
+Front-end for managing audits, using
 
 - React 19
 - TypeScript

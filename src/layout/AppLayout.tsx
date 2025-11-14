@@ -8,7 +8,10 @@ const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
-    <div className="min-h-screen xl:flex">
+    // <div className="min-h-screen xl:flex">
+    <div className="min-h-screen x:flex">
+      {/* /* Modified to fix horizontal scroll on xl screens*/}
+
       <div>
         <AppSidebar />
         <Backdrop />

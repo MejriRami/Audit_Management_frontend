@@ -19,8 +19,10 @@ const Calendar: React.FC = () => {
     null
   );
   const [eventTitle, setEventTitle] = useState("");
+  const [questionnaireCode, setQuestionnaireCode] = useState("");
   const [eventStartDate, setEventStartDate] = useState("");
   const [eventEndDate, setEventEndDate] = useState("");
+  const [entity, setEntity] = useState("");
   const [eventLevel, setEventLevel] = useState("");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const calendarRef = useRef<FullCalendar>(null);
@@ -38,7 +40,7 @@ const Calendar: React.FC = () => {
     setEvents([
       {
         id: "1",
-        title: "Event Conf.",
+        title: "test@avocarbon.com",
         start: new Date().toISOString().split("T")[0],
         extendedProps: { calendar: "Danger" },
       },
@@ -53,10 +55,19 @@ const Calendar: React.FC = () => {
         title: "Workshop",
         start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
         end: new Date(Date.now() + 259200000).toISOString().split("T")[0],
-        extendedProps: { calendar: "Primary" },
+        extendedProps: { calendar: "secondary" },
       },
     ]);
   }, []);
+  useEffect(() => {
+    // Style the custom "Plan an Audit +" button once the calendar renders
+    const button = document.querySelector(".fc-addEventButton-button");
+    if (button) {
+      button.className =
+        "fc-addEventButton-button px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] " +
+        "text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600] border-none focus:outline-none";
+    }
+  }, [events]); // run again when events render (ensures button exists)
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();
@@ -69,6 +80,7 @@ const Calendar: React.FC = () => {
     const event = clickInfo.event;
     setSelectedEvent(event as unknown as CalendarEvent);
     setEventTitle(event.title);
+    setQuestionnaireCode(event.title);
     setEventStartDate(event.start?.toISOString().split("T")[0] || "");
     setEventEndDate(event.end?.toISOString().split("T")[0] || "");
     setEventLevel(event.extendedProps.calendar);
@@ -118,12 +130,12 @@ const Calendar: React.FC = () => {
   return (
     <>
       <PageMeta
-        title="React.js Calendar Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Calendar Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="Plan Audit Calendar"
+        description="Manage and schedule audits with our interactive calendar tool."
       />
-      <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div className="custom-calendar">
-          <FullCalendar
+      {/* <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="custom-calendar"> */}
+      {/* <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
@@ -139,131 +151,228 @@ const Calendar: React.FC = () => {
             eventContent={renderEventContent}
             customButtons={{
               addEventButton: {
-                text: "Add Event +",
+                text: "Plan an Audit +",
                 click: openModal,
               },
             }}
-          />
+          /> */}
+      {/* </div> */}
+      <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 p-5">
+        {/* Plan an Audit Button */}
+        <div className="p-5 border border-gray-300 rounded-2xl bg-gray-100 dark:bg-gray-800 dark:border-gray-700 lg:p-6 flex justify-center">
+          <button
+            onClick={openModal}
+            aria-label="Plan an Audit"
+            className="fc-addEventButton-button flex items-center justify-center px-6 py-4 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600] border-none focus:outline-none transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-xl text-xl"
+          >
+            <i className="fa fa-calendar-plus mr-3"></i>{" "}
+            {/* Icon for clarity */}
+            Plan an Audit +
+          </button>
         </div>
-        <Modal
-          isOpen={isOpen}
-          onClose={closeModal}
-          className="max-w-[700px] p-6 lg:p-10"
-        >
-          <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
-            <div>
-              <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
-                {selectedEvent ? "Edit Event" : "Add Event"}
-              </h5>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Plan your next big moment: schedule or edit an event to stay on
-                track
-              </p>
-            </div>
-            <div className="mt-8">
+
+        {/* Reschedule an Audit Button */}
+        {/* <div className="p-5 border border-gray-300 rounded-2xl bg-gray-100 dark:bg-gray-800 dark:border-gray-700 lg:p-6 flex justify-center">
+          <button
+            onClick={openModal}
+            aria-label="Reschedule an Audit"
+            className="fc-addEventButton-button flex items-center justify-center px-6 py-4 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600] border-none focus:outline-none transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-xl text-xl"
+          >
+            <i className="fa fa-calendar-edit mr-3"></i>{" "}
+            Reschedule an Audit
+          </button>
+        </div> */}
+      </div>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        className="max-w-[700px] p-6 lg:p-10"
+      >
+        <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+          <div>
+            <h5 className="mb-2 font-semibold text-gray-800 modal-title text-theme-xl dark:text-white/90 lg:text-2xl">
+              {selectedEvent ? "Edit An Audit" : "Plan an Audit"}
+            </h5>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Plan your next audit: schedule or edit an audit to stay on track
+            </p>
+          </div>
+          <div className="mt-8 space-y-6">
+            {/* === First Row: Audit Title & Auditee Email === */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    Event Title
-                  </label>
-                  <input
-                    id="event-title"
-                    type="text"
-                    value={eventTitle}
-                    onChange={(e) => setEventTitle(e.target.value)}
-                    className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
-                </div>
-              </div>
-              <div className="mt-6">
-                <label className="block mb-4 text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Event Color
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Audit Title
                 </label>
-                <div className="flex flex-wrap items-center gap-4 sm:gap-5">
-                  {Object.entries(calendarsEvents).map(([key, value]) => (
-                    <div key={key} className="n-chk">
-                      <div
-                        className={`form-check form-check-${value} form-check-inline`}
-                      >
-                        <label
-                          className="flex items-center text-sm text-gray-700 form-check-label dark:text-gray-400"
-                          htmlFor={`modal${key}`}
-                        >
-                          <span className="relative">
-                            <input
-                              className="sr-only form-check-input"
-                              type="radio"
-                              name="event-level"
-                              value={key}
-                              id={`modal${key}`}
-                              checked={eventLevel === key}
-                              onChange={() => setEventLevel(key)}
-                            />
-                            <span className="flex items-center justify-center w-5 h-5 mr-2 border border-gray-300 rounded-full box dark:border-gray-700">
-                              <span
-                                className={`h-2 w-2 rounded-full bg-white ${
-                                  eventLevel === key ? "block" : "hidden"
-                                }`}
-                              ></span>
-                            </span>
-                          </span>
-                          {key}
-                        </label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <input
+                  id="event-title"
+                  type="text"
+                  value={eventTitle}
+                  onChange={(e) => setEventTitle(e.target.value)}
+                  placeholder="Enter audit title"
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 
+                   text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 
+                   focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 
+                   dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 
+                   dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                />
               </div>
 
-              <div className="mt-6">
+              <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Enter Start Date
+                  Auditee Email
                 </label>
-                <div className="relative">
-                  <input
-                    id="event-start-date"
-                    type="date"
-                    value={eventStartDate}
-                    onChange={(e) => setEventStartDate(e.target.value)}
-                    className="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                  Enter End Date
-                </label>
-                <div className="relative">
-                  <input
-                    id="event-end-date"
-                    type="date"
-                    value={eventEndDate}
-                    onChange={(e) => setEventEndDate(e.target.value)}
-                    className="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                  />
-                </div>
+                <input
+                  id="auditee-email"
+                  type="email"
+                  placeholder="e.g. auditee@avocarbon.com"
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 
+                   text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 
+                   focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 
+                   dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 
+                   dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                />
               </div>
             </div>
-            <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
-              <button
-                onClick={closeModal}
-                type="button"
-                className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleAddOrUpdateEvent}
-                type="button"
-                className="btn btn-success btn-update-event flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
-              >
-                {selectedEvent ? "Update Changes" : "Add Event"}
-              </button>
+
+            {/* === Second Row: Questionnaire Code & Entity Code === */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Questionnaire Code
+                </label>
+                <select
+                  id="questionnaire-code"
+                  value={questionnaireCode}
+                  onChange={(e) => setQuestionnaireCode(e.target.value)}
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 
+                   text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden 
+                   focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 
+                   dark:text-white/90 dark:focus:border-brand-800"
+                >
+                  <option value="">Select a questionnaire</option>
+                  <option value="Q001">Q001 – IATF</option>
+                  <option value="Q002">Q002 – ISO</option>
+                  <option value="Q003">Q003 – Environmental Review</option>
+                  <option value="Q004">Q004 – VDA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Entity Code
+                </label>
+                <select
+                  id="entity-code"
+                  value={entity}
+                  onChange={(e) => setEntity(e.target.value)}
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 
+                   text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden 
+                   focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 
+                   dark:text-white/90 dark:focus:border-brand-800"
+                >
+                  <option value="">Select an entity</option>
+                  <option value="ENT001">ENT001 – Manufacturing</option>
+                  <option value="ENT002">ENT002 – Logistics</option>
+                  <option value="ENT003">ENT003 – Finance</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6">
+              <label className="block mb-4 text-sm font-medium text-gray-700 dark:text-gray-400">
+                Audit Level
+              </label>
+              <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+                {Object.entries(calendarsEvents).map(([key, value]) => (
+                  <div key={key} className="n-chk">
+                    <div
+                      className={`form-check form-check-${value} form-check-inline`}
+                    >
+                      <label
+                        className="flex items-center text-sm text-gray-700 form-check-label dark:text-gray-400"
+                        htmlFor={`modal${key}`}
+                      >
+                        <span className="relative">
+                          <input
+                            className="sr-only form-check-input"
+                            type="radio"
+                            name="event-level"
+                            value={key}
+                            id={`modal${key}`}
+                            checked={eventLevel === key}
+                            onChange={() => setEventLevel(key)}
+                          />
+                          <span className="flex items-center justify-center w-5 h-5 mr-2 border border-gray-300 rounded-full box dark:border-gray-700">
+                            <span
+                              className={`h-2 w-2 rounded-full bg-white ${
+                                eventLevel === key ? "block" : "hidden"
+                              }`}
+                            ></span>
+                          </span>
+                        </span>
+                        {key}
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* === Third Row: Dates === */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  Start Date
+                </label>
+                <input
+                  id="event-start-date"
+                  type="date"
+                  value={eventStartDate}
+                  onChange={(e) => setEventStartDate(e.target.value)}
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 
+                   text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden 
+                   focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 
+                   dark:text-white/90 dark:focus:border-brand-800"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                  End Date
+                </label>
+                <input
+                  id="event-end-date"
+                  type="date"
+                  value={eventEndDate}
+                  onChange={(e) => setEventEndDate(e.target.value)}
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 
+                   text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden 
+                   focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 
+                   dark:text-white/90 dark:focus:border-brand-800"
+                />
+              </div>
             </div>
           </div>
-        </Modal>
-      </div>
+
+          <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
+            <button
+              onClick={closeModal}
+              type="button"
+              className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleAddOrUpdateEvent}
+              type="button"
+              className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
+            >
+              {selectedEvent ? "Update Changes" : "Plan audit"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      {/* </div> */}
     </>
   );
 };
