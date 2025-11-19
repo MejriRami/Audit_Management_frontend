@@ -20,6 +20,9 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import Framework from "./pages/Framework/Framework";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
+import PlanAudit from "./pages/Audit/PlanAudit";
+import AddQuestionnaire from "./components/form/form-elements/add-questionnaire";
+import AuditChecklist from "./components/audit/FillAudit";
 // import QuestionnairePage from "./pages/Questionnaire/QuestionnairePage";
 export default function App() {
   return (
@@ -40,13 +43,14 @@ export default function App() {
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
             <Route path="/questionnaire" element={<Questionnaire />} />
+            <Route path="/add-questionnaire" element={<AddQuestionnaire />} />
             {/* <Route path="/x" element={<QuestionnairePage />} /> */}
 
             {/* Add Framework */}
             <Route path="/framework" element={<Framework />} />
 
             {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+            <Route path="/audits" element={<BasicTables />} />
 
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
@@ -59,8 +63,8 @@ export default function App() {
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
+            <Route path="/fill" element={<AuditChecklist />} />
           </Route>
-
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />

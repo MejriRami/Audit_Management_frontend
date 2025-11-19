@@ -16,7 +16,16 @@ export interface QuestionAndResponse {
   criticality: string;  
   response: string;     
 }
-
+export interface ScheduleHistoryEntry {
+  id: number;
+  old_start: string;
+  old_end: string;
+  new_start: string;
+  new_end: string;
+  reason?: string;
+  changed_at: string;
+  changed_by: { id: number; name: string };
+}
 export interface Audit {
   id: number;
    entity:string;
@@ -33,6 +42,10 @@ export interface Audit {
   }[];
   questions_and_responses?: QuestionAndResponse[]; 
   questionnaire:string;
+   // New fields for scheduling
+  start?: string;
+  end?: string;
+  scheduleHistory?: ScheduleHistoryEntry[];
 }
 
 export interface Entity {
@@ -106,3 +119,13 @@ export interface Question {
   score?: number;
   type?: string;
 }
+
+
+export interface ScheduleHistory {
+  id: string;
+  oldDate: string;
+  newDate: string;
+  changedAt: string;
+}
+
+ 

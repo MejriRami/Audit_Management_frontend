@@ -28,7 +28,7 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
               bg-gradient-to-r from-[#F9FAFB] to-[#F1F5F9]
               dark:from-[#1C1C1E] dark:to-[#111113]
               text-gray-800 dark:text-gray-100
-              font-semibold text-[15px] uppercase tracking-wide
+              font-semibold text-[15px]  tracking-wide
             "
           >
             <TableRow>
@@ -49,24 +49,30 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Auditee
-              </TableCell>
+              </TableCell>{" "}
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Framework
-              </TableCell>
-              <TableCell
-                isHeader
-                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
-                Entity
+                Plant
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Status
+              </TableCell>
+              <TableCell
+                isHeader
+                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Expected Date
+              </TableCell>
+              <TableCell
+                isHeader
+                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Questionnaire
               </TableCell>
               <TableCell
                 isHeader
@@ -128,15 +134,9 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
                       ))}
                   </div>
                 </TableCell>
-
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  {audit.framework || "-"}
-                </TableCell>
-
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   {audit.entity || "-"}
                 </TableCell>
-
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   <Badge
                     size="sm"
@@ -157,6 +157,12 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
                     {audit.status.charAt(0).toUpperCase() +
                       audit.status.slice(1)}
                   </Badge>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  {/* {audit.entity || "-"} */}10:30-11:30 13/11/2025
+                </TableCell>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  {audit.framework || "-"}
                 </TableCell>
 
                 <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">

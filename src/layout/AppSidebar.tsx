@@ -47,12 +47,7 @@ const navItems: NavItem[] = [
   //   icon: <ListIcon />,
   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   // },
-  {
-    name: "Audits",
-    icon: <TableIcon />,
-    path: "/basic-tables",
-    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
+
   {
     name: "Framework",
     icon: <TableIcon />,
@@ -63,7 +58,19 @@ const navItems: NavItem[] = [
     name: "Questionnaire",
     icon: <TableIcon />,
     path: "/questionnaire",
-    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+    subItems: [
+      { name: "Add a questionnaire", path: "/add-questionnaire" },
+      { name: "List of questionnaires", path: "/questionnaire", pro: false },
+    ],
+  },
+  {
+    name: "Audits",
+    icon: <TableIcon />,
+    path: "/audits",
+    subItems: [
+      { name: "Execute Audit", path: "/fill", pro: false },
+      { name: "List of Audits", path: "/audits", pro: false },
+    ],
   },
   // {
   //   name: "Pages",

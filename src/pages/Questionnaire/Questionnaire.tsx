@@ -1,6 +1,5 @@
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
-import AddQuestionnaire from "../../components/form/form-elements/add-questionnaire";
 import ComponentCard from "../../components/common/ComponentCard";
 import {
   Table,
@@ -28,12 +27,14 @@ import { getAuditors } from "../../api/users";
 import Select from "../../components/form/Select";
 import ConfirmDialog from "../../components/form/ConfirmDialogProps";
 import QuestionsModal from "../../components/Questions.tsx/QuestionsModal";
+import { TimePicker } from "../../components/calendar/TimePicker";
+import { DatePickerOnly } from "../../components/calendar/DatePickerOnly";
+import PlanAudit from "../Audit/PlanAudit";
 // TEMP MOCK QUESTIONS
 export const mockQuestions = [
   {
     id: 1,
     description: "Does the facility maintain required safety controls?",
-    status: "mandatory",
     chapter: "Safety",
     qNumber: 1,
     weight: 5,
@@ -49,7 +50,6 @@ export const mockQuestions = [
   {
     id: 2,
     description: "Are all employees trained on equipment operation?",
-    status: "not mandatory",
     chapter: "Training",
     qNumber: 2,
     weight: 2,
@@ -65,7 +65,6 @@ export const mockQuestions = [
   {
     id: 3,
     description: "Is critical documentation updated monthly?",
-    status: "mandatory",
     chapter: "P6.Process Analytics and production",
     qNumber: 3,
     weight: 10,
@@ -79,6 +78,11 @@ export const mockQuestions = [
     type: "Compliance",
   },
 ];
+const plantOptions = [
+  { value: "Plant A", label: "Plant A" },
+  { value: "Plant B", label: "Plant B" },
+  { value: "Plant C", label: "Plant C" },
+];
 
 export default function FormElements() {
   const [loading, setLoading] = useState(false);
@@ -86,6 +90,7 @@ export default function FormElements() {
   const [selectedQuestionnaire, setSelectedQuestionnaire] =
     useState<Questionnaire | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchAuditors = async () => {
@@ -134,6 +139,9 @@ export default function FormElements() {
     setIsModalOpen(false);
   };
 
+  const closeAuditModalOpen = () => {
+    setIsAuditModalOpen(false);
+  };
   // Open edit modal
   const handleEditQuestionnaire = (questionnaire: Questionnaire) => {
     setSelectedQuestionnaire(questionnaire);
@@ -229,17 +237,37 @@ export default function FormElements() {
     | "Health, Safety and Environment"
     | "Standard Respect"
     | "Usage of Glasses";
+
   const typeStyles: Record<CellType, string> = {
-    process: "bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700",
-    "Internal System":
-      "bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700",
-    machines: "bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800",
-    "Health, Safety and Environment":
-      "bg-gradient-to-r from-red-100 to-red-200 text-red-700",
-    "Standard Respect":
-      "bg-gradient-to-r from-green-100 to-green-200 text-green-700",
-    "Usage of Glasses":
-      "bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-700",
+    process: `
+    bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700
+    dark:bg-gradient-to-r dark:from-blue-700/40 dark:via-blue-600/30 dark:to-blue-700/40 dark:text-blue-200
+  `,
+
+    "Internal System": `
+    bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700
+    dark:bg-gradient-to-r dark:from-purple-700/40 dark:via-purple-600/30 dark:to-purple-700/40 dark:text-purple-200
+  `,
+
+    machines: `
+    bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
+    dark:bg-gradient-to-r dark:from-amber-600/30 dark:via-amber-500/20 dark:to-amber-600/30 dark:text-amber-200
+  `,
+
+    "Health, Safety and Environment": `
+    bg-gradient-to-r from-red-100 to-red-200 text-red-700
+    dark:bg-gradient-to-r dark:from-rose-700/40 dark:via-rose-600/30 dark:to-rose-700/40 dark:text-rose-200
+  `,
+
+    "Standard Respect": `
+    bg-gradient-to-r from-green-100 to-green-200 text-green-700
+    dark:bg-gradient-to-r dark:from-emerald-700/40 dark:via-emerald-600/30 dark:to-emerald-700/40 dark:text-emerald-200
+  `,
+
+    "Usage of Glasses": `
+    bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-700
+    dark:bg-gradient-to-r dark:from-indigo-700/40 dark:via-indigo-600/30 dark:to-indigo-700/40 dark:text-indigo-200
+  `,
   };
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -247,6 +275,11 @@ export default function FormElements() {
   const openDeleteConfirm = (id: number) => {
     setDeleteId(id);
     setIsConfirmOpen(true);
+  };
+
+  const onGenerateAudit = (id: number) => {
+    // setSelectedQuestionnaire(questionnaire);
+    setIsAuditModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -278,16 +311,17 @@ export default function FormElements() {
   const [frameworkOptions, setFrameworkOptions] = useState<
     { label: string; value: string }[]
   >([]);
+
   return (
     <div className="p-6 space-y-8">
       <PageMeta title="Questionnaire" description="..." />
       <PageBreadcrumb pageTitle="Questionnaire" />
-      <div className="max-w-3xl mx-auto my-6">
+      {/* <div className="max-w-3xl mx-auto my-6">
         <AddQuestionnaire onAdded={handleFrameworkAdded} />
-      </div>
+      </div> */}
       <ComponentCard title="Questionnaires List">
-        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-white/[0.05] bg-white dark:bg-gray-900 shadow-sm">
-          <div className="max-w-full overflow-x-auto">
+        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-white/[0.05] bg-white dark:bg-gray-900 shadow-lg">
+          <div className="max-w-full overflow-x-auto relative">
             {loading ? (
               <div className="p-6 text-center text-gray-500 dark:text-gray-400">
                 Loading Questionnaires...
@@ -295,7 +329,7 @@ export default function FormElements() {
             ) : (
               <Table className="min-w-full border-collapse">
                 {/* Sticky Header */}
-                <TableHeader className="sticky top-0 z-30 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-[#1C1C1E] dark:to-[#111113] border-b border-gray-200 dark:border-white/[0.1]">
+                <TableHeader className="sticky top-0 z-30 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-[#1C1C1E] dark:via-[#2A2A2C] dark:to-[#111113] border-b border-gray-200 dark:border-white/[0.1] shadow-sm">
                   <TableRow className="divide-x divide-gray-200 dark:divide-white/[0.05]">
                     {[
                       "#ID",
@@ -303,27 +337,26 @@ export default function FormElements() {
                       "Version",
                       "Framework",
                       "Type",
-                      "Valid Auditors",
+                      "Auditors",
                       "Target Duration Time",
                       "Score Calculation",
                       "Guide File",
                       "Actions",
                     ].map((header, index) => {
-                      // Sticky positions for left/right columns
                       const stickyClasses =
                         index === 0
-                          ? "sticky left-0 z-40 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"
+                          ? "sticky left-0 z-40 shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]"
                           : index === 1
-                          ? "sticky left-[80px] z-40 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]"
+                          ? "sticky left-[80px] z-40 shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]"
                           : index === 9
-                          ? "sticky right-0 z-40 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]"
+                          ? "sticky right-0 z-40 shadow-[-2px_0_6px_-3px_rgba(0,0,0,0.1)]"
                           : "";
 
                       return (
                         <TableCell
                           key={header}
                           isHeader
-                          className={`px-6 py-3 text-left text-sm font-normal text-gray-700 dark:text-gray-300  tracking-wide bg-gradient-to-r from-gray-50 to-gray-100 dark:from-[#1C1C1E] dark:to-[#111113] ${stickyClasses}`}
+                          className={`px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 tracking-wide bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 dark:from-[#1C1C1E] dark:via-[#2A2A2C] dark:to-[#111113] ${stickyClasses}`}
                         >
                           {header}
                         </TableCell>
@@ -337,17 +370,17 @@ export default function FormElements() {
                     questionnaires.map((q) => (
                       <TableRow
                         key={q.id}
-                        className="divide-x divide-gray-100 dark:divide-white/[0.05] group hover:bg-blue-50 dark:hover:bg-white/[0.05] transition-colors"
+                        className="divide-x divide-gray-100 dark:divide-white/[0.05] group hover:bg-orange-50 dark:hover:bg-white/[0.05] transition-colors duration-200"
                       >
-                        {/* Sticky ID column */}
-                        <TableCell className="sticky left-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-6 py-3 text-sm text-gray-500 dark:text-gray-400 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.05)]">
+                        {/* Sticky ID */}
+                        <TableCell className="sticky left-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-orange-50 dark:group-hover:bg-white/[0.05] px-6 py-3 text-sm text-gray-500 dark:text-gray-400 shadow-[2px_0_6px_-3px_rgba(0,0,0,0.05)]">
                           {q.id}
                         </TableCell>
 
-                        {/* Sticky Name column */}
-                        <TableCell className="sticky left-[80px] z-20 bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] shadow-[2px_0_4px_-2px_rgba(0,0,0,0.05)]">
+                        {/* Sticky Name */}
+                        <TableCell className="sticky left-[80px] z-20 bg-white dark:bg-gray-900 group-hover:bg-orange-50 dark:group-hover:bg-white/[0.05] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.05)]">
                           <button
-                            className="text-orange-400 hover:underline px-4 py-2 min-w-[250px] whitespace-normal text-sm"
+                            className="text--500 hover:underline px-4 py-2 min-w-[250px] whitespace-normal text-sm font-medium transition-transform duration-200 hover:scale-105"
                             onClick={() => openModal(q)}
                           >
                             {q.name}
@@ -355,40 +388,36 @@ export default function FormElements() {
                         </TableCell>
 
                         {/* Normal columns */}
-                        <TableCell className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
                           {q.version_no}
                         </TableCell>
-                        <TableCell className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
                           {q.framework}
                         </TableCell>
-                        <TableCell className="px-6 py-3 text-sm font-normal text-gray-800 dark:text-gray-100">
+                        <TableCell className="px-6 py-3 text-sm">
                           <span
-                            className={`inline-flex items-center justify-center px-6 py-2 rounded-full text-xs font-normal capitalize tracking-wide shadow-sm
-                ${
-                  q.type && typeStyles.hasOwnProperty(q.type)
-                    ? typeStyles[q.type as CellType]
-                    : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                }
-                transition-all duration-200 hover:scale-105`}
+                            className={`inline-flex items-center justify-center px-5 py-1 rounded-full text-xs font-medium capitalize tracking-wide shadow-sm
+                        ${
+                          q.type && typeStyles.hasOwnProperty(q.type)
+                            ? typeStyles[q.type as CellType]
+                            : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                        }
+                        transition-all duration-200 hover:scale-105`}
                           >
                             {q.type || "N/A"}
                           </span>
                         </TableCell>
-
-                        <TableCell className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          <div className="flex flex-col gap-1">
-                            {q.auditors?.map((p: any) => (
-                              <div
-                                key={p.email}
-                                className="text-sm text-gray-700 dark:text-gray-300"
-                              >
-                                {p.email}
-                              </div>
-                            ))}
-                          </div>
+                        <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
+                          {q.auditors?.map((p: any) => (
+                            <div
+                              key={p.email}
+                              className="text-sm text-gray-700 dark:text-gray-300"
+                            >
+                              {p.email}
+                            </div>
+                          ))}
                         </TableCell>
-
-                        <TableCell className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
+                        <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
                           {q.target_duration}
                         </TableCell>
                         <TableCell className="px-6 py-3 text-sm font-medium text-gray-800 dark:text-white">
@@ -398,21 +427,31 @@ export default function FormElements() {
                           {q.guideFile || "N/A"}
                         </TableCell>
 
-                        {/* Sticky Actions column */}
-                        <TableCell className="sticky right-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-6 py-3 text-center shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.05)]">
+                        {/* Sticky Actions */}
+                        <TableCell className="sticky right-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-orange-50 dark:group-hover:bg-white/[0.05] px-6 py-3 text-center shadow-[-2px_0_6px_-3px_rgba(0,0,0,0.05)]">
                           <div className="flex justify-center gap-3">
                             <button
-                              className="px-2.5 py-1.5 text-sm bg-gradient-to-r from-[#0584CE] to-[#046EAF] dark:from-[#035C91] dark:to-[#023C64] text-white rounded-md"
+                              className="px-2 py-1
+ text-xs bg-gradient-to-r from-[#4ADE80] to-[#22C55E]
+ text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
                               onClick={() => handleEditQuestionnaire(q)}
                             >
                               Edit
                             </button>
-
                             <button
-                              className="px-2.5 py-1.5 text-sm bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-md dark:from-[#B55A00] dark:to-[#8A4600]"
+                              className="px-1.5 py-1
+ text-xs bg-gradient-to-r from-[#F87171] to-[#EF4444]
+ text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
                               onClick={() => openDeleteConfirm(q.id)}
                             >
                               Delete
+                            </button>
+                            <button
+                              className="px-1.5 py-1 text-xs bg-gradient-to-r from-blue-300 to-blue-400
+ text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
+                              onClick={() => onGenerateAudit(q.id)}
+                            >
+                              Generate An Audit
                             </button>
                           </div>
                         </TableCell>
@@ -421,7 +460,7 @@ export default function FormElements() {
                   ) : (
                     <tr>
                       <td colSpan={10}>
-                        <p className="text-gray-500 p-4">
+                        <p className="text-gray-500 p-6 text-center">
                           No Questionnaires found.
                         </p>
                       </td>
@@ -456,9 +495,9 @@ export default function FormElements() {
               Modify the details of the selected Questionnaire.
             </p>
           </div>
-
           <div className="mt-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Row 1: Name | Framework | Version */}
               <div className="space-y-4">
                 <Label htmlFor="name">Questionnaire Name</Label>
                 <Input
@@ -478,18 +517,32 @@ export default function FormElements() {
                   options={frameworkOptions}
                   placeholder="Select a Framework"
                   defaultValue={selectedQuestionnaire?.framework || ""}
-                  onChange={(e) => {
+                  onChange={(e) =>
                     setSelectedQuestionnaire((prev) =>
                       prev ? { ...prev, framework: e } : prev
-                    );
-                  }}
+                    )
+                  }
                   className="dark:bg-dark-900"
                 />
               </div>
 
-              {/* type */}
+              <div className="space-y-4">
+                <Label htmlFor="version">Version</Label>
+                <Input
+                  type="number"
+                  value={selectedQuestionnaire?.version_no || ""}
+                  onChange={(e) =>
+                    setSelectedQuestionnaire((prev) =>
+                      prev
+                        ? { ...prev, version_no: parseInt(e.target.value) }
+                        : prev
+                    )
+                  }
+                />
+              </div>
 
-              <div className="space-y-4 md:col-span-2">
+              {/* Row 2: Type (full width) */}
+              <div className="space-y-4 md:col-span-1">
                 <Label>Select Type</Label>
                 <Select
                   options={auditTypeOptions}
@@ -505,21 +558,6 @@ export default function FormElements() {
               </div>
 
               <div className="space-y-4">
-                <Label htmlFor="name">Version</Label>
-                <Input
-                  type="number"
-                  value={selectedQuestionnaire?.version_no || ""}
-                  onChange={(e) =>
-                    setSelectedQuestionnaire((prev) =>
-                      prev
-                        ? { ...prev, version_no: parseInt(e.target.value) }
-                        : prev
-                    )
-                  }
-                />
-              </div>
-
-              <div className="space-y-4">
                 <Label htmlFor="tm">Target Duration Time</Label>
                 <div className="relative">
                   <Input
@@ -527,7 +565,7 @@ export default function FormElements() {
                     id="tm"
                     value={
                       selectedQuestionnaire?.target_duration
-                        ? selectedQuestionnaire.target_duration.padStart(8, "0") // ensures 02:00:00 not 2:00:00
+                        ? selectedQuestionnaire.target_duration.padStart(8, "0")
                         : ""
                     }
                     onChange={(e) =>
@@ -538,35 +576,14 @@ export default function FormElements() {
                       )
                     }
                   />
-
                   <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                     <TimeIcon className="size-6" />
                   </span>
                 </div>
               </div>
-              <div>
-                <MultiSelect
-                  label="Valid Auditors"
-                  options={auditorOptions}
-                  defaultSelected={
-                    selectedQuestionnaire?.auditors?.map((a) => a.email) || []
-                  }
-                  onChange={(selectedEmails: string[]) => {
-                    setSelectedQuestionnaire((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            // store auditors as array of { email: string }
-                            auditors: selectedEmails.map((email) => ({
-                              email,
-                            })),
-                          }
-                        : prev
-                    );
-                  }}
-                />
-              </div>
-              <div>
+
+              {/* Row 3: Score Calculation (full width) */}
+              <div className="space-y-4 ">
                 <Label>Score Calculation</Label>
                 <TextArea
                   placeholder="Enter your score formula"
@@ -580,12 +597,35 @@ export default function FormElements() {
                 />
               </div>
 
-              <div>
-                <Label>Upload Guide Line file</Label>
+              {/* Row 4: File Upload (full width) */}
+              <div className="space-y-4 md:col-span-3">
+                <Label>Upload Guide Line File</Label>
                 <FileInput
                   // onChange={handleFileChange}
                   className="custom-class"
                   // value={selectedQuestionnaire?.file || ""}
+                />
+              </div>
+
+              <div className="space-y-4 md:col-span-3">
+                <MultiSelect
+                  label="Auditors"
+                  options={auditorOptions}
+                  defaultSelected={
+                    selectedQuestionnaire?.auditors?.map((a) => a.email) || []
+                  }
+                  onChange={(selectedEmails: string[]) => {
+                    setSelectedQuestionnaire((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            auditors: selectedEmails.map((email) => ({
+                              email,
+                            })),
+                          }
+                        : prev
+                    );
+                  }}
                 />
               </div>
             </div>
@@ -618,6 +658,14 @@ export default function FormElements() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setIsConfirmOpen(false)}
       />
+
+      {/* Add Audit Plan */}
+
+      <PlanAudit
+        isAuditModalOpen={isAuditModalOpen}
+        closeAuditModalOpen={closeAuditModalOpen}
+        auditorOptions={auditorOptions}
+      ></PlanAudit>
     </div>
   );
 }
