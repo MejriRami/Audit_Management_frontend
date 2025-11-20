@@ -57,11 +57,15 @@ const navItems: NavItem[] = [
   //   icon: <ListIcon />,
   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   // },
+<<<<<<< HEAD
    {
     name: "Audits",
     icon: <FileSearch className="w-5 h-5" />,
     path: "/basic-tables",
   },
+=======
+
+>>>>>>> 47dd181aa1fc3672a181ab53e0717bd10fcf08e7
   {
     name: "Framework",
     icon: <BookCheck className="w-5 h-5" />,
@@ -81,11 +85,27 @@ const navItems: NavItem[] = [
     name: "Questionnaire",
     icon: <ListChecks className="w-5 h-5" />,
     path: "/questionnaire",
+<<<<<<< HEAD
   },
   {
     name: "KPI Audits",
     icon: <BarChart2 className="w-5 h-5" />,
     path: "/kpi-audits",
+=======
+    subItems: [
+      { name: "Add a questionnaire", path: "/add-questionnaire" },
+      { name: "List of questionnaires", path: "/questionnaire", pro: false },
+    ],
+  },
+  {
+    name: "Audits",
+    icon: <TableIcon />,
+    path: "/audits",
+    subItems: [
+      { name: "Execute Audit", path: "/fill", pro: false },
+      { name: "List of Audits", path: "/audits", pro: false },
+    ],
+>>>>>>> 47dd181aa1fc3672a181ab53e0717bd10fcf08e7
   },
   // {
   //   name: "Pages",

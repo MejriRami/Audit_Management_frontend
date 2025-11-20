@@ -23,10 +23,18 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "flatpickr": "^4.6.13",
+<<<<<<< HEAD
     "lucide-react": "^0.554.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-big-calendar": "^1.19.4",
+=======
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.554.0",
+    "react": "^19.0.0",
+    "react-apexcharts": "^1.7.0",
+    "react-datepicker": "^8.9.0",
+>>>>>>> 47dd181aa1fc3672a181ab53e0717bd10fcf08e7
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",

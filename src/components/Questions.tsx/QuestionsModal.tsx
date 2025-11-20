@@ -222,9 +222,9 @@ export default function QuestionsModal({
                   <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                     Description
                   </th>
-                  <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+                  {/* <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                     Status
-                  </th>
+                  </th> */}
                   <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                     Chapter
                   </th>
@@ -272,7 +272,7 @@ export default function QuestionsModal({
                         className="w-full border rounded px-2 py-1"
                       />
                     </td>
-                    <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+                    {/* <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                       <select
                         name="status"
                         value={newQuestion.status || ""}
@@ -282,7 +282,7 @@ export default function QuestionsModal({
                         <option value="mandatory">Mandatory</option>
                         <option value="not mandatory">Not Mandatory</option>
                       </select>
-                    </td>
+                    </td> */}
                     <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                       <input
                         name="chapter"
@@ -369,7 +369,7 @@ export default function QuestionsModal({
                           q.description
                         )}
                       </td>
-                      <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
+                      {/* <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                         {editRowId === q.id ? (
                           <select
                             name="status"
@@ -397,7 +397,7 @@ export default function QuestionsModal({
                             {q.status || "N/A"}
                           </span>
                         )}
-                      </td>
+                      </td> */}
                       <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                         {editRowId === q.id ? (
                           <input

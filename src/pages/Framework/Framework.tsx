@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Framework from "../../components/form/form-elements/add-framework";
-import ComponentCard from "../../components/common/ComponentCard";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../../components/ui/table";
+
 import { Framework as FrameworkType } from "../../types";
 import {
   getFrameworks,
@@ -18,6 +11,9 @@ import {
 } from "../../api/frameworks";
 import { Modal } from "../../components/ui/modal";
 import ConfirmDialog from "../../components/form/ConfirmDialogProps";
+import Label from "../../components/form/Label";
+import Input from "../../components/form/input/InputField";
+import Panel from "../../components/form/panel";
 
 export default function FrameworkElements() {
   const [frameworks, setFrameworks] = useState<FrameworkType[]>([]);
@@ -25,6 +21,54 @@ export default function FrameworkElements() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFramework, setSelectedFramework] =
     useState<FrameworkType | null>(null);
+  const [auditCode, setAuditCode] = useState("");
+  // Generate stable color from string
+  const getColorForType = (str: string) => {
+    const colors = [
+      "bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-100",
+      "bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-100",
+      "bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-100",
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-100",
+      "bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-100",
+      "bg-pink-100 text-pink-700 dark:bg-pink-800 dark:text-pink-100",
+      "bg-orange-100 text-orange-700 dark:bg-orange-800 dark:text-orange-100",
+      "bg-teal-100 text-teal-700 dark:bg-teal-800 dark:text-teal-100",
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
+
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Audit Types are simple strings
+
+  // const auditTypeOptions = [
+  //   { value: "process", label: "Process" },
+  //   { value: "Internal System", label: "Internal System" },
+  //   { value: "machines", label: "Machines" },
+  //   {
+  //     value: "Health, Safety and Environment",
+  //     label: "Health, Safety and Environment",
+  //   },
+  //   { value: "Standard Respect", label: "Standard Respect" },
+  //   { value: "Usage of Glasses", label: "Usage of Glasses" },
+  // ];
+  const auditTypeOptions = [
+    "process",
+    "Internal System",
+    "machines",
+    "Usage of Glasses",
+    "Standard Respect",
+    "Health, Safety and Environment",
+  ];
+
+  const [auditTypes, setAuditTypes] = useState<string[]>(auditTypeOptions);
 
   // Fetch list of frameworks
   const fetchFrameworks = async () => {
@@ -95,131 +139,197 @@ export default function FrameworkElements() {
       setDeleteId(null);
     }
   };
+  const handleAddAuditType = () => {
+    setErrorMsg("");
+
+    const clean = auditCode.trim();
+    if (!clean) return;
+
+    // case insensitive duplicate check
+    const exists = auditTypes.some(
+      (t) => t.toLowerCase() === clean.toLowerCase()
+    );
+
+    if (exists) {
+      setErrorMsg("❗ This audit type already exists.");
+      return;
+    }
+
+    setAuditTypes((prev) => [...prev, clean]);
+    setAuditCode("");
+  };
+
+  const deleteAuditType = (code: string) => {
+    setAuditTypes((prev) => prev.filter((t) => t !== code));
+  };
 
   return (
-    <div className="p-6 space-y-8">
-      <PageMeta
-        title="Framework Management"
-        description="Manage and add new frameworks to the system"
-      />
-      <PageBreadcrumb pageTitle="Framework" />
+    <div className="p-8 space-y-16">
+      <PageMeta title="Framework Management" description="" />
+      <PageBreadcrumb pageTitle="Frameworks" />
 
-      {/* Add Framework Form */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <Framework onAdded={handleFrameworkAdded} />
-      </div>
-
-      {/* Frameworks List */}
-      <ComponentCard title="Frameworks List">
-        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-white/[0.05] bg-white dark:bg-gray-900 shadow-sm">
-          <div className="max-w-full overflow-x-auto">
-            {loading ? (
-              <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-                Loading frameworks...
-              </div>
-            ) : (
-              <Table className="min-w-full">
-                <TableHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-[#1C1C1E] dark:to-[#111113] border-b border-gray-200 dark:border-white/[0.1]">
-                  <TableRow>
-                    {["#ID", "Label", "Code", "Actions"].map(
-                      (header, index) => (
-                        <TableCell
-                          key={header}
-                          isHeader
-                          className={`px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide ${
-                            index === 0
-                              ? "w-1/12"
-                              : index === 3
-                              ? "w-2/12 text-center"
-                              : "w-3/12"
-                          }`}
-                        >
-                          {header}
-                        </TableCell>
-                      )
-                    )}
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  {frameworks.length > 0 ? (
-                    frameworks.map((framework) => (
-                      <TableRow
-                        key={framework.id}
-                        className="hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
-                      >
-                        <TableCell className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          {framework.id}
-                        </TableCell>
-                        <TableCell className="px-6 py-3 text-sm font-medium text-gray-800 dark:text-white">
-                          {framework.label}
-                        </TableCell>
-                        <TableCell className="px-6 py-3 text-sm text-gray-500 dark:text-gray-400">
-                          {framework.code}
-                        </TableCell>
-                        <TableCell className="px-6 py-3 text-center">
-                          <div className="flex items-center justify-center space-x-3">
-                            <button
-                              onClick={() => handleEdit(framework)}
-                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
-                              title="Edit"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.8"
-                                stroke="currentColor"
-                                className="w-5 h-5 cursor-pointer transition-colors hover:text-blue-700 dark:hover:text-blue-300"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M16.862 4.487a2.25 2.25 0 0 1 3.182 3.182L8.25 19.463 3 21l1.537-5.25L16.862 4.487z"
-                                />
-                              </svg>
-                            </button>
-
-                            <button
-                              onClick={() => openDeleteConfirm(framework.id)}
-                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
-                              title="Delete"
-                            >
-                              <svg
-                                className="cursor-pointer hover:fill-error-500 dark:hover:fill-error-500 fill-gray-700 dark:fill-gray-400"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M6.54142 3.7915C6.54142 2.54886 7.54878 1.5415 8.79142 1.5415H11.2081C12.4507 1.5415 13.4581 2.54886 13.4581 3.7915V4.0415H15.6252H16.666C17.0802 4.0415 17.416 4.37729 17.416 4.7915C17.416 5.20572 17.0802 5.5415 16.666 5.5415H16.3752V8.24638V13.2464V16.2082C16.3752 17.4508 15.3678 18.4582 14.1252 18.4582H5.87516C4.63252 18.4582 3.62516 17.4508 3.62516 16.2082V13.2464V8.24638V5.5415H3.3335C2.91928 5.5415 2.5835 5.20572 2.5835 4.7915C2.5835 4.37729 2.91928 4.0415 3.3335 4.0415H4.37516H6.54142V3.7915ZM14.8752 13.2464V8.24638V5.5415H13.4581H12.7081H7.29142H6.54142H5.12516V8.24638V13.2464V16.2082C5.12516 16.6224 5.46095 16.9582 5.87516 16.9582H14.1252C14.5394 16.9582 14.8752 16.6224 14.8752 16.2082V13.2464ZM8.04142 4.0415H11.9581V3.7915C11.9581 3.37729 11.6223 3.0415 11.2081 3.0415H8.79142C8.37721 3.0415 8.04142 3.37729 8.04142 3.7915V4.0415ZM8.3335 7.99984C8.74771 7.99984 9.0835 8.33562 9.0835 8.74984V13.7498C9.0835 14.1641 8.74771 14.4998 8.3335 14.4998C7.91928 14.4998 7.5835 14.1641 7.5835 13.7498V8.74984C7.5835 8.33562 7.91928 7.99984 8.3335 7.99984ZM12.4168 8.74984C12.4168 8.33562 12.081 7.99984 11.6668 7.99984C11.2526 7.99984 10.9168 8.33562 10.9168 8.74984V13.7498C10.9168 14.1641 11.2526 14.4998 11.6668 14.4998C12.081 14.4998 12.4168 14.1641 12.4168 13.7498V8.74984Z"
-                                  fill=""
-                                ></path>
-                              </svg>
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell className="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-                        No frameworks found.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+      {/* ===========================
+         FRAMEWORKS LIST SECTION
+       =========================== */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between ">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            🧱 Frameworks
+          </h2>
         </div>
-      </ComponentCard>
 
-      {/* Edit Framework Modal */}
+        {loading && (
+          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+        )}
+
+        {!loading && frameworks.length === 0 && (
+          <div className="p-6 border rounded-2xl bg-gray-50 dark:bg-gray-900/20 text-center">
+            <p className="text-gray-500 dark:text-gray-400">
+              No frameworks found.
+            </p>
+          </div>
+        )}
+
+        {/* Grid list */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 ">
+          {frameworks.map((f) => (
+            <div
+              key={f.id}
+              className="rounded-2xl border bg-white dark:bg-gray-900 shadow-sm p-6
+            flex flex-col justify-between hover:shadow-md transition bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100  dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+            >
+              {/* Top */}
+              <div className="space-y-1">
+                <h3 className="text-md font-normal text-gray-800 dark:text-gray-100">
+                  {f.label}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  ID: {f.id}
+                </p>
+
+                {/* code badge */}
+                <span
+                  className="inline-block mt-2 px-3 py-1 text-xs font-medium
+              bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 
+              rounded-full"
+                >
+                  {f.code}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center mt-6 gap-3">
+                <button
+                  onClick={() => handleEdit(f)}
+                  className="px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 
+                text-blue-600 dark:text-blue-300 font-medium hover:bg-blue-100 
+                dark:hover:bg-blue-900/30 transition"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => openDeleteConfirm(f.id)}
+                  className="px-4 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 
+                text-orange-600 dark:text-orange-300 font-medium hover:bg-orange-100 
+                dark:hover:bg-orange-900/30 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+          🏷️ Audit Types
+        </h2>
+
+        {auditTypes.length === 0 ? (
+          <div className="p-6 border rounded-2xl bg-gray-50 dark:bg-gray-900/20 text-center">
+            <p className="text-gray-500 dark:text-gray-400">
+              No audit types found.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4">
+            {auditTypes.map((code) => (
+              <div
+                key={code}
+                className={`p-4 rounded-xl shadow-sm border hover:shadow-md transition relative group ${getColorForType(
+                  code
+                )}`}
+              >
+                <span className="font-semibold text-sm">{code}</span>
+
+                {/* Delete */}
+                <button
+                  onClick={() => deleteAuditType(code)}
+                  className="absolute top-2 right-2 text-gray-600 hover:text-red-600 
+            opacity-0 group-hover:opacity-100 transition"
+                >
+                  ✖
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ===========================
+         FORMS SECTION (2-column)
+       =========================== */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-10">
+        {/* Add Framework */}
+        <Panel
+          title="Add Framework"
+          className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-50  dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+        >
+          <Framework onAdded={handleFrameworkAdded} />
+        </Panel>
+
+        {/* Add Audit Type */}
+        <Panel
+          title="Add Audit Type"
+          className="
+  bg-gradient-to-br from-blue-50 via-blue-100/70 to-blue-50
+  dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
+        >
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label>Audit Code</Label>
+              <Input
+                placeholder="e.g. Machines"
+                value={auditCode}
+                onChange={(e) => setAuditCode(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            {errorMsg && (
+              <p className="text-red-600 text-sm font-medium">{errorMsg}</p>
+            )}
+
+            <button
+              onClick={handleAddAuditType}
+              className={`
+      w-full py-3 rounded-xl font-semibold text-white transition
+      ${
+        !auditCode
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-gradient-to-r from-orange-400 to-orange-500 hover:brightness-110"
+      }
+  `}
+            >
+              Add Type
+            </button>
+          </div>
+        </Panel>
+      </section>
+
+      {/* ===========================
+         EDIT MODAL
+       =========================== */}
       <Modal
         isOpen={isOpen && selectedFramework !== null}
         onClose={closeModal}
@@ -236,7 +346,7 @@ export default function FrameworkElements() {
           </div>
 
           <div className="mt-8 space-y-6">
-            {/* Framework Label */}
+            {/* Label */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                 Label
@@ -249,11 +359,11 @@ export default function FrameworkElements() {
                     prev ? { ...prev, label: e.target.value } : prev
                   )
                 }
-                className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
               />
             </div>
 
-            {/* Framework Code */}
+            {/* Code */}
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                 Code
@@ -266,29 +376,33 @@ export default function FrameworkElements() {
                     prev ? { ...prev, code: e.target.value } : prev
                   )
                 }
-                className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 mt-6 modal-footer sm:justify-end">
+          <div className="flex items-center gap-3 mt-6 sm:justify-end">
             <button
               onClick={closeModal}
               type="button"
-              className="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto"
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
             >
               Close
             </button>
             <button
               onClick={() => handleUpdateFramework(selectedFramework!)}
               type="button"
-              className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
+              className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg"
             >
               Update Framework
             </button>
           </div>
         </div>
       </Modal>
+
+      {/* ===========================
+         CONFIRM DELETE
+       =========================== */}
       <ConfirmDialog
         isOpen={isConfirmOpen}
         title="Delete Framework"

@@ -11,6 +11,8 @@ import { AddQuestionnaire as addQuestionnaireAPI } from "../../../api/Questionna
 import { getFrameworks } from "../../../api/frameworks.ts";
 import { getAuditors } from "../../../api/users.ts";
 import { Auditor } from "../../../types.ts";
+import PageMeta from "../../common/PageMeta.tsx";
+import PageBreadcrumb from "../../common/PageBreadCrumb.tsx";
 
 interface QuestionnaireProps {
   onAdded?: () => void;
@@ -177,136 +179,151 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
     formData.auditors.length > 0;
   // ---------- Render ----------
   return (
-    <ComponentCard title="Add a Questionnaire">
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Name */}
-          <div className="space-y-4">
-            <Label htmlFor="name">Questionnaire Name</Label>
-            <Input
-              type="text"
-              id="name"
-              placeholder="Enter name"
-              value={formData.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
-          </div>
+    <div className="p-6 space-y-8">
+      <PageMeta title="Questionnaire" description="..." />
+      <PageBreadcrumb pageTitle="Questionnaire" />
+      <div className="max-w-3xl mx-auto my-6 ">
+        <ComponentCard
+          title="Add a Questionnaire"
+          className="
+  bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200
+  dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
+"
+        >
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name */}
+              <div className="space-y-4">
+                <Label htmlFor="name">Questionnaire Name</Label>
+                <Input
+                  type="text"
+                  id="name"
+                  placeholder="Enter name"
+                  value={formData.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                />
+              </div>
 
-          {/* Framework */}
-          <div className="space-y-4">
-            <Label>Select Framework</Label>
-            <Select
-              options={frameworkOptions}
-              placeholder="Select a Framework"
-              onChange={(value) => {
-                handleChange("framework", value);
-                console.log("framework value is", formData.framework);
-              }}
-              className="dark:bg-dark-900"
-            />
-          </div>
+              {/* Framework */}
+              <div className="space-y-4">
+                <Label>Select Framework</Label>
+                <Select
+                  options={frameworkOptions}
+                  placeholder="Select a Framework"
+                  onChange={(value) => {
+                    handleChange("framework", value);
+                    console.log("framework value is", formData.framework);
+                  }}
+                  className="dark:bg-dark-900"
+                />
+              </div>
 
-          {/* Type */}
-          <div className="space-y-4 md:col-span-2">
-            <Label>Select Type</Label>
-            <Select
-              options={auditTypeOptions}
-              placeholder="Select a Type"
-              onChange={(value) => handleChange("type", value)}
-              className="dark:bg-dark-900"
-            />
-          </div>
+              {/* Type */}
+              <div className="space-y-4 md:col-span-2">
+                <Label>Select Type</Label>
+                <Select
+                  options={auditTypeOptions}
+                  placeholder="Select a Type"
+                  onChange={(value) => handleChange("type", value)}
+                  className="dark:bg-dark-900"
+                />
+              </div>
 
-          {/* Version */}
-          <div className="space-y-4">
-            <Label htmlFor="version">Version</Label>
-            <Input
-              type="number"
-              id="version"
-              placeholder="1"
-              min="1"
-              value={formData.version}
-              onChange={(e) => handleChange("version", e.target.value)}
-            />
-          </div>
+              {/* Version */}
+              <div className="space-y-4">
+                <Label htmlFor="version">Version</Label>
+                <Input
+                  type="number"
+                  id="version"
+                  placeholder="1"
+                  min="1"
+                  value={formData.version}
+                  onChange={(e) => handleChange("version", e.target.value)}
+                />
+              </div>
 
-          {/* Target Duration */}
-          <div className="space-y-4">
-            <Label htmlFor="tm">Target Duration Time</Label>
-            <div className="relative">
-              <Input
-                type="time"
-                id="tm"
-                value={formData.duration}
-                onChange={(e) => handleChange("duration", e.target.value)}
-              />
-              <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                <TimeIcon className="size-6" />
-              </span>
-            </div>
-          </div>
+              {/* Target Duration */}
+              <div className="space-y-4">
+                <Label htmlFor="tm">Target Duration Time</Label>
+                <div className="relative">
+                  <Input
+                    type="time"
+                    id="tm"
+                    value={formData.duration}
+                    onChange={(e) => handleChange("duration", e.target.value)}
+                  />
+                  <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                    <TimeIcon className="size-6" />
+                  </span>
+                </div>
+              </div>
 
-          {/* Auditors */}
-          <div>
-            <MultiSelect
-              label="Valid Auditors"
-              options={auditorOptions}
-              defaultSelected={[]}
-              onChange={handleAuditorsChange}
-            />
-          </div>
+              {/* Auditors */}
+              <div>
+                <MultiSelect
+                  label="Valid Auditors"
+                  options={auditorOptions}
+                  defaultSelected={[]}
+                  onChange={handleAuditorsChange}
+                />
+              </div>
 
-          {/* Score Formula */}
-          <div>
-            <Label>Score Calculation</Label>
-            <TextArea
-              placeholder="Enter your score formula"
-              value={formData.scoreFormula}
-              onChange={(value) => handleChange("scoreFormula", value)}
-              rows={6}
-            />
-          </div>
+              {/* Score Formula */}
+              <div>
+                <Label>Score Calculation</Label>
+                <TextArea
+                  placeholder="Enter your score formula"
+                  value={formData.scoreFormula}
+                  onChange={(value) => handleChange("scoreFormula", value)}
+                  rows={6}
+                />
+              </div>
 
-          {/* File Upload */}
-          <div>
-            <Label>Upload Guideline File</Label>
-            <FileInput onChange={handleFileChange} className="custom-class" />
-            {formData.guidelineFile && (
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {formData.guidelineFile}
-              </p>
-            )}
-          </div>
+              {/* File Upload */}
+              <div>
+                <Label>Upload Guideline File</Label>
+                <FileInput
+                  onChange={handleFileChange}
+                  className="custom-class"
+                />
+                {formData.guidelineFile && (
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {formData.guidelineFile}
+                  </p>
+                )}
+              </div>
 
-          {/* Submit Button */}
-          <div className="md:col-span-2 flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={!isFormValid || isSubmitting}
-              className={`px-4 py-2 rounded-lg text-white font-medium transition 
+              {/* Submit Button */}
+              <div className="md:col-span-2 flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={!isFormValid || isSubmitting}
+                  className={`px-4 py-2 rounded-lg text-white font-medium transition 
     ${
       !isFormValid || isSubmitting
         ? "bg-gray-400 cursor-not-allowed"
         : "bg-gradient-to-r from-[#F68C1F] to-[#EF7807] hover:from-[#F78F3F] hover:to-[#F47A07]"
     }`}
-            >
-              {isSubmitting ? "Submitting..." : "Add Questionnaire"}
-            </button>
-          </div>
+                >
+                  {isSubmitting ? "Submitting..." : "Add Questionnaire"}
+                </button>
+              </div>
 
-          {/* Messages */}
-          {message && (
-            <div className="md:col-span-2 text-green-600 font-medium mt-2">
-              ✅ {message}
+              {/* Messages */}
+              {message && (
+                <div className="md:col-span-2 text-green-600 font-medium mt-2">
+                  ✅ {message}
+                </div>
+              )}
+              {error && (
+                <div className="md:col-span-2 text-red-600 font-medium mt-2">
+                  ⚠️ {error}
+                </div>
+              )}
             </div>
-          )}
-          {error && (
-            <div className="md:col-span-2 text-red-600 font-medium mt-2">
-              ⚠️ {error}
-            </div>
-          )}
-        </div>
-      </form>
-    </ComponentCard>
+          </form>
+        </ComponentCard>
+      </div>
+    </div>
   );
 }
