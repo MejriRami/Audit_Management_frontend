@@ -57,30 +57,20 @@ const navItems: NavItem[] = [
   //   icon: <ListIcon />,
   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   // },
-   {
-    name: "Audits",
-    icon: <FileSearch className="w-5 h-5" />,
-    path: "/basic-tables",
-  },
   {
     name: "Framework",
     icon: <BookCheck className="w-5 h-5" />,
     path: "/framework",
   },
   {
-    name: "Audits Calendar",
-    icon: <CalendarCheck className="w-5 h-5" />,
-    path: "/audits-calendar",
-  },
-  {
-    name: "Audit Execution",
-    icon: <ClipboardCheck className="w-5 h-5" />,
-    path: "/audit-execution",
-  },
-  {
     name: "Questionnaire",
     icon: <ListChecks className="w-5 h-5" />,
     path: "/questionnaire",
+  },
+  {
+    name: "Audits Calendar",
+    icon: <CalendarCheck className="w-5 h-5" />,
+    path: "/audits-calendar",
   },
   {
     name: "KPI Audits",
