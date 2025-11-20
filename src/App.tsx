@@ -15,6 +15,10 @@ import Calendar from "./pages/Calendar";
 import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
+import KpiAudits from "./pages/Kpi/KpiAudits";
+import AuditsCalendar from "./pages/AuditsCalendar/AuditsCalendar";
+import AuditExecution from "./pages/AuditExecution/AuditExecution";
+
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
@@ -36,7 +40,8 @@ export default function App() {
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
-
+            {/* KPI Audits – NEW ROUTE */}
+            <Route path="/kpi-audits" element={<KpiAudits />} />
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
             <Route path="/questionnaire" element={<Questionnaire />} />
@@ -47,6 +52,7 @@ export default function App() {
 
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
+            <Route path="/audit-execution" element={<AuditExecution />} />
 
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
@@ -55,6 +61,7 @@ export default function App() {
             <Route path="/buttons" element={<Buttons />} />
             <Route path="/images" element={<Images />} />
             <Route path="/videos" element={<Videos />} />
+            <Route path="/audits-calendar" element={<AuditsCalendar />} />
 
             {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />

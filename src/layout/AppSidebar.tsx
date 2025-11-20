@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import {
+  ClipboardList,
+  FileSearch,
+  BookCheck,
+  LayoutDashboard,
+  ClipboardCheck,
+  BarChart2,
+  CalendarCheck,
+  ListChecks,
+} from "lucide-react";
 
 // Assume these icons are imported from an icon library
 import {
@@ -47,23 +57,35 @@ const navItems: NavItem[] = [
   //   icon: <ListIcon />,
   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   // },
-  {
+   {
     name: "Audits",
-    icon: <TableIcon />,
+    icon: <FileSearch className="w-5 h-5" />,
     path: "/basic-tables",
-    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
   },
   {
     name: "Framework",
-    icon: <TableIcon />,
+    icon: <BookCheck className="w-5 h-5" />,
     path: "/framework",
-    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  },
+  {
+    name: "Audits Calendar",
+    icon: <CalendarCheck className="w-5 h-5" />,
+    path: "/audits-calendar",
+  },
+  {
+    name: "Audit Execution",
+    icon: <ClipboardCheck className="w-5 h-5" />,
+    path: "/audit-execution",
   },
   {
     name: "Questionnaire",
-    icon: <TableIcon />,
+    icon: <ListChecks className="w-5 h-5" />,
     path: "/questionnaire",
-    // subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  },
+  {
+    name: "KPI Audits",
+    icon: <BarChart2 className="w-5 h-5" />,
+    path: "/kpi-audits",
   },
   // {
   //   name: "Pages",
