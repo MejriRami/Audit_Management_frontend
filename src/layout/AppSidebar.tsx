@@ -63,9 +63,35 @@ const navItems: NavItem[] = [
     path: "/framework",
   },
   {
-    name: "Questionnaire",
+    name: "Questionnaires",
     icon: <ListChecks className="w-5 h-5" />,
     path: "/questionnaire",
+    // subItems: [
+    //   {
+    //     name: "Create Questionnaire",
+    //     path: "/add-questionnaire",
+    //   },
+    //   { name: "Questionnaire List", path: "/questionnaire", pro: false },
+    // ],
+  },
+  {
+    name: "Create Questionnaire",
+    icon: <PageIcon className="w-5 h-5" />,
+    path: "/add-questionnaire",
+  },
+  {
+    name: "Execute Audit",
+    icon: <ClipboardList className="w-5 h-5" />,
+    path: "/fill",
+  },
+  {
+    name: "Audits",
+    icon: <TableIcon />,
+    path: "/audits",
+    // subItems: [
+    //   { name: "Execute Audit", path: "/fill", pro: false },
+    //   { name: "List of Audits", path: "/audits", pro: false },
+    // ],
   },
   {
     name: "Audits Calendar",

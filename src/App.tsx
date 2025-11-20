@@ -17,17 +17,13 @@ import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import KpiAudits from "./pages/Kpi/KpiAudits";
 import AuditsCalendar from "./pages/AuditsCalendar/AuditsCalendar";
-import AuditExecution from "./pages/AuditExecution/AuditExecution";
-
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import Home from "./pages/Dashboard/Home";
+// import Home from "./pages/Dashboard/Home";
 import Framework from "./pages/Framework/Framework";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
-import PlanAudit from "./pages/Audit/PlanAudit";
 import AddQuestionnaire from "./components/form/form-elements/add-questionnaire";
 import AuditChecklist from "./components/audit/FillAudit";
-// import QuestionnairePage from "./pages/Questionnaire/QuestionnairePage";
 export default function App() {
   return (
     <>
@@ -37,7 +33,7 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             {/* <Route index path="/" element={<Home />} /> */}
-            <Route index path="/" element={<BasicTables />} />
+            <Route index path="/" element={<KpiAudits />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
