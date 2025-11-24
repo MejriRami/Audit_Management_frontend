@@ -1,470 +1,627 @@
-import React, { useEffect, useState } from "react";
-import { Upload, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Upload,
+  X,
+  Download,
+  FileText,
+  ClipboardList,
+  ChevronDown,
+} from "lucide-react";
 
+// -------------------- Types --------------------
 interface PlannedAudit {
   id: number;
   name: string;
-  questions: string[];
+  questions: { text: string; critical: number }[];
 }
 
-interface AuditItemErrors {
-  findings?: string;
-  // because?: string;
-  carReason?: string;
+interface Auditor {
+  id: number;
+  name: string;
+  avatar: string;
 }
+
+type AuditValue = "" | 0 | 3 | 5 | 8 | 10;
 
 interface AuditItem {
   id: number;
   question: string;
-  value: string; // Valid | Not Valid | Needs Improvement
+  critical: number;
+  value: AuditValue;
   findings: string;
-  // because: string;
-  evidence: File[];
   carReason: string;
-  errors: AuditItemErrors;
+  evidence: File[];
+  errors: {
+    value?: string;
+    findings?: string;
+    carReason?: string;
+  };
 }
 
-export default function AuditChecklist() {
-  // --- Demo data (replace with API calls) ---
-  const auditors = [
-    // { id: 1, name: "John Smith" },
-    { id: 2, name: "Nour Sellami" },
-    { id: 3, name: "Chiraz Ben Abbess" },
-  ];
+interface ValueOption {
+  value: AuditValue;
+  label: string;
+  color: string;
+}
 
-  const plannedAudits: PlannedAudit[] = [
-    {
-      id: 1,
-      name: "Planned Audit - Q1",
-      questions: [
-        "Is documentation up to date?",
-        "Are safety procedures followed?",
-        "Is equipment calibration maintained?",
-      ],
-    },
-    {
-      id: 2,
-      name: "Planned Audit - Supplier Review",
-      questions: [
-        "Are suppliers evaluated annually?",
-        "Is purchasing process validated?",
-      ],
-    },
-    {
-      id: 3,
-      name: "Planned Audit - Safety",
-      questions: [
-        "Is PPE used correctly?",
-        "Are incidents documented?",
-        "Are emergency exits accessible?",
-      ],
-    },
-  ];
+// -------------------- Mock Data --------------------
+const PLANNED_AUDITS: PlannedAudit[] = [
+  {
+    id: 1,
+    name: "Q1 Compliance Audit",
+    questions: [
+      { text: "Is documentation up to date?", critical: 5 },
+      { text: "Are safety procedures followed?", critical: 10 },
+      { text: "Is equipment calibration maintained?", critical: 7 },
+    ],
+  },
+  {
+    id: 2,
+    name: "Supplier Review Audit",
+    questions: [
+      { text: "Are suppliers evaluated annually?", critical: 6 },
+      { text: "Is purchasing process validated?", critical: 4 },
+    ],
+  },
+];
 
-  // --- State ---
-  const [selectedAuditor, setSelectedAuditor] = useState<number | null>(null);
+const AUDITORS: Auditor[] = [
+  { id: 2, name: "Nour Sellami", avatar: "NS" },
+  { id: 3, name: "Chiraz Ben Abbess", avatar: "CB" },
+];
+
+const VALUE_OPTIONS: ValueOption[] = [
+  { value: 0, label: "0 - Non-conformant", color: "text-red-700" },
+  { value: 3, label: "3 - Not sufficient", color: "text-orange-700" },
+  { value: 5, label: "5 - Improvement needed", color: "text-amber-700" },
+  { value: 8, label: "8 - Acceptable", color: "text-emerald-600" },
+  { value: 10, label: "10 - Good practice", color: "text-emerald-700" },
+];
+
+// -------------------- Helpers --------------------
+const needsDetails = (v: AuditValue): boolean => v !== "" && v <= 5;
+
+const getValueColor = (v: AuditValue): string => {
+  if (v === "") return "text-slate-700";
+  return VALUE_OPTIONS.find((o) => o.value === v)?.color || "text-slate-700";
+};
+
+const getCriticalClass = (critical: number): string => {
+  if (critical >= 8) return "bg-red-100 text-red-700";
+  if (critical >= 5) return "bg-amber-100 text-amber-700";
+  return "bg-emerald-100 text-emerald-700";
+};
+
+const validateItem = (item: AuditItem): AuditItem["errors"] => {
+  const errors: AuditItem["errors"] = {};
+  if (item.value === "") errors.value = "Required";
+  if (needsDetails(item.value)) {
+    if (!item.findings.trim()) errors.findings = "Required";
+    if (!item.carReason.trim()) errors.carReason = "Required";
+  }
+  return errors;
+};
+
+const createAuditItems = (audit: PlannedAudit): AuditItem[] => {
+  return audit.questions.map((q, i) => ({
+    id: i + 1,
+    question: q.text,
+    critical: q.critical,
+    value: "",
+    findings: "",
+    carReason: "",
+    evidence: [],
+    errors: {},
+  }));
+};
+
+// -------------------- Component --------------------
+export default function AuditChecklistPro() {
+  const [selectedAuditor, setSelectedAuditor] = useState<number | "">("");
   const [selectedPlannedAuditId, setSelectedPlannedAuditId] = useState<
     number | ""
   >("");
   const [items, setItems] = useState<AuditItem[]>([]);
-  const [autoSaveEnabled] = useState(false); // placeholder for autosave
+  const [submitting, setSubmitting] = useState(false);
+  const [previews, setPreviews] = useState<Map<string, string>>(new Map());
 
-  // --- Helpers ---
-  const needsDetails = (value: string) =>
-    value === "Not Valid" || value === "Needs Improvement";
+  // Cleanup previews on unmount
+  useEffect(() => {
+    return () => {
+      previews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
-  const loadQuestionsForAudit = (auditId: number) => {
-    const audit = plannedAudits.find((a) => a.id === auditId);
-    if (!audit) return;
+  // Update previews when items change
+  useEffect(() => {
+    const newPreviews = new Map<string, string>();
+    const oldPreviews = new Map(previews);
 
-    const loaded = audit.questions.map((q, idx) => ({
-      id: idx + 1,
-      question: q,
-      value: "",
-      findings: "",
-      // because: "",
-      evidence: [] as File[],
-      carReason: "",
-      errors: {},
-    }));
+    items.forEach((item) => {
+      item.evidence.forEach((file) => {
+        const key = `${item.id}-${file.name}-${file.size}`;
+        if (oldPreviews.has(key)) {
+          newPreviews.set(key, oldPreviews.get(key)!);
+          oldPreviews.delete(key);
+        } else {
+          newPreviews.set(key, URL.createObjectURL(file));
+        }
+      });
+    });
 
-    setItems(loaded);
+    // Cleanup unused previews
+    oldPreviews.forEach((url) => URL.revokeObjectURL(url));
+    setPreviews(newPreviews);
+  }, [items]);
+
+  const handleAuditSelection = (auditId: number | "") => {
+    setSelectedPlannedAuditId(auditId);
+    if (auditId === "") {
+      setItems([]);
+      return;
+    }
+    const audit = PLANNED_AUDITS.find((a) => a.id === auditId);
+    if (audit) {
+      setItems(createAuditItems(audit));
+    }
   };
 
-  const updateItemField = <K extends keyof AuditItem>(
+  const updateField = <K extends keyof AuditItem>(
     id: number,
     field: K,
     value: AuditItem[K]
   ) => {
     setItems((prev) =>
-      prev.map((it) =>
-        it.id === id
+      prev.map((item) =>
+        item.id === id
           ? {
-              ...it,
+              ...item,
               [field]: value,
-              errors: { ...it.errors, [field as string]: undefined },
+              errors: { ...item.errors, [field]: undefined },
             }
-          : it
+          : item
       )
     );
   };
 
   const addEvidence = (id: number, files: FileList | null) => {
     if (!files) return;
-    const newFiles = Array.from(files);
+    const imageFiles = Array.from(files).filter((f) =>
+      f.type.startsWith("image/")
+    );
+    if (imageFiles.length === 0) return;
+
     setItems((prev) =>
-      prev.map((it) =>
-        it.id === id ? { ...it, evidence: [...it.evidence, ...newFiles] } : it
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, evidence: [...item.evidence, ...imageFiles] }
+          : item
       )
     );
   };
 
-  const removeEvidence = (id: number, index: number) => {
+  const removeEvidence = (id: number, idx: number) => {
     setItems((prev) =>
-      prev.map((it) =>
-        it.id === id
-          ? { ...it, evidence: it.evidence.filter((_, i) => i !== index) }
-          : it
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, evidence: item.evidence.filter((_, i) => i !== idx) }
+          : item
       )
     );
   };
 
-  const validateItemForCAR = (item: AuditItem) => {
-    const errors: AuditItemErrors = {};
-    if (needsDetails(item.value)) {
-      if (!item.findings.trim()) errors.findings = "Findings are required.";
-      // if (!item.because.trim()) errors.because = "Because is required.";
-      if (!item.carReason.trim()) errors.carReason = "CAR reason is required.";
-    }
-    return errors;
-  };
-
-  const handleRequestCAR = (id: number) => {
+  const requestCAR = (id: number) => {
     setItems((prev) =>
-      prev.map((it) => {
-        if (it.id !== id) return it;
-        const errors = validateItemForCAR(it);
-        if (Object.keys(errors).length > 0) {
-          return { ...it, errors };
-        }
-
-        // Placeholder: send CAR to backend
-        console.log("CAR requested for item:", it);
-        return { ...it, errors: {} };
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const errors = validateItem(item);
+        if (Object.keys(errors).length) return { ...item, errors };
+        alert(`CAR requested for item #${id}`);
+        return { ...item, errors: {} };
       })
     );
   };
 
-  const validateBeforeSubmit = () => {
-    if (!selectedPlannedAuditId) return false;
-    for (const it of items) {
-      if (!it.value) return false;
-      if (needsDetails(it.value)) {
-        // if (!it.findings.trim() || !it.because.trim() || !it.carReason.trim())
-        if (!it.findings.trim() || !it.carReason.trim()) return false;
-      }
-    }
-    return true;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // final validation
-    const validated = items.map((it) => ({
-      ...it,
-      errors: validateItemForCAR(it),
+
+    const validated = items.map((item) => ({
+      ...item,
+      errors: validateItem(item),
     }));
+
     setItems(validated);
 
-    const hasErrors = validated.some((it) => Object.keys(it.errors).length > 0);
-    if (hasErrors) return;
+    if (validated.some((item) => Object.keys(item.errors).length > 0)) return;
 
-    // Placeholder: submit to backend
-    console.log("Submitting audit", {
-      plannedAuditId: selectedPlannedAuditId,
-      items: validated,
-    });
+    setSubmitting(true);
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    alert("Audit submitted successfully!");
+    setSubmitting(false);
   };
 
-  // Optional: autosave placeholder
-  useEffect(() => {
-    if (!autoSaveEnabled) return;
-    const t = setTimeout(() => {
-      // autosave to localStorage or backend
-      console.log("Autosave placeholder", { selectedPlannedAuditId, items });
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [selectedPlannedAuditId, items, autoSaveEnabled]);
+  const downloadCSV = () => {
+    const rows = [
+      [
+        "#",
+        "Question",
+        "Critical",
+        "Value",
+        "Findings",
+        "CAR Reason",
+        "Evidence",
+      ],
+      ...items.map((item) => [
+        item.id,
+        item.question,
+        item.critical,
+        item.value,
+        item.findings.replace(/\n/g, " "),
+        item.carReason.replace(/\n/g, " "),
+        item.evidence.map((f) => f.name).join("|"),
+      ]),
+    ];
 
-  // --- Render ---
+    const csv = rows
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "audit.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const progress = items.length
+    ? Math.round(
+        (items.filter((i) => i.value !== "").length / items.length) * 100
+      )
+    : 0;
+
+  const canSubmit =
+    selectedPlannedAuditId !== "" &&
+    selectedAuditor !== "" &&
+    items.length > 0 &&
+    items.every(
+      (item) =>
+        item.value !== "" &&
+        (!needsDetails(item.value) ||
+          (item.findings.trim() && item.carReason.trim()))
+    );
+
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8 space-y-8">
-      {" "}
-      {/* bg-gradient-to-br from-orange-50 via-orange-100 to-orange-50  dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
-      <h2 className="text-3xl font-bold text-gray-800">Audit Process</h2>
-      {/* Auditor Selection */}
-      <div className="space-y-2 ">
-        <label className="font-medium text-gray-700">Select Auditor</label>
-        <select
-          className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500"
-          value={selectedAuditor || ""}
-          onChange={(e) => {
-            const id = Number(e.target.value);
-            setSelectedAuditor(id);
-            // setSelectedPlannedAudit(null);
-            setItems([]);
-          }}
-        >
-          <option value="">Select Auditor</option>
-          {auditors.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      {/* Planned audit selector */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 ">
-          Select Planned Audit
-        </label>
-        <select
-          className="mt-1 block w-full p-3 rounded-xl border bg-white"
-          value={selectedPlannedAuditId}
-          onChange={(e) => {
-            const val = e.target.value === "" ? "" : Number(e.target.value);
-            setSelectedPlannedAuditId(val);
-            if (val !== "") loadQuestionsForAudit(Number(val));
-            else setItems([]);
-          }}
-        >
-          <option value="">-- choose --</option>
-          {plannedAudits
-            .filter((a) => !selectedAuditor || a.id % 3 === selectedAuditor % 3) // demo filter logic
-            .map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-        </select>
-      </div>
-      {/* questions */}
-      {items.length === 0 && selectedPlannedAuditId !== "" && (
-        <p className="text-sm text-gray-500">
-          No questions available for this planned audit.
-        </p>
-      )}
-      {items.length > 0 && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {items.map((item) => (
-            <div key={item.id} className="p-4 border rounded-xl bg-gray-100  ">
-              {/* if we cant to add color to background*/}
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-semibold text-gray-800">{item.question}</p>
-                  <p className="text-sm text-gray-500">Question #{item.id}</p>
-                </div>
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white border border-slate-200 rounded-lg shadow-sm mb-6">
+          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-600 rounded-lg">
+                <ClipboardList className="text-white" size={20} />
               </div>
-              {/* value */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Value *
-                </label>
-                <select
-                  className={`mt-1 block w-full p-3 rounded-xl border ${
-                    item.errors.findings ||
-                    // item.errors.because ||
-                    item.errors.carReason
-                      ? "border-red-400"
-                      : "border-gray-200"
-                  }`}
-                  value={item.value}
-                  onChange={(e) =>
-                    updateItemField(item.id, "value", e.target.value)
-                  }
-                >
-                  <option value="">Select</option>
-                  <option value="Valid">Valid</option>
-                  <option value="Not Valid">Not Valid</option>
-                  <option value="Needs Improvement">Needs Improvement</option>
-                  <option value="Not applicable">Not applicable</option>
-                </select>
+              <div>
+                <h1 className="text-lg font-semibold text-slate-800">
+                  Audit Execution — Standard
+                </h1>
+                <p className="text-xs text-slate-500">
+                  Complete checklist with findings and evidence
+                </p>
               </div>
-              {/* findings & because (required only if needsDetails) */}
-              {needsDetails(item.value) ? (
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Findings *
-                    </label>
-                    <textarea
-                      className={`mt-1 block w-full p-3 rounded-xl border ${
-                        item.errors.findings
-                          ? "border-red-500"
-                          : "border-gray-200"
-                      }`}
-                      value={item.findings}
-                      onChange={(e) =>
-                        updateItemField(item.id, "findings", e.target.value)
-                      }
-                      rows={3}
-                      placeholder="Describe the findings"
-                    />
-                    {item.errors.findings && (
-                      <p className="text-sm text-red-600">
-                        {item.errors.findings}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Because *
-                    </label>
-                    <textarea
-                      className={`mt-1 block w-full p-3 rounded-xl border ${
-                        item.errors.because
-                          ? "border-red-500"
-                          : "border-gray-200"
-                      }`}
-                      value={item.because}
-                      onChange={(e) =>
-                        updateItemField(item.id, "because", e.target.value)
-                      }
-                      rows={2}
-                      placeholder="Explain why (short reason)"
-                    />
-                    {item.errors.because && (
-                      <p className="text-sm text-red-600">
-                        {item.errors.because}
-                      </p>
-                    )}
-                  </div> */}
-                </div>
-              ) : (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Findings (optional)
-                  </label>
-                  <textarea
-                    className="mt-1 block w-full p-3 rounded-xl border border-gray-200"
-                    value={item.findings}
-                    onChange={(e) =>
-                      updateItemField(item.id, "findings", e.target.value)
-                    }
-                    rows={2}
-                    placeholder="Optional findings"
-                  />
-                </div>
-              )}
-              {/* Evidence (multiple images) */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Evidence (images, multiple)
-                </label>
-                <label className="mt-2 inline-flex items-center gap-2 px-3 py-2 border rounded-xl cursor-pointer bg-white">
-                  <Upload size={16} />
-                  <span className="text-sm">Upload images</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => addEvidence(item.id, e.target.files)}
-                  />
-                </label>
-
-                {item.evidence.length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 gap-3">
-                    {item.evidence.map((f, idx) => (
-                      <div key={idx} className="relative group">
-                        <img
-                          src={URL.createObjectURL(f)}
-                          alt={f.name}
-                          className="h-24 w-full object-cover rounded-lg border"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeEvidence(item.id, idx)}
-                          className="absolute top-1 right-1 p-1 rounded-full bg-red-600 text-white opacity-0 group-hover:opacity-100"
-                          aria-label="Remove evidence"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* CAR reason + request button (only show when needsDetails) */}
-              {needsDetails(item.value) && (
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      CAR Reason *
-                    </label>
-                    <textarea
-                      className={`mt-1 block w-full p-3 rounded-xl border ${
-                        item.errors.carReason
-                          ? "border-red-500"
-                          : "border-gray-200"
-                      }`}
-                      value={item.carReason}
-                      onChange={(e) =>
-                        updateItemField(item.id, "carReason", e.target.value)
-                      }
-                      rows={2}
-                      placeholder="Reason for corrective action"
-                    />
-                    {item.errors.carReason && (
-                      <p className="text-sm text-red-600">
-                        {item.errors.carReason}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleRequestCAR(item.id)}
-                      className="px-4 py-2 rounded-xl bg-orange-600 text-white hover:bg-orange-700"
-                    >
-                      Request CAR
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        // quick helper: clear CAR fields and errors
-                        updateItemField(item.id, "carReason", "");
-                        // updateItemField(item.id, "because", "");
-                        updateItemField(item.id, "findings", "");
-                      }}
-                      className="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
-          ))}
-
-          <div>
             <button
-              type="submit"
-              disabled={!validateBeforeSubmit()}
-              className={`w-full py-3 rounded-xl text-white ${
-                validateBeforeSubmit()
-                  ? "bg-blue-300 hover:bg-gradient-to-b from-[#0584CE] to-[#046EAF] dark:from-[#035C91] dark:to-[#023C64]"
-                  : "bg-gray-300 cursor-not-allowed"
-              }`}
+              onClick={downloadCSV}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
             >
-              Submit Audit
+              <Download size={16} className="text-slate-600" />
+              Export CSV
             </button>
           </div>
-        </form>
-      )}
+
+          {/* Selection Row */}
+          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1.5 uppercase tracking-wide">
+                Auditor
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedAuditor}
+                  onChange={(e) =>
+                    setSelectedAuditor(
+                      e.target.value ? Number(e.target.value) : ""
+                    )
+                  }
+                  className="w-full p-2.5 pr-8 bg-white border border-slate-300 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Select auditor...</option>
+                  {AUDITORS.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={16}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                />
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-medium text-slate-600 mb-1.5 uppercase tracking-wide">
+                Planned Audit
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedPlannedAuditId}
+                  onChange={(e) =>
+                    handleAuditSelection(
+                      e.target.value ? Number(e.target.value) : ""
+                    )
+                  }
+                  className="w-full p-2.5 pr-8 bg-white border border-slate-300 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Select planned audit...</option>
+                  {PLANNED_AUDITS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={16}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Progress */}
+          {items.length > 0 && (
+            <div className="px-4 py-3 border-t border-slate-200 flex items-center gap-4">
+              <span className="text-xs font-medium text-slate-600">
+                Progress:
+              </span>
+              <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-indigo-600 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-xs font-semibold text-slate-700">
+                {progress}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Table */}
+        <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200">
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide w-12">
+                    #
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide min-w-[200px]">
+                    Question
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wide w-20">
+                    Critical
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide w-48">
+                    Value
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide w-44">
+                    Findings
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide w-36">
+                    Evidence
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide w-48">
+                    CAR
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-12 text-center">
+                      <FileText
+                        className="mx-auto mb-2 text-slate-300"
+                        size={32}
+                      />
+                      <p className="text-sm text-slate-500">
+                        Select a planned audit to load questions
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  items.map((item) => (
+                    <tr
+                      key={item.id}
+                      className={`hover:bg-slate-50/50 transition-colors ${
+                        item.errors?.value ? "bg-red-50/30" : ""
+                      }`}
+                    >
+                      <td className="px-3 py-3 align-top">
+                        <span className="text-sm font-medium text-slate-700">
+                          {item.id}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 align-top">
+                        <p className="text-sm text-slate-800">
+                          {item.question}
+                        </p>
+                      </td>
+                      <td className="px-3 py-3 align-top text-center">
+                        <span
+                          className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold ${getCriticalClass(
+                            item.critical
+                          )}`}
+                        >
+                          {item.critical}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 align-top">
+                        <select
+                          value={item.value}
+                          onChange={(e) => {
+                            const val =
+                              e.target.value === ""
+                                ? ""
+                                : (Number(e.target.value) as AuditValue);
+                            updateField(item.id, "value", val);
+                          }}
+                          aria-invalid={!!item.errors?.value}
+                          className={`w-full p-2 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            item.errors?.value
+                              ? "border-red-400 bg-red-50"
+                              : "border-slate-300 bg-white"
+                          } ${getValueColor(item.value)}`}
+                        >
+                          <option value="">Select...</option>
+                          {VALUE_OPTIONS.map((opt) => (
+                            <option key={String(opt.value)} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        {item.errors?.value && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {item.errors.value}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 align-top">
+                        <textarea
+                          value={item.findings}
+                          onChange={(e) =>
+                            updateField(item.id, "findings", e.target.value)
+                          }
+                          rows={2}
+                          placeholder={
+                            needsDetails(item.value)
+                              ? "Required..."
+                              : "Optional..."
+                          }
+                          aria-invalid={!!item.errors?.findings}
+                          className={`w-full p-2 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            item.errors?.findings
+                              ? "border-red-400 bg-red-50"
+                              : "border-slate-300"
+                          }`}
+                        />
+                        {item.errors?.findings && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {item.errors.findings}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 align-top">
+                        <label className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs bg-slate-100 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-200 transition-colors">
+                          <Upload size={14} className="text-slate-600" />
+                          <span className="text-slate-700">Upload</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(e) =>
+                              addEvidence(item.id, e.target.files)
+                            }
+                          />
+                        </label>
+                        {item.evidence.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {item.evidence.map((file, idx) => {
+                              const key = `${item.id}-${file.name}-${file.size}`;
+                              return (
+                                <div key={key} className="relative group">
+                                  <img
+                                    src={previews.get(key)}
+                                    alt={file.name}
+                                    className="h-10 w-10 object-cover rounded border border-slate-200"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeEvidence(item.id, idx)}
+                                    className="absolute -top-1 -right-1 p-0.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X size={10} />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 align-top">
+                        <textarea
+                          value={item.carReason}
+                          onChange={(e) =>
+                            updateField(item.id, "carReason", e.target.value)
+                          }
+                          rows={2}
+                          placeholder={
+                            needsDetails(item.value)
+                              ? "Required..."
+                              : "Optional..."
+                          }
+                          aria-invalid={!!item.errors?.carReason}
+                          className={`w-full p-2 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            item.errors?.carReason
+                              ? "border-red-400 bg-red-50"
+                              : "border-slate-300"
+                          }`}
+                        />
+                        {item.errors?.carReason && (
+                          <p className="text-xs text-red-500 mt-1">
+                            {item.errors.carReason}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => requestCAR(item.id)}
+                          className="mt-2 px-3 py-1.5 text-xs font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                        >
+                          Request CAR
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer */}
+          {items.length > 0 && (
+            <div className="px-4 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <p className="text-xs text-slate-500">
+                Values ≤5 require findings and CAR reason.
+              </p>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit || submitting}
+                className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  canSubmit
+                    ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+                    : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                }`}
+              >
+                {submitting ? "Submitting..." : "Submit Audit"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
