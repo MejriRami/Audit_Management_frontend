@@ -1,21 +1,68 @@
+ 
+// -------------------- Users & Participants --------------------
 export interface User {
   id: number;
   name: string;
-    email: string;
-
-  role: string;
+  email: string;
 }
 
-export interface AuditParticipant {
-  user:User;
-  local_role: string; // Auditor / Auditee
+export interface Participant {
+  user: User;
+  local_role: "auditor" | "auditee";
+}
+export type CorrectiveActionStatus =
+  | "Pending"
+  | "Submitted"
+  | "Accepted"
+  | "Rejected"
+  | "Completed";
+// -------------------- Questions & Findings --------------------
+export interface QuestionResponse {
+  id: number;
+  description: string;
+  criticality?: string;
+  response?: string;
 }
 
-export interface QuestionAndResponse {
-  description: string;  
-  criticality: string;  
-  response: string;     
+export interface Finding {
+  question_id: number;
+  finding_type: string;
+  corrective_action?: string;
+  corrective_action_status?: CorrectiveActionStatus
 }
+
+// -------------------- Audit --------------------
+export interface Audit {
+  id: number;
+  framework?: string;
+  entity?: string;
+  status?: string;
+  finalScore?: number;
+  participants?: Participant[];
+  sessions?: { start_time: string; end_time: string }[];
+  questions_and_responses?: QuestionResponse[];
+  findings?: Finding[];
+}
+
+// -------------------- Corrective Actions Table --------------------
+export interface CorrectiveAction {
+  reject_reason: string;
+  description: string;
+  id: number;
+  auditId: number;
+  auditAnswerId: number;
+  auditee: string;
+  pilotUser: string;
+  auditFramework: string;
+  finding_type: string;
+  corrective_action?: string;
+  reason_why?: string;
+  due_date?: string; // ISO date string
+  status: CorrectiveActionStatus;
+  escalated: boolean;
+}
+
+
 export interface ScheduleHistoryEntry {
   id: number;
   old_start: string;
@@ -26,27 +73,31 @@ export interface ScheduleHistoryEntry {
   changed_at: string;
   changed_by: { id: number; name: string };
 }
-export interface Audit {
-  id: number;
-   entity:string;
-  framework?: string; // from questionnaire_version
-  status: "planned" | "postponed" | "confirmed" |"cancelled" ;
-  finalScoreType: "color" | "yes_no" | "scale";
-  finalScore: string;
-  participants: AuditParticipant[];
-  sessions?: { start_time: string; end_time: string }[];
-  findings?: {
-    finding_type: string;  // Change to match the backend field
-    corrective_action: string;  // Change to match the backend field
-    corrective_action_status: string; // Change to match the backend field
-  }[];
-  questions_and_responses?: QuestionAndResponse[]; 
-  questionnaire:string;
-   // New fields for scheduling
-  start?: string;
-  end?: string;
-  scheduleHistory?: ScheduleHistoryEntry[];
-}
+// export interface Audit {
+//   weak_points: string;
+//   strong_points: string;
+//   id: number;
+//    entity:string;
+//   framework?: string; // from questionnaire_version
+//   status: "planned" | "postponed" | "confirmed" |"cancelled" ;
+//   finalScoreType: "color" | "yes_no" | "scale";
+//   finalScore: string;
+//   participants: AuditParticipant[];
+//   sessions?: { start_time: string; end_time: string }[];
+//   findings?: {
+//     question_id: any;
+//     finding_type: string;  // Change to match the backend field
+//     corrective_action: string;  // Change to match the backend field
+//     corrective_action_status: string; // Change to match the backend field
+//   }[];
+//   questions_and_responses?: QuestionAndResponse[]; 
+//   questionnaire:string;
+//    // New fields for scheduling
+//   start?: string;
+//   end?: string;
+//   scheduleHistory?: ScheduleHistoryEntry[];
+//   total_score?: number;
+// }
 
 export interface Entity {
   id: number;

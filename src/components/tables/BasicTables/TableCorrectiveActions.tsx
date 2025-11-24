@@ -1,0 +1,308 @@
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "../../ui/table";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { motion, AnimatePresence } from "framer-motion";
+import { CorrectiveAction, CorrectiveActionStatus } from "../../../types";
+import { ReasonModal } from "../../modals/ReasonModal";
+import Badge from "../../ui/badge/Badge";
+
+interface TableCorrectiveActionsProps {
+  correctiveActions: CorrectiveAction[];
+}
+
+const statusColorMap: Record<CorrectiveActionStatus, string> = {
+  Pending: "bg-yellow-100 text-yellow-800",
+  Submitted: "bg-blue-100 text-blue-800",
+  Accepted: "bg-green-100 text-green-800",
+  Rejected: "bg-red-100 text-red-800",
+  Completed: "bg-gray-100 text-green-700",
+};
+
+export default function TableCorrectiveActions({
+  correctiveActions,
+}: TableCorrectiveActionsProps) {
+  const [actions, setActions] = useState<CorrectiveAction[]>(correctiveActions);
+  const [expandedAudits, setExpandedAudits] = useState<Record<number, boolean>>(
+    {}
+  );
+  const [expandedStatus, setExpandedStatus] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  const [rejectModal, setRejectModal] = useState<{
+    open: boolean;
+    actionId: number | null;
+  }>({ open: false, actionId: null });
+
+  const toggleAudit = (auditId: number) => {
+    setExpandedAudits((prev) => ({ ...prev, [auditId]: !prev[auditId] }));
+  };
+
+  const toggleStatus = (auditId: number, status: CorrectiveActionStatus) => {
+    const key = `${auditId}-${status}`;
+    setExpandedStatus((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Accept / Reject handlers
+  const handleAccept = (id: number) => {
+    setActions((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status: "Completed" } : c))
+    );
+  };
+
+  const handleReject = (id: number, reason: string) => {
+    setActions((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, status: "Pending", reason_why: reason } : c
+      )
+    );
+  };
+
+  if (!actions.length)
+    return <p className="text-gray-500 p-4">No corrective actions found.</p>;
+
+  // Group by auditId
+  const groupedByAudit = actions.reduce<Record<number, CorrectiveAction[]>>(
+    (acc, action) => {
+      if (!acc[action.auditId]) acc[action.auditId] = [];
+      acc[action.auditId].push(action);
+      return acc;
+    },
+    {}
+  );
+
+  return (
+    <div className="space-y-4">
+      {Object.entries(groupedByAudit).map(([auditId, auditActions]) => {
+        const auditNum = Number(auditId);
+        const isAuditExpanded = expandedAudits[auditNum] || false;
+
+        // Group by status
+        const groupedByStatus = auditActions.reduce<
+          Record<string, CorrectiveAction[]>
+        >((acc, action) => {
+          if (!acc[action.status]) acc[action.status] = [];
+          acc[action.status].push(action);
+          return acc;
+        }, {});
+
+        return (
+          <div
+            key={auditId}
+            className="overflow-hidden rounded-xl border border-gray-200 dark:border-white/[0.05] bg-white dark:bg-white/[0.03] shadow-sm"
+          >
+            {/* Audit Header */}
+            <div
+              onClick={() => toggleAudit(auditNum)}
+              className="flex justify-between items-center px-5 py-3 bg-gray-50 dark:bg-white/5 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition"
+            >
+              <span className="font-semibold text-gray-700 dark:text-gray-300 text-lg">
+                Audit ID: {auditId} | Date: {auditActions[0].due_date}
+              </span>
+              <motion.div
+                animate={{ rotate: isAuditExpanded ? 180 : 0 }}
+                className="w-5 h-5 text-gray-500"
+              >
+                <ChevronDownIcon />
+              </motion.div>
+            </div>
+
+            {/* Status Sections */}
+            <AnimatePresence>
+              {isAuditExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="space-y-2 px-5 py-3 overflow-hidden"
+                >
+                  {Object.entries(groupedByStatus).map(
+                    ([status, actionsByStatus]) => {
+                      const statusKey = `${auditNum}-${status}`;
+                      const isStatusExpanded =
+                        expandedStatus[statusKey] || false;
+
+                      return (
+                        <div key={status}>
+                          {/* Status Header */}
+                          <div
+                            onClick={() =>
+                              toggleStatus(
+                                auditNum,
+                                status as CorrectiveActionStatus
+                              )
+                            }
+                            className="flex justify-between items-center cursor-pointer bg-gray-100 dark:bg-white/10 px-4 py-2 rounded hover:bg-gray-200 dark:hover:bg-white/20 transition"
+                          >
+                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                              {status} ({actionsByStatus.length})
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-semibold ${
+                                statusColorMap[status as CorrectiveActionStatus]
+                              }`}
+                            >
+                              {status}
+                            </span>
+                            <motion.div
+                              animate={{ rotate: isStatusExpanded ? 180 : 0 }}
+                              className="w-4 h-4 text-gray-500"
+                            >
+                              <ChevronDownIcon />
+                            </motion.div>
+                          </div>
+
+                          {/* Table */}
+                          <AnimatePresence>
+                            {isStatusExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="max-w-full overflow-x-auto mt-2 rounded border border-gray-200 dark:border-white/10"
+                              >
+                                <Table>
+                                  <TableHeader className="border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 text-gray-800 dark:text-gray-100 font-semibold text-[15px] tracking-wide">
+                                    <TableRow>
+                                      {[
+                                        "#",
+                                        "Answer ID",
+                                        "Finding Type",
+                                        "Corrective Action",
+                                        "Auditee",
+                                        "Pilot User",
+                                        "Reason Why", // ⬅ NEW COLUMN
+                                        "Due Date",
+                                        "Escalated",
+                                        "",
+                                      ].map((header) => (
+                                        <TableCell
+                                          key={header}
+                                          isHeader
+                                          className="px-5 py-3 text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                                        >
+                                          {header}
+                                        </TableCell>
+                                      ))}
+                                    </TableRow>
+                                  </TableHeader>
+
+                                  <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                    {actionsByStatus.map((c, idx) => (
+                                      <TableRow
+                                        key={c.id}
+                                        className="hover:bg-gray-50 dark:hover:bg-white/5 transition"
+                                      >
+                                        <TableCell className="px-4 py-3">
+                                          {idx + 1}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.auditAnswerId}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.finding_type}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.corrective_action || "-"}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.auditee}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.pilotUser}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.reason_why || "-"}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.due_date || "-"}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                          {c.escalated ? "Yes" : "No"}
+                                        </TableCell>
+
+                                        {/* Action buttons */}
+                                        <TableCell className="px-4 py-3">
+                                          {c.status === "Submitted" && (
+                                            <div className="flex items-center space-x-2">
+                                              <button
+                                                className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                                                onClick={() =>
+                                                  handleAccept(c.id)
+                                                }
+                                              >
+                                                Accept
+                                              </button>
+                                              <button
+                                                className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                                                onClick={() =>
+                                                  setRejectModal({
+                                                    open: true,
+                                                    actionId: c.id,
+                                                  })
+                                                }
+                                              >
+                                                Reject
+                                              </button>
+                                            </div>
+                                          )}
+
+                                          {/* Show reason under Pending if rejected previously */}
+                                          {c.status === "Pending" &&
+                                            c.reason_why && (
+                                              <div className="mt-1 border-l-4 border-red-500 pl-2 text-xs text-black-600">
+                                                <div className="flex items-center gap-2">
+                                                  <Badge
+                                                    size="sm"
+                                                    color="error"
+                                                  >
+                                                    Rejected
+                                                  </Badge>
+                                                </div>
+                                                <p className="mt-1">
+                                                  <span className="font-semibold">
+                                                    Reason:
+                                                  </span>{" "}
+                                                  {c.reason_why}
+                                                </p>
+                                              </div>
+                                            )}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    }
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Reject Modal */}
+            <ReasonModal
+              open={rejectModal.open}
+              onClose={() => setRejectModal({ open: false, actionId: null })}
+              onSubmit={(reason) => {
+                if (rejectModal.actionId) {
+                  handleReject(rejectModal.actionId, reason);
+                }
+                setRejectModal({ open: false, actionId: null });
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
