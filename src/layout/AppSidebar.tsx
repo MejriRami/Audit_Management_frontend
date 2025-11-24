@@ -36,27 +36,6 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  // {
-  //   icon: <GridIcon />,
-  //   name: "Dashboard",
-  //   path: "/",
-  //   // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  // },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Plan for Audit",
-  //   path: "/calendar",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // },
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
   {
     name: "Framework",
     icon: <BookCheck className="w-5 h-5" />,
@@ -66,32 +45,22 @@ const navItems: NavItem[] = [
     name: "Questionnaires",
     icon: <ListChecks className="w-5 h-5" />,
     path: "/questionnaire",
-    // subItems: [
-    //   {
-    //     name: "Create Questionnaire",
-    //     path: "/add-questionnaire",
-    //   },
-    //   { name: "Questionnaire List", path: "/questionnaire", pro: false },
-    // ],
   },
   {
     name: "Create Questionnaire",
     icon: <PageIcon className="w-5 h-5" />,
     path: "/add-questionnaire",
   },
-  {
-    name: "Execute Audit",
-    icon: <ClipboardList className="w-5 h-5" />,
-    path: "/fill",
-  },
+
   {
     name: "Audits",
     icon: <TableIcon />,
     path: "/audits",
-    // subItems: [
-    //   { name: "Execute Audit", path: "/fill", pro: false },
-    //   { name: "List of Audits", path: "/audits", pro: false },
-    // ],
+  },
+  {
+    name: "Execute Audit",
+    icon: <ClipboardList className="w-5 h-5" />,
+    path: "/fill",
   },
   {
     name: "Audits Calendar",
@@ -103,14 +72,6 @@ const navItems: NavItem[] = [
     icon: <BarChart2 className="w-5 h-5" />,
     path: "/kpi-audits",
   },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
 ];
 
 const othersItems: NavItem[] = [
@@ -157,7 +118,6 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => location.pathname === path,
     [location.pathname]
@@ -213,17 +173,17 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-1.5">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group transition-colors duration-300
+              className={`menu-item group transition-all duration-200
               ${
                 openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white font-semibold"
-                  : "text-gray-300 hover:bg-gray-100/10 hover:text-white/90 dark:hover:bg-gray-800/50"
+                  ? "bg-white/90 dark:bg-white/10 text-indigo-700 dark:text-indigo-300 font-medium shadow-sm"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/5 hover:text-indigo-600 dark:hover:text-indigo-400"
               }
               ${
                 !isExpanded && !isHovered
@@ -233,10 +193,10 @@ const AppSidebar: React.FC = () => {
             `}
             >
               <span
-                className={`menu-item-icon-size ${
+                className={`menu-item-icon-size transition-colors ${
                   openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "text-gray-800 dark:text-white"
-                    : "text-gray-400 group-hover:text-gray-200"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
                 }`}
               >
                 {nav.icon}
@@ -249,8 +209,8 @@ const AppSidebar: React.FC = () => {
                   className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
-                      ? "rotate-180 text-gray-700 dark:text-gray-200"
-                      : "text-gray-400"
+                      ? "rotate-180 text-indigo-600 dark:text-indigo-400"
+                      : "text-slate-400 dark:text-slate-500"
                   }`}
                 />
               )}
@@ -259,18 +219,18 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group transition-colors duration-300
+                className={`menu-item group transition-all duration-200
                 ${
                   isActive(nav.path)
-                    ? "bg-gray-200/50 text-gray-900 dark:bg-gray-800 dark:text-white font-semibold"
-                    : "text-gray-300 hover:bg-gray-100/10 hover:text-white/90 dark:hover:bg-gray-800/50"
+                    ? "bg-white/90 dark:bg-white/10 text-indigo-700 dark:text-indigo-300 font-medium shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-white/5 hover:text-indigo-600 dark:hover:text-indigo-400"
                 }`}
               >
                 <span
-                  className={`menu-item-icon-size ${
+                  className={`menu-item-icon-size transition-colors ${
                     isActive(nav.path)
-                      ? "text-gray-900 dark:text-white"
-                      : "text-gray-400 group-hover:text-gray-200"
+                      ? "text-indigo-600 dark:text-indigo-400"
+                      : "text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
                   }`}
                 >
                   {nav.icon}
@@ -301,10 +261,10 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
-                      className={`menu-dropdown-item transition-colors duration-300 ${
+                      className={`menu-dropdown-item transition-all duration-200 ${
                         isActive(subItem.path)
-                          ? "text-gray-900 bg-gray-200/50 dark:text-white dark:bg-gray-800 font-medium"
-                          : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                          ? "text-indigo-700 dark:text-indigo-300 bg-white/70 dark:bg-white/10 font-medium"
+                          : "text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/40 dark:hover:bg-white/5"
                       }`}
                     >
                       {subItem.name}
@@ -323,12 +283,12 @@ const AppSidebar: React.FC = () => {
     <aside
       className={`
     fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 
-    bg-gradient-to-b from-[#0584CE] to-[#046EAF]
-    dark:from-[#035C91] dark:to-[#023C64]
-    text-slate-100 dark:text-slate-200
-    border-r border-white/10 dark:border-white/5
+    bg-gradient-to-b from-blue-50  to-indigo-50
+    dark:from-slate-900 dark:via-indigo-950 dark:to-violet-950
+    text-slate-700 dark:text-slate-200
+    border-r border-indigo-100 dark:border-indigo-900/30
     h-screen transition-all duration-300 ease-in-out z-50 
-    shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]
+    backdrop-blur-sm
     ${
       isExpanded || isMobileOpen
         ? "w-[290px]"
@@ -350,15 +310,19 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/" className="font-semibold tracking-tight">
           {isExpanded || isHovered || isMobileOpen ? (
-            <span className="text-[22px] text-gray-900 dark:text-white transition-colors duration-300">
-              <div className="text-xl font-semibold">
-                Track<span className="text-[#F68C1F]">Audit</span>
-                <div className="border-b-2 border-white mt-1"></div>{" "}
-                {/* White line under the text */}
+            <span className="text-[22px] text-slate-800 dark:text-white transition-colors duration-300">
+              <div className="text-xl font-bold">
+                Track
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0584CE] to-[#046EAF]">
+                  Audit
+                </span>
+                <div className="border-b-2 border-indigo-200 dark:border-indigo-700 mt-1"></div>
               </div>
             </span>
           ) : (
-            <span className="text-[22px] text-[#F68C1F] font-bold">T</span>
+            <span className="text-[22px] text-indigo-600 dark:text-indigo-400 font-bold">
+              T
+            </span>
           )}
         </Link>
       </div>
@@ -371,7 +335,7 @@ const AppSidebar: React.FC = () => {
             <div className="flex flex-col gap-4">
               <div>
                 <h2
-                  className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  className={`mb-4 text-xs uppercase flex leading-[20px] text-slate-400 dark:text-slate-500 font-semibold tracking-wider ${
                     !isExpanded && !isHovered
                       ? "lg:justify-center"
                       : "justify-start"
@@ -388,15 +352,19 @@ const AppSidebar: React.FC = () => {
             </div>
           </nav>
         </div>
-        {/* Sidebar widget fixed at bottom */}
-        {/* {(isExpanded || isHovered || isMobileOpen) && (
-          <div className="mt-4">
-            <SidebarWidget />
-          </div>
-        )} */}
       </div>
     </aside>
   );
 };
 
 export default AppSidebar;
+{
+  /* Sidebar widget fixed at bottom */
+}
+{
+  /* {(isExpanded || isHovered || isMobileOpen) && (
+          <div className="mt-4">
+            <SidebarWidget />
+          </div>
+        )} */
+}

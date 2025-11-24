@@ -1,4 +1,4 @@
- import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
 import {
@@ -27,8 +27,6 @@ import { getAuditors } from "../../api/users";
 import Select from "../../components/form/Select";
 import ConfirmDialog from "../../components/form/ConfirmDialogProps";
 import QuestionsModal from "../../components/Questions.tsx/QuestionsModal";
-import { TimePicker } from "../../components/calendar/TimePicker";
-import { DatePickerOnly } from "../../components/calendar/DatePickerOnly";
 import PlanAudit from "../Audit/PlanAudit";
 // TEMP MOCK QUESTIONS
 export const mockQuestions = [
@@ -77,11 +75,6 @@ export const mockQuestions = [
     score: 0,
     type: "Compliance",
   },
-];
-const plantOptions = [
-  { value: "Plant A", label: "Plant A" },
-  { value: "Plant B", label: "Plant B" },
-  { value: "Plant C", label: "Plant C" },
 ];
 
 export default function FormElements() {
@@ -219,55 +212,15 @@ export default function FormElements() {
     }
   };
 
-  // Callback to refresh after adding new
-  const handleFrameworkAdded = () => {
-    fetchQuestionnaires();
-  };
+  // // Callback to refresh after adding new
+  // const handleFrameworkAdded = () => {
+  //   fetchQuestionnaires();
+  // };
 
   // Close modal
   const closeEditModal = () => {
     setSelectedQuestionnaire(null);
     setIsOpen(false);
-  };
-
-  type CellType =
-    | "process"
-    | "Internal System"
-    | "machines"
-    | "Health, Safety and Environment"
-    | "Standard Respect"
-    | "Usage of Glasses";
-
-  const typeStyles: Record<CellType, string> = {
-    process: `
-    bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700
-    dark:bg-gradient-to-r dark:from-blue-700/40 dark:via-blue-600/30 dark:to-blue-700/40 dark:text-blue-200
-  `,
-
-    "Internal System": `
-    bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700
-    dark:bg-gradient-to-r dark:from-purple-700/40 dark:via-purple-600/30 dark:to-purple-700/40 dark:text-purple-200
-  `,
-
-    machines: `
-    bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
-    dark:bg-gradient-to-r dark:from-amber-600/30 dark:via-amber-500/20 dark:to-amber-600/30 dark:text-amber-200
-  `,
-
-    "Health, Safety and Environment": `
-    bg-gradient-to-r from-red-100 to-red-200 text-red-700
-    dark:bg-gradient-to-r dark:from-rose-700/40 dark:via-rose-600/30 dark:to-rose-700/40 dark:text-rose-200
-  `,
-
-    "Standard Respect": `
-    bg-gradient-to-r from-green-100 to-green-200 text-green-700
-    dark:bg-gradient-to-r dark:from-emerald-700/40 dark:via-emerald-600/30 dark:to-emerald-700/40 dark:text-emerald-200
-  `,
-
-    "Usage of Glasses": `
-    bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-700
-    dark:bg-gradient-to-r dark:from-indigo-700/40 dark:via-indigo-600/30 dark:to-indigo-700/40 dark:text-indigo-200
-  `,
   };
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -277,7 +230,7 @@ export default function FormElements() {
     setIsConfirmOpen(true);
   };
 
-  const onGenerateAudit = (id: number) => {
+  const onGenerateAudit = () => {
     // setSelectedQuestionnaire(questionnaire);
     setIsAuditModalOpen(true);
   };
@@ -327,9 +280,9 @@ export default function FormElements() {
                 Loading Questionnaires...
               </div>
             ) : (
-              <Table className="min-w-full border-collapse">
+              <Table className="min-w-full border-collapse table-auto">
                 {/* Sticky Header */}
-                <TableHeader className="sticky top-0 z-30 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-[#1C1C1E] dark:via-[#2A2A2C] dark:to-[#111113] border-b border-gray-200 dark:border-white/[0.1] shadow-sm">
+                <TableHeader className="sticky top-0 z-30 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-[#1C1C1E] dark:via-[#2A2A2C] dark:to-[#111113] border-b border-gray-200 dark:border-white/[0.1]">
                   <TableRow className="divide-x divide-gray-200 dark:divide-white/[0.05]">
                     {[
                       "#ID",
@@ -343,20 +296,22 @@ export default function FormElements() {
                       "Guide File",
                       "Actions",
                     ].map((header, index) => {
-                      const stickyClasses =
-                        index === 0
-                          ? "sticky left-0 z-40 shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]"
-                          : index === 1
-                          ? "sticky left-[80px] z-40 shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]"
-                          : index === 9
-                          ? "sticky right-0 z-40 shadow-[-2px_0_6px_-3px_rgba(0,0,0,0.1)]"
-                          : "";
+                      let stickyClasses = "";
+                      if (index === 0)
+                        stickyClasses =
+                          "sticky left-0 z-40 w-[80px] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]";
+                      else if (index === 1)
+                        stickyClasses =
+                          "sticky left-[80px] z-40 w-[250px] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]";
+                      else if (index === 9)
+                        stickyClasses =
+                          "sticky right-0 z-40 w-[200px] shadow-[-2px_0_6px_-3px_rgba(0,0,0,0.1)]";
 
                       return (
                         <TableCell
                           key={header}
                           isHeader
-                          className={`px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 tracking-wide bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 dark:from-[#1C1C1E] dark:via-[#2A2A2C] dark:to-[#111113] ${stickyClasses}`}
+                          className={`px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 tracking-wide bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-[#1C1C1E] dark:via-[#2A2A2C] dark:to-[#111113] ${stickyClasses}`}
                         >
                           {header}
                         </TableCell>
@@ -365,45 +320,38 @@ export default function FormElements() {
                   </TableRow>
                 </TableHeader>
 
+                {/* Table Body */}
                 <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                   {questionnaires.length > 0 ? (
                     questionnaires.map((q) => (
                       <TableRow
                         key={q.id}
-                        className="divide-x divide-gray-100 dark:divide-white/[0.05] group hover:bg-orange-50 dark:hover:bg-white/[0.05] transition-colors duration-200"
+                        className="divide-x divide-gray-100 dark:divide-white/[0.05] group hover:bg-blue-50 dark:hover:bg-white/[0.05] transition-colors duration-200"
                       >
                         {/* Sticky ID */}
-                        <TableCell className="sticky left-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-orange-50 dark:group-hover:bg-white/[0.05] px-6 py-3 text-sm text-gray-500 dark:text-gray-400 shadow-[2px_0_6px_-3px_rgba(0,0,0,0.05)]">
+                        <TableCell className="sticky left-0 z-20 w-[80px] bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                           {q.id}
                         </TableCell>
 
                         {/* Sticky Name */}
-                        <TableCell className="sticky left-[80px] z-20 bg-white dark:bg-gray-900 group-hover:bg-orange-50 dark:group-hover:bg-white/[0.05] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.05)]">
+                        <TableCell className="sticky left-[80px] z-20 w-[250px] bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-4 py-3">
                           <button
-                            className="text--500 hover:underline px-4 py-2 min-w-[250px] whitespace-normal text-sm font-medium transition-transform duration-200 hover:scale-105"
+                            className="text-gray-700 dark:text-gray-200 hover:underline text-sm font-medium transition-transform duration-200"
                             onClick={() => openModal(q)}
                           >
                             {q.name}
                           </button>
                         </TableCell>
 
-                        {/* Normal columns */}
+                        {/* Normal Columns */}
                         <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
                           {q.version_no}
                         </TableCell>
                         <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
                           {q.framework}
                         </TableCell>
-                        <TableCell className="px-6 py-3 text-sm">
-                          <span
-                            className={`inline-flex items-center justify-center px-5 py-1 rounded-full text-xs font-medium capitalize tracking-wide shadow-sm
-                        ${
-                          q.type && typeStyles.hasOwnProperty(q.type)
-                            ? typeStyles[q.type as CellType]
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                        }
-                        transition-all duration-200 hover:scale-105`}
-                          >
+                        <TableCell className="px-4 py-2 text-sm">
+                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-200">
                             {q.type || "N/A"}
                           </span>
                         </TableCell>
@@ -428,31 +376,26 @@ export default function FormElements() {
                         </TableCell>
 
                         {/* Sticky Actions */}
-                        <TableCell className="sticky right-0 z-20 bg-white dark:bg-gray-900 group-hover:bg-orange-50 dark:group-hover:bg-white/[0.05] px-6 py-3 text-center shadow-[-2px_0_6px_-3px_rgba(0,0,0,0.05)]">
-                          <div className="flex justify-center gap-3">
+                        <TableCell className="sticky right-0 z-20 w-[200px] bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-4 py-3 text-center">
+                          <div className="flex justify-center gap-2">
                             <button
-                              className="px-2 py-1
- text-xs bg-gradient-to-r from-[#4ADE80] to-[#22C55E]
- text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
+                              className="px-2 py-1 text-xs bg-gradient-to-r from-green-400 to-green-500 text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
                               onClick={() => handleEditQuestionnaire(q)}
                             >
                               Edit
                             </button>
                             <button
-                              className="px-1.5 py-1
- text-xs bg-gradient-to-r from-[#F87171] to-[#EF4444]
- text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
+                              className="px-2 py-1 text-xs bg-gradient-to-r from-red-400 to-red-500 text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
                               onClick={() => openDeleteConfirm(q.id)}
                             >
                               Delete
                             </button>
-                            <button
-                              className="px-1.5 py-1 text-xs bg-gradient-to-r from-blue-300 to-blue-400
- text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
-                              onClick={() => onGenerateAudit(q.id)}
+                            {/* <button
+                              className="px-2 py-1 text-xs   bg-indigo-600 text-white rounded-md shadow hover:scale-105 transition-transform duration-200"
+                              onClick={() => onGenerateAudit()}
                             >
-                              Generate An Audit
-                            </button>
+                              Generate Audit
+                            </button> */}
                           </div>
                         </TableCell>
                       </TableRow>

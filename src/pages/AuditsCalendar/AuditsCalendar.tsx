@@ -5,10 +5,7 @@ import ComponentCard from "../../components/common/ComponentCard";
 import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 
-import {
-  Calendar as BigCalendar,
-  dateFnsLocalizer,
-} from "react-big-calendar";
+import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -48,7 +45,7 @@ const localizer = dateFnsLocalizer({
 const RAW_EVENTS: CalendarEvent[] = [
   // -------------------------
   // 15 FAKE AUDITS (FUTURE)
-//  Month index: 10 = Nov, 11 = Dec, 0 = Jan (next year)
+  //  Month index: 10 = Nov, 11 = Dec, 0 = Jan (next year)
   // -------------------------
   {
     id: 1,
@@ -203,22 +200,25 @@ const RAW_EVENTS: CalendarEvent[] = [
 
   // -------------------------
   // FAKE AUDITEE FREE SLOTS (also future)
-//  Spread across Dec 2025 and Jan 2026
+  //  Spread across Dec 2025 and Jan 2026
   // -------------------------
-  ...["plant-manager@site-a.com", "logistics@site-b.com", "production@site-c.com"].flatMap(
-    (auditee, idx) =>
-      Array.from({ length: 7 }).map((_, i) => {
-        const day = 3 + i * 3 + idx; // spread days
-        return {
-          id: 200 + idx * 50 + i,
-          title: "Auditee Free Slot",
-          auditor: "",
-          auditee,
-          start: new Date(2025, 11, day, 9, 0), // December 2025
-          end: new Date(2025, 11, day, 11, 0),
-          type: "auditee-free" as CalendarEventType,
-        } as CalendarEvent;
-      })
+  ...[
+    "plant-manager@site-a.com",
+    "logistics@site-b.com",
+    "production@site-c.com",
+  ].flatMap((auditee, idx) =>
+    Array.from({ length: 7 }).map((_, i) => {
+      const day = 3 + i * 3 + idx; // spread days
+      return {
+        id: 200 + idx * 50 + i,
+        title: "Auditee Free Slot",
+        auditor: "",
+        auditee,
+        start: new Date(2025, 11, day, 9, 0), // December 2025
+        end: new Date(2025, 11, day, 11, 0),
+        type: "auditee-free" as CalendarEventType,
+      } as CalendarEvent;
+    })
   ),
 ];
 
@@ -234,7 +234,9 @@ export default function AuditsCalendar() {
     RAW_EVENTS[0]?.start ?? new Date()
   );
 
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null
+  );
 
   // Auditor options
   const auditorOptions = useMemo(
@@ -352,7 +354,7 @@ export default function AuditsCalendar() {
             onClick={() => setMode("myAudits")}
             className={`px-4 py-2 rounded-lg text-sm font-medium border ${
               mode === "myAudits"
-                ? "bg-[#0584CE] text-white border-[#0584CE]"
+                ? "bg-indigo-600 text-white  "
                 : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
             }`}
           >
@@ -363,7 +365,7 @@ export default function AuditsCalendar() {
             onClick={() => setMode("auditeeAvailability")}
             className={`px-4 py-2 rounded-lg text-sm font-medium border ${
               mode === "auditeeAvailability"
-                ? "bg-[#0584CE] text-white border-[#0584CE]"
+                ? "bg-indigo-600  text-white border-[#0584CE]"
                 : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
             }`}
           >
@@ -579,9 +581,7 @@ export default function AuditsCalendar() {
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
               <span className="font-medium">Type:</span>{" "}
-              {selectedEvent.type === "audit"
-                ? "Audit"
-                : "Auditee free slot"}
+              {selectedEvent.type === "audit" ? "Audit" : "Auditee free slot"}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-300">
               <span className="font-medium">Auditor:</span>{" "}

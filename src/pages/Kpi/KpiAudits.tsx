@@ -244,8 +244,8 @@ const AUDITS_DURATION_BY_MONTH: AuditsDurationPoint[] = [
 // OTHER TYPES / HELPERS
 // -----------------------------------------------------------------------------
 type ChartId =
-  | "auditsByMonth"       // duration per month (hours)
-  | "scoreByMonth"        // avg score per month (bar or line)
+  | "auditsByMonth" // duration per month (hours)
+  | "scoreByMonth" // avg score per month (bar or line)
   | "ncByMonth"
   | "statusDistribution"
   | "auditsPerAuditor"
@@ -298,8 +298,7 @@ export default function KpiAudits() {
       FAKE_DATA.filter((a) => {
         const byAuditor =
           selectedAuditor === "all" || a.auditor === selectedAuditor;
-        const byMonth =
-          selectedMonth === "all" || a.month === selectedMonth;
+        const byMonth = selectedMonth === "all" || a.month === selectedMonth;
         return byAuditor && byMonth;
       }),
     [selectedAuditor, selectedMonth]
@@ -313,12 +312,10 @@ export default function KpiAudits() {
     const totalAudits = filteredData.length;
     const avgScore =
       filteredData.reduce((sum, a) => sum + a.score, 0) / totalAudits;
-    const totalNc = filteredData.reduce(
-      (sum, a) => sum + a.nonConformities,
-      0
-    );
-    const passedCount = filteredData.filter((a) => a.status === "Passed")
-      .length;
+    const totalNc = filteredData.reduce((sum, a) => sum + a.nonConformities, 0);
+    const passedCount = filteredData.filter(
+      (a) => a.status === "Passed"
+    ).length;
     const passRate = (passedCount / totalAudits) * 100;
 
     return { totalAudits, avgScore, totalNc, passRate };
@@ -377,10 +374,7 @@ export default function KpiAudits() {
 
   // 5) Average score per month (used for chart 2 small + chart 5 big)
   const scoreByMonth = useMemo(() => {
-    const map = new Map<
-      string,
-      { totalScore: number; count: number }
-    >();
+    const map = new Map<string, { totalScore: number; count: number }>();
     filteredData.forEach((a) => {
       if (!map.has(a.month)) {
         map.set(a.month, { totalScore: 0, count: 0 });
@@ -412,10 +406,7 @@ export default function KpiAudits() {
 
   // 7) Pass rate per month
   const passRateByMonth = useMemo(() => {
-    const map = new Map<
-      string,
-      { passed: number; total: number }
-    >();
+    const map = new Map<string, { passed: number; total: number }>();
     filteredData.forEach((a) => {
       if (!map.has(a.month)) {
         map.set(a.month, { passed: 0, total: 0 });
@@ -456,9 +447,7 @@ export default function KpiAudits() {
             />
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-medium text-gray-500 uppercase">
-              Month
-            </p>
+            <p className="text-xs font-medium text-gray-500 uppercase">Month</p>
             <Select
               options={monthOptions}
               defaultValue={selectedMonth}
@@ -520,9 +509,12 @@ export default function KpiAudits() {
       </ComponentCard>
 
       {/* 7 CHARTS – SMALL CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
         {/* 1) Duration of audits per month (stacked by site) */}
-        <ComponentCard title="Audit Duration per Month (All Sites)">
+        <ComponentCard
+          title="Audit Duration per Month (All Sites)"
+          className="col-span-2"
+        >
           <div
             role="button"
             onClick={() => setActiveChart("auditsByMonth")}
@@ -531,7 +523,7 @@ export default function KpiAudits() {
             {auditsByMonth.length === 0 ? (
               <p className="text-sm text-gray-500">No data.</p>
             ) : (
-              <div className="h-56">
+              <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={auditsByMonth}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -605,7 +597,11 @@ export default function KpiAudits() {
                     <YAxis domain={[0, 100]} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="avgScore" fill={mondayBlue} name="Average score" />
+                    <Bar
+                      dataKey="avgScore"
+                      fill={mondayBlue}
+                      name="Average score"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -659,9 +655,7 @@ export default function KpiAudits() {
                       dataKey="value"
                       nameKey="name"
                       outerRadius={80}
-                      label={(entry) =>
-                        `${entry.name} (${entry.value})`
-                      }
+                      label={(entry) => `${entry.name} (${entry.value})`}
                     >
                       {statusDistribution.map((entry, index) => (
                         <Cell
@@ -931,9 +925,7 @@ export default function KpiAudits() {
                       nameKey="name"
                       innerRadius={60}
                       outerRadius={100}
-                      label={(entry) =>
-                        `${entry.name} (${entry.value})`
-                      }
+                      label={(entry) => `${entry.name} (${entry.value})`}
                     >
                       {statusDistribution.map((entry, index) => (
                         <Cell

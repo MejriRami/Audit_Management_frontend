@@ -51,7 +51,7 @@ export function useAudits(filters: AuditFilters) {
           a.framework?.toLowerCase().includes(term) ||
           a.status?.toLowerCase().includes(term) ||
           a.entity?.toLowerCase().includes(term) ||
-          a.questionnaire?.toLowerCase().includes(term) ||
+          // a.questionnaire?.toLowerCase().includes(term) ||
           String(a.id).includes(term)
       );
     }

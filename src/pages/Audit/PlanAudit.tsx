@@ -149,7 +149,7 @@ PlanModalProps) {
 
           <button
             type="button"
-            className="px-4 py-2 bg-gradient-to-r from-[#F68C1F] to-[#EF7807] text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
+            className="px-4 py-2  bg-indigo-600 text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
           >
             Add Audit Plan
           </button>

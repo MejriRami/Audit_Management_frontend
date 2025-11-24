@@ -139,8 +139,8 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
       };
 
       console.log("Sending payload:", payload);
-      const res = await addQuestionnaireAPI(payload);
-      console.log("✅ Questionnaire added:", res);
+      // const res = await addQuestionnaireAPI(payload);
+      // console.log("✅ Questionnaire added:", res);
       if (onAdded) onAdded();
 
       setMessage(" Questionnaire added successfully!");
@@ -186,7 +186,7 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
         <ComponentCard
           title="Add a Questionnaire"
           className="
-  bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200
+ 
   dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
 "
         >
@@ -302,7 +302,7 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
     ${
       !isFormValid || isSubmitting
         ? "bg-gray-400 cursor-not-allowed"
-        : "bg-gradient-to-r from-[#F68C1F] to-[#EF7807] hover:from-[#F78F3F] hover:to-[#F47A07]"
+        : "bg-gradient-to-r bg-indigo-600 to-indigo-700 hover:opacity-70"
     }`}
                 >
                   {isSubmitting ? "Submitting..." : "Add Questionnaire"}
