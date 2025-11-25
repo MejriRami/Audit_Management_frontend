@@ -43,7 +43,7 @@ const AppHeader: React.FC = () => {
   return (
     // <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
 
-    <header className="sticky top-0 flex w-full bg-gradient-to-b from-blue-50   to-indigo-50  z-99999 dark:from-slate-900 dark:via-indigo-950 dark:to-violet-950 text-slate-700 dark:text-slate-200 shadow-md border-b border-indigo-100 dark:border-indigo-900/30 z-99999  lg:border-b">
+    <header className="sticky top-0  flex w-full bg-gradient-to-b from-blue-50   to-indigo-50  z-99999 dark:from-slate-900 dark:via-indigo-950 dark:to-violet-950 text-slate-700 dark:text-slate-200 shadow-md border-b border-indigo-100 dark:border-indigo-900/30 z-99999  lg:border-b">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button

@@ -16,7 +16,8 @@ export const ReasonModal: React.FC<ReasonModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    // <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40  backdrop-blur-[2px]">
+    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999 backdrop-blur-[2px]">
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-96 shadow-xl">
         <h2 className="text-lg font-semibold mb-3">Reason Required</h2>
 

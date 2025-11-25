@@ -22,7 +22,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999 backdrop-blur-[2px]">
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md p-6">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
           {title}
