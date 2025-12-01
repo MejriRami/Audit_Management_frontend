@@ -1,11 +1,11 @@
-import { Questionnaire, QuestionnaireVersionUpdate } from "../types";
+import { Questionnaire, QuestionnaireUpdate } from "../types";
 const API_BASE = "http://localhost:8000/questionnaire";
 
 // Fetch all questionnaires
-export const getAllQuestionnaireVersions = async (): Promise<
+export const getAllQuestionnaire = async (): Promise<
   Questionnaire[]
 > => {
-  const res = await fetch("api/questionnaire/questionnaire-versions");
+  const res = await fetch("api/questionnaire/getAll");
   if (!res.ok) throw new Error("Failed to fetch frameworks");
   return res.json();
 };
@@ -15,13 +15,13 @@ import axios from "axios";
 export const AddQuestionnaire = async (
   data: Omit<Questionnaire, "id">
 ): Promise<Questionnaire> => {
-  const res = await axios.post("api/questionnaire/create-version", data);
+  const res = await axios.post("api/questionnaire/add", data);
   return res.data;
 };
 
 // delete a questionnaire
 export const deleteQuestionnaire = async (id: number): Promise<void> => {
-  const res = await fetch(`api/questionnaire/delete-version/${id}`, {
+  const res = await fetch(`api/questionnaire/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Failed to delete questionnaire");
@@ -30,9 +30,9 @@ export const deleteQuestionnaire = async (id: number): Promise<void> => {
 // Update a questionnaire TODO
 export const updateQuestionnaire = async (
   questionnaire_id: number,
-  data: Partial<QuestionnaireVersionUpdate>
+  data: Partial<QuestionnaireUpdate>
 ): Promise<Questionnaire> => {
-  const res = await fetch(`${API_BASE}/update-version/${questionnaire_id}`, {
+  const res = await fetch(`${API_BASE}/${questionnaire_id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

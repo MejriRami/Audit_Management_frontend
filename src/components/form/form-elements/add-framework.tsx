@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
+import { addFramework } from "../../../api/frameworks";
 
 interface FrameworkProps {
   onAdded?: () => void;
@@ -10,33 +10,15 @@ interface FrameworkProps {
 export default function Framework({ onAdded }: FrameworkProps) {
   const [code, setCode] = useState("");
   const [label, setLabel] = useState("");
-  // const [version, setVersion] = useState<number | "">("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const API_URL = "http://localhost:8000/questionnaire/add";
-
   const handleAddFramework = async () => {
-    // if (!code || !label || !version) {
-    if (!code || !label) {
-      setMessage("⚠️ Please fill all the fields.");
-      return;
-    }
-
     setLoading(true);
-    setMessage("");
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // body: JSON.stringify({ code, label, version }),
-        body: JSON.stringify({ code, label }),
-      });
-
-      if (!response.ok) throw new Error("Failed to add framework");
-
-      setMessage("✅ Framework added successfully!");
-
+      const response = await addFramework({ label, code });
+      setMessage("✅" + response);
+      console.log("API Response:", response);
       // Reset inputs
       setCode("");
       setLabel("");
@@ -75,20 +57,6 @@ export default function Framework({ onAdded }: FrameworkProps) {
           onChange={(e) => setLabel(e.target.value)}
         />
       </div>
-
-      {/* <div>
-          <Label htmlFor="version">Version</Label>
-          <Input
-            type="number"
-            id="version"
-            placeholder="1"
-            min="1"
-            value={version}
-            onChange={(e) =>
-              setVersion(e.target.value === "" ? "" : Number(e.target.value))
-            }
-          />
-        </div> */}
 
       <button
         onClick={handleAddFramework}

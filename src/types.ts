@@ -73,31 +73,7 @@ export interface ScheduleHistoryEntry {
   changed_at: string;
   changed_by: { id: number; name: string };
 }
-// export interface Audit {
-//   weak_points: string;
-//   strong_points: string;
-//   id: number;
-//    entity:string;
-//   framework?: string; // from questionnaire_version
-//   status: "planned" | "postponed" | "confirmed" |"cancelled" ;
-//   finalScoreType: "color" | "yes_no" | "scale";
-//   finalScore: string;
-//   participants: AuditParticipant[];
-//   sessions?: { start_time: string; end_time: string }[];
-//   findings?: {
-//     question_id: any;
-//     finding_type: string;  // Change to match the backend field
-//     corrective_action: string;  // Change to match the backend field
-//     corrective_action_status: string; // Change to match the backend field
-//   }[];
-//   questions_and_responses?: QuestionAndResponse[]; 
-//   questionnaire:string;
-//    // New fields for scheduling
-//   start?: string;
-//   end?: string;
-//   scheduleHistory?: ScheduleHistoryEntry[];
-//   total_score?: number;
-// }
+
 
 export interface Entity {
   id: number;
@@ -117,58 +93,48 @@ export interface Framework {
   label: string;
   code: string;
 }
-interface email{
-  email:string;
-}
+
 
 export interface Questionnaire {
   id: number;
-  questionnaire_id: number;
-  version_no: number;
+  name: string;
+  version: number;
   status: string;
-  target_duration: string;
+  target_duration: string; // "HH:MM:SS"
   score_calculation?: string;
   guideline_file?: string;
-  type: string;
-  framework: string;
-  name: string;
-  auditors: email[];
-  questions:Question[];
+  type: string; // audit type value
+  framework_id?: string; // dropdown value
+  framework?: {id:string,label:string}; // display code
+  auditors?: Auditor[];
+  questions: Question[];
 }
 
+export interface QuestionnaireUpdate {
+  id: number;
+  name?: string;
+  framework_id?: number; // number
+  type?: string;
+  status?: string;
+  target_duration?: string; // "HH:MM:SS"
+  guideline_file?: string;
+  auditors_emails?: Auditor[];
+  score_calculation?: string;
+  version?: number;
+}
 
 export interface Auditor {
-  id: number;
-  name: string;
   email: string;
 }
 
-export interface QuestionnaireVersionUpdate {
-  name?: string;
-  framework?: string;
-  type?: string;
-  version_no?: number;
-  status?: string;
-  target_duration?: string;  // send as "HH:MM:SS"
-  guideline_file?: string;
-  auditor_emails?: string[];
-  score_calculation?: string;
-}
+
 
 export interface Question {
   id: number;
   description: string;
-  status: string;
   chapter: string;
-  qNumber: number;
   weight: number;
-  value?: number;
-  fail?: number;
-  improve?: number;
-  pass?: number;
-  criticalSuccess?: number;
-  score?: number;
-  type?: string;
+  critical_value?: number;
 }
 
 

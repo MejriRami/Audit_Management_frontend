@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import ComponentCard from "../../common/ComponentCard";
-import Label from "../Label";
-import Input from "../input/InputField";
-import Select from "../Select";
-import { TimeIcon } from "../../../icons";
-import MultiSelect from "../MultiSelect.tsx";
-import TextArea from "../input/TextArea.tsx";
-import FileInput from "../input/FileInput.tsx";
-import { AddQuestionnaire as addQuestionnaireAPI } from "../../../api/Questionnaire.ts";
-import { getFrameworks } from "../../../api/frameworks.ts";
-import { getAuditors } from "../../../api/users.ts";
-import { Auditor } from "../../../types.ts";
-import PageMeta from "../../common/PageMeta.tsx";
-import PageBreadcrumb from "../../common/PageBreadCrumb.tsx";
+import ComponentCard from "../common/ComponentCard.tsx";
+import Label from "../form/Label.tsx";
+import Input from "../form/input/InputField.tsx";
+import Select from "../form/Select.tsx";
+import { TimeIcon } from "../../icons/index.ts";
+import MultiSelect from "../form/MultiSelect.tsx";
+import TextArea from "../form/input/TextArea.tsx";
+import FileInput from "../form/input/FileInput.tsx";
+import { AddQuestionnaire as addQuestionnaireAPI } from "../../api/Questionnaire.ts";
+import { getFrameworks } from "../../api/frameworks.ts";
+// import { getAuditors } from "../../../api/users.ts";
+// import { Auditor } from "../../../types.ts";
+import PageMeta from "../common/PageMeta.tsx";
+import PageBreadcrumb from "../common/PageBreadCrumb.tsx";
+import { fetchAuditTypes, SelectOption } from "../../api/audit_types.ts";
 
 interface QuestionnaireProps {
   onAdded?: () => void;
@@ -23,8 +24,7 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
   const [formData, setFormData] = useState({
     name: "",
     framework: "",
-    type: "",
-    version: "",
+    type_id: "",
     duration: "",
     auditors: [] as string[],
     scoreFormula: "",
@@ -34,18 +34,7 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  const auditTypeOptions = [
-    { value: "process", label: "Process" },
-    { value: "Internal System", label: "Internal System" },
-    { value: "machines", label: "Machines" },
-    {
-      value: "Health, Safety and Environment",
-      label: "Health, Safety and Environment",
-    },
-    { value: "Standard Respect", label: "Standard Respect" },
-    { value: "Usage of Glasses", label: "Usage of Glasses" },
-  ];
+  const [auditTypeOptions, setAuditTypeOptions] = useState<SelectOption[]>([]);
 
   const [frameworkOptions, setFrameworkOptions] = useState<
     { label: string; value: string }[]
@@ -68,21 +57,22 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
     }
   };
 
-  const fetchAuditors = async () => {
-    const auditors: Auditor[] = await getAuditors();
-    const formatted = auditors.map((a) => ({
-      text: a.email,
-      value: a.email,
-      selected: false,
-    }));
-    console.log("Fetched auditors:", formatted);
-    setAuditorOptions(formatted);
-  };
+  // const fetchAuditors = async () => {
+  //   const auditors: Auditor[] = await getAuditors();
+  //   const formatted = auditors.map((a) => ({
+  //     text: a.email,
+  //     value: a.email,
+  //     selected: false,
+  //   }));
+  //   console.log("Fetched auditors:", formatted);
+  //   setAuditorOptions(formatted);
+  // };
 
   // Load data on mount
   useEffect(() => {
     fetchFrameworks();
-    fetchAuditors();
+    // fetchAuditors();
+    fetchAuditTypes().then(setAuditTypeOptions).catch(console.error);
   }, []);
 
   // ---------- Handlers ----------
@@ -98,38 +88,35 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
   const handleAuditorsChange = (selected: string[]) => {
     setFormData((prev) => ({ ...prev, auditors: selected }));
   };
+  const isFormValid =
+    formData.name !== "" &&
+    formData.framework !== "" &&
+    formData.type_id !== "" &&
+    formData.duration !== "";
+
+  // ---------- Submit ----------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setMessage("");
     setError("");
-    if (
-      !formData.name ||
-      !formData.framework ||
-      !formData.type ||
-      !formData.version ||
-      !formData.duration ||
-      formData.auditors.length === 0
-    ) {
+
+    if (!isFormValid) {
       setError("⚠️ Please fill in all required fields before submitting.");
       setIsSubmitting(false);
-
       return;
     }
+
     try {
-      // Format duration (convert hh:mm → hh:mm:ss)
-      const formattedDuration =
-        formData.duration && formData.duration.includes(":")
-          ? `${formData.duration}:00`
-          : "02:00:00";
-      console.log("xxx", formData);
-      // Build payload that matches the FastAPI schema
+      const formattedDuration = formData.duration.includes(":")
+        ? `${formData.duration}:00`
+        : "02:00:00";
+
       const payload = {
-        questionnaire_id: formData.framework, // questionnaire_id of framework ( id of selected framework)
+        questionnaire_id: formData.framework,
         name: formData.name,
-        framework: formData.framework,
-        type: formData.type,
-        version_no: Number(formData.version) || 1,
+        framework_id: formData.framework,
+        type_id: formData.type_id,
         status: "under revision",
         target_duration: formattedDuration,
         score_calculation: formData.scoreFormula,
@@ -138,45 +125,33 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
         questions: [],
       };
 
-      console.log("Sending payload:", payload);
-      // const res = await addQuestionnaireAPI(payload);
-      // console.log("✅ Questionnaire added:", res);
+      await addQuestionnaireAPI(payload);
+      console.log("Questionnaire added:", payload);
       if (onAdded) onAdded();
 
-      setMessage(" Questionnaire added successfully!");
+      setMessage("Questionnaire added successfully!");
+
+      // 🔥 Reset form but keep "Add" button enabled for new entry
       setFormData({
         name: "",
         framework: "",
-        type: "",
-        version: "",
+        type_id: "",
         duration: "",
         auditors: [],
         scoreFormula: "",
-        guidelineFile: "",
+        guidelineFile: null,
       });
     } catch (err: any) {
-      console.error("❌ Failed to add questionnaire:", err);
-
-      //  Handle backend FastAPI error properly
-      if (err.response && err.response.data?.detail) {
-        // Show FastAPI's error message
+      if (err.response?.data?.detail) {
         setError(` ${err.response.data.detail}`);
-      } else if (err.message) {
-        setError(`⚠️ ${err.message}`);
       } else {
-        setError("⚠️ An unexpected error occurred.");
+        setError(`⚠️ ${err.message || "Unexpected error"}`);
       }
     } finally {
       setIsSubmitting(false);
     }
   };
-  const isFormValid =
-    formData.name &&
-    formData.framework &&
-    formData.type &&
-    formData.version &&
-    formData.duration &&
-    formData.auditors.length > 0;
+  //  && formData.auditors.length > 0;
   // ---------- Render ----------
   return (
     <div className="p-6 space-y-8">
@@ -207,38 +182,44 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
               {/* Framework */}
               <div className="space-y-4">
                 <Label>Select Framework</Label>
-                <Select
-                  options={frameworkOptions}
-                  placeholder="Select a Framework"
-                  onChange={(value) => {
-                    handleChange("framework", value);
-                    console.log("framework value is", formData.framework);
-                  }}
-                  className="dark:bg-dark-900"
-                />
+                <select
+                  className="w-full p-2 rounded-md border dark:bg-dark-900"
+                  value={formData.framework}
+                  onChange={(e) => handleChange("framework", e.target.value)}
+                >
+                  <option value="">Select a Framework</option>
+                  {frameworkOptions.map((f) => (
+                    <option key={f.value} value={f.value}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Type */}
               <div className="space-y-4 md:col-span-2">
                 <Label>Select Type</Label>
-                <Select
-                  options={auditTypeOptions}
-                  placeholder="Select a Type"
-                  onChange={(value) => handleChange("type", value)}
-                  className="dark:bg-dark-900"
-                />
+                <select
+                  className="w-full p-2 rounded-md border dark:bg-dark-900"
+                  value={formData.type_id}
+                  onChange={(e) => handleChange("type_id", e.target.value)}
+                >
+                  <option value="">Select a Type</option>
+                  {auditTypeOptions.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Version */}
+              {/* Auditors */}
               <div className="space-y-4">
-                <Label htmlFor="version">Version</Label>
-                <Input
-                  type="number"
-                  id="version"
-                  placeholder="1"
-                  min="1"
-                  value={formData.version}
-                  onChange={(e) => handleChange("version", e.target.value)}
+                <MultiSelect
+                  label="Auditors"
+                  options={auditorOptions}
+                  defaultSelected={[]}
+                  onChange={handleAuditorsChange}
                 />
               </div>
 
@@ -256,16 +237,6 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
                     <TimeIcon className="size-6" />
                   </span>
                 </div>
-              </div>
-
-              {/* Auditors */}
-              <div>
-                <MultiSelect
-                  label="Valid Auditors"
-                  options={auditorOptions}
-                  defaultSelected={[]}
-                  onChange={handleAuditorsChange}
-                />
               </div>
 
               {/* Score Formula */}
