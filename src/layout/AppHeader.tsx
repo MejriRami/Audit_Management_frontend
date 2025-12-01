@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
-import NotificationDropdown from "../components/header/NotificationDropdown";
-import UserDropdown from "../components/header/UserDropdown";
+import { LogOut } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { logUserOut } from "../redux/auth/auth";
 
 const AppHeader: React.FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -24,6 +27,11 @@ const AppHeader: React.FC = () => {
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const logout = () => {
+    logUserOut(dispatch);
+    navigate('/signIn');
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -180,6 +188,11 @@ const AppHeader: React.FC = () => {
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
+            {/* logout */}
+            <LogOut 
+              onClick={logout}
+              className="cursor-pointer"
+            />
             {/* <NotificationDropdown /> */}
             {/* <!-- Notification Menu Area --> */}
           </div>
