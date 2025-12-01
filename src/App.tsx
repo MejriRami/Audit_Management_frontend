@@ -24,55 +24,58 @@ import Framework from "./pages/Framework/Framework";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
 import AddQuestionnaire from "./components/form/form-elements/add-questionnaire";
 import AuditChecklist from "./components/audit/FillAudit";
+import ResetPassword from "./pages/AuthPages/ResetPassword";
+import RequireAuth from "./components/auth/RequireAuth";
 export default function App() {
   return (
     <>
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            {/* <Route index path="/" element={<Home />} /> */}
-            <Route index path="/" element={<KpiAudits />} />
-
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
-            {/* KPI Audits – NEW ROUTE */}
-            <Route path="/kpi-audits" element={<KpiAudits />} />
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
-            <Route path="/questionnaire" element={<Questionnaire />} />
-            <Route path="/add-questionnaire" element={<AddQuestionnaire />} />
-            {/* <Route path="/x" element={<QuestionnairePage />} /> */}
-
-            {/* Add Framework */}
-            <Route path="/framework" element={<Framework />} />
-
-            {/* Tables */}
-            <Route path="/audits" element={<BasicTables />} />
-
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-            <Route path="/audits-calendar" element={<AuditsCalendar />} />
-
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
-            <Route path="/fill" element={<AuditChecklist />} />
-          </Route>
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Dashboard Layout */}
+          <Route element={<RequireAuth />}>
+            <Route element={<AppLayout />}>
+              {/* <Route index path="/" element={<Home />} /> */}
+              <Route index path="/home" element={<KpiAudits />} />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
+              {/* Others Page */}
+              <Route path="/profile" element={<UserProfiles />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/blank" element={<Blank />} />
+              {/* KPI Audits – NEW ROUTE */}
+              <Route path="/kpi-audits" element={<KpiAudits />} />
+              {/* Forms */}
+              <Route path="/form-elements" element={<FormElements />} />
+              <Route path="/questionnaire" element={<Questionnaire />} />
+              <Route path="/add-questionnaire" element={<AddQuestionnaire />} />
+              {/* <Route path="/x" element={<QuestionnairePage />} /> */}
+
+              {/* Add Framework */}
+              <Route path="/framework" element={<Framework />} />
+
+              {/* Tables */}
+              <Route path="/audits" element={<BasicTables />} />
+
+              {/* Ui Elements */}
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/avatars" element={<Avatars />} />
+              <Route path="/badge" element={<Badges />} />
+              <Route path="/buttons" element={<Buttons />} />
+              <Route path="/images" element={<Images />} />
+              <Route path="/videos" element={<Videos />} />
+              <Route path="/audits-calendar" element={<AuditsCalendar />} />
+
+              {/* Charts */}
+              <Route path="/line-chart" element={<LineChart />} />
+              <Route path="/bar-chart" element={<BarChart />} />
+              <Route path="/fill" element={<AuditChecklist />} />
+            </Route>
+            {/* Fallback Route */}
+            <Route path="*" element={<NotFound />} />
+          </Route>  
         </Routes>
       </Router>
     </>

@@ -2,6 +2,7 @@ import React from "react";
 import GridShape from "../../components/common/GridShape";
 import { Link } from "react-router";
 import ThemeTogglerTwo from "../../components/common/ThemeTogglerTwo";
+import logoAvoCarbon from "/images/logo/avocarbon.png";
 
 export default function AuthLayout({
   children,
@@ -15,7 +16,7 @@ export default function AuthLayout({
         <div
           className="items-center hidden w-full h-full lg:w-1/2 
   lg:grid 
-  bg-gradient-to-b from-[#0584CE] to-[#046EAF] 
+  bg-gradient-to-b from-[#0584CE] to-[#00000] 
   dark:from-[#035C91] dark:to-[#023C64] 
   text-slate-100 dark:text-slate-200 
   border-r border-white/10 dark:border-white/5 
@@ -29,7 +30,7 @@ export default function AuthLayout({
                 <img
                   width={231}
                   height={48}
-                  src="/images/logo/auth-logo.svg"
+                  src={logoAvoCarbon}
                   alt="Logo"
                 />
               </Link>
