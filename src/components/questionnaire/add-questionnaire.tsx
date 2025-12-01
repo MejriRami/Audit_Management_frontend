@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import ComponentCard from "../common/ComponentCard.tsx";
 import Label from "../form/Label.tsx";
 import Input from "../form/input/InputField.tsx";
@@ -9,17 +10,19 @@ import TextArea from "../form/input/TextArea.tsx";
 import FileInput from "../form/input/FileInput.tsx";
 import { AddQuestionnaire as addQuestionnaireAPI } from "../../api/Questionnaire.ts";
 import { getFrameworks } from "../../api/frameworks.ts";
-// import { getAuditors } from "../../../api/users.ts";
-// import { Auditor } from "../../../types.ts";
 import PageMeta from "../common/PageMeta.tsx";
 import PageBreadcrumb from "../common/PageBreadCrumb.tsx";
 import { fetchAuditTypes, SelectOption } from "../../api/audit_types.ts";
+import { Auditor } from "../../types.ts";
+import { getAuditors } from "../../api/users.ts";
 
 interface QuestionnaireProps {
   onAdded?: () => void;
 }
 
 export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
+  const navigate = useNavigate(); // Use the navigate hook
+
   // ---------- Form State ----------
   const [formData, setFormData] = useState({
     name: "",
@@ -42,6 +45,16 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
   const [auditorOptions, setAuditorOptions] = useState<
     { value: string; text: string; selected: boolean }[]
   >([]);
+  const fetchAuditors = async () => {
+    const auditors: Auditor[] = await getAuditors();
+    const formatted = auditors.map((a) => ({
+      text: a.email,
+      value: a.email,
+      selected: false,
+    }));
+    console.log("Fetched auditors:", formatted);
+    setAuditorOptions(formatted);
+  };
   // Fetch list of frameworks
   const fetchFrameworks = async () => {
     try {
@@ -53,26 +66,14 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
       setFrameworkOptions(formatted);
     } catch (error) {
       console.error(error);
-    } finally {
     }
   };
-
-  // const fetchAuditors = async () => {
-  //   const auditors: Auditor[] = await getAuditors();
-  //   const formatted = auditors.map((a) => ({
-  //     text: a.email,
-  //     value: a.email,
-  //     selected: false,
-  //   }));
-  //   console.log("Fetched auditors:", formatted);
-  //   setAuditorOptions(formatted);
-  // };
 
   // Load data on mount
   useEffect(() => {
     fetchFrameworks();
-    // fetchAuditors();
     fetchAuditTypes().then(setAuditTypeOptions).catch(console.error);
+    fetchAuditors();
   }, []);
 
   // ---------- Handlers ----------
@@ -88,6 +89,7 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
   const handleAuditorsChange = (selected: string[]) => {
     setFormData((prev) => ({ ...prev, auditors: selected }));
   };
+
   const isFormValid =
     formData.name !== "" &&
     formData.framework !== "" &&
@@ -131,7 +133,6 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
 
       setMessage("Questionnaire added successfully!");
 
-      // 🔥 Reset form but keep "Add" button enabled for new entry
       setFormData({
         name: "",
         framework: "",
@@ -151,19 +152,25 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
       setIsSubmitting(false);
     }
   };
-  //  && formData.auditors.length > 0;
+
   // ---------- Render ----------
   return (
     <div className="p-6 space-y-8">
       <PageMeta title="Questionnaire" description="..." />
       <PageBreadcrumb pageTitle="Questionnaire" />
+      {/* Add the "Go to Questionnaire" button outside the form */}
+      <div className="flex justify-end pt-4">
+        <button
+          onClick={() => navigate("/questionnaire")}
+          className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
+        >
+          Go to Questionnaire
+        </button>
+      </div>
       <div className="max-w-3xl mx-auto my-6 ">
         <ComponentCard
           title="Add a Questionnaire"
-          className="
- 
-  dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800
-"
+          className="dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
         >
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -182,35 +189,22 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
               {/* Framework */}
               <div className="space-y-4">
                 <Label>Select Framework</Label>
-                <select
-                  className="w-full p-2 rounded-md border dark:bg-dark-900"
-                  value={formData.framework}
-                  onChange={(e) => handleChange("framework", e.target.value)}
-                >
-                  <option value="">Select a Framework</option>
-                  {frameworkOptions.map((f) => (
-                    <option key={f.value} value={f.value}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  options={frameworkOptions}
+                  placeholder="Select a Framework"
+                  onChange={(value) => handleChange("framework", value)}
+                  defaultValue={formData.framework}
+                />
               </div>
-
               {/* Type */}
               <div className="space-y-4 md:col-span-2">
                 <Label>Select Type</Label>
-                <select
-                  className="w-full p-2 rounded-md border dark:bg-dark-900"
-                  value={formData.type_id}
-                  onChange={(e) => handleChange("type_id", e.target.value)}
-                >
-                  <option value="">Select a Type</option>
-                  {auditTypeOptions.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  options={auditTypeOptions}
+                  placeholder="Select a Type"
+                  onChange={(value) => handleChange("type_id", value)}
+                  defaultValue={formData.type_id}
+                />
               </div>
 
               {/* Auditors */}
@@ -270,11 +264,11 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
                   type="submit"
                   disabled={!isFormValid || isSubmitting}
                   className={`px-4 py-2 rounded-lg text-white font-medium transition 
-    ${
-      !isFormValid || isSubmitting
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-gradient-to-r bg-indigo-600 to-indigo-700 hover:opacity-70"
-    }`}
+                    ${
+                      !isFormValid || isSubmitting
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gradient-to-r bg-indigo-600 to-indigo-700 hover:opacity-70"
+                    }`}
                 >
                   {isSubmitting ? "Submitting..." : "Add Questionnaire"}
                 </button>
