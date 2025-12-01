@@ -22,7 +22,7 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 // import Home from "./pages/Dashboard/Home";
 import Framework from "./pages/Framework/Framework";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
-import AddQuestionnaire from "./components/form/form-elements/add-questionnaire";
+import AddQuestionnaire from "./components/questionnaire/add-questionnaire";
 import AuditChecklist from "./components/audit/FillAudit";
 export default function App() {
   return (

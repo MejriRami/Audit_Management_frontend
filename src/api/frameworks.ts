@@ -1,6 +1,6 @@
 import { Framework } from "../types";
 
-const API_BASE = "http://localhost:8000/questionnaire";
+const API_BASE = "http://localhost:8000/framework";
 
 // Fetch all frameworks
 export const getFrameworks = async (): Promise<Framework[]> => {
@@ -13,13 +13,15 @@ export const getFrameworks = async (): Promise<Framework[]> => {
 export const addFramework = async (
   data: Omit<Framework, "id">
 ): Promise<Framework> => {
-  const res = await fetch("api/add", {
+  
+  const response = await fetch(`${API_BASE}/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to add framework");
-  return res.json();
+
+    if (!response.ok) throw new Error("Failed to add framework");
+  return response.json();
 };
 
 // Update a framework

@@ -14,6 +14,12 @@ import ConfirmDialog from "../../components/form/ConfirmDialogProps";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Panel from "../../components/form/panel";
+import {
+  createAuditType,
+  deleteAuditType,
+  fetchAuditTypes,
+  SelectOption,
+} from "../../api/audit_types";
 
 export default function FrameworkElements() {
   const [frameworks, setFrameworks] = useState<FrameworkType[]>([]);
@@ -46,29 +52,10 @@ export default function FrameworkElements() {
 
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Audit Types are simple strings
-
-  // const auditTypeOptions = [
-  //   { value: "process", label: "Process" },
-  //   { value: "Internal System", label: "Internal System" },
-  //   { value: "machines", label: "Machines" },
-  //   {
-  //     value: "Health, Safety and Environment",
-  //     label: "Health, Safety and Environment",
-  //   },
-  //   { value: "Standard Respect", label: "Standard Respect" },
-  //   { value: "Usage of Glasses", label: "Usage of Glasses" },
-  // ];
-  const auditTypeOptions = [
-    "process",
-    "Internal System",
-    "machines",
-    "Usage of Glasses",
-    "Standard Respect",
-    "Health, Safety and Environment",
-  ];
-
-  const [auditTypes, setAuditTypes] = useState<string[]>(auditTypeOptions);
+  // const [auditTypes, setAuditTypes] = useState<string[]>(auditTypeOptions);
+  const [auditTypes, setAuditTypes] = useState<SelectOption[]>([]);
+  const capitalizeFirst = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
   // Fetch list of frameworks
   const fetchFrameworks = async () => {
@@ -82,12 +69,15 @@ export default function FrameworkElements() {
       setLoading(false);
     }
   };
+  // const [auditTypeOptions, setAuditTypeOptions] = useState<SelectOption[]>([]);
 
   // Load data on mount
   useEffect(() => {
     fetchFrameworks();
+    fetchAuditTypes()
+      .then(setAuditTypes)
+      .catch((err) => console.error(err));
   }, []);
-
   // Callback to refresh after adding new
   const handleFrameworkAdded = () => {
     fetchFrameworks();
@@ -139,28 +129,40 @@ export default function FrameworkElements() {
       setDeleteId(null);
     }
   };
-  const handleAddAuditType = () => {
+  const handleAddAuditType = async () => {
     setErrorMsg("");
-
     const clean = auditCode.trim();
     if (!clean) return;
 
-    // case insensitive duplicate check
+    // Check for duplicate (case-insensitive)
     const exists = auditTypes.some(
-      (t) => t.toLowerCase() === clean.toLowerCase()
+      (t) => t.label.toLowerCase() === clean.toLowerCase()
     );
-
     if (exists) {
       setErrorMsg("❗ This audit type already exists.");
       return;
     }
 
-    setAuditTypes((prev) => [...prev, clean]);
-    setAuditCode("");
+    try {
+      const newType = await createAuditType(clean); // call backend
+      setAuditTypes((prev) => [...prev, newType]);
+      setAuditCode("");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to create audit type.");
+    }
   };
 
-  const deleteAuditType = (code: string) => {
-    setAuditTypes((prev) => prev.filter((t) => t !== code));
+  // Delete audit type
+
+  const handleDeleteAuditType = async (id: number) => {
+    try {
+      await deleteAuditType(id);
+      setAuditTypes((prev) => prev.filter((t) => Number(t.value) !== id));
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message); // ✔️ affiche le vrai message du backend
+    }
   };
 
   return (
@@ -254,20 +256,21 @@ export default function FrameworkElements() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4">
-            {auditTypes.map((code) => (
+            {auditTypes.map((t) => (
               <div
-                key={code}
+                key={t.value}
                 className={`p-4 rounded-xl shadow-sm border hover:shadow-md transition relative group ${getColorForType(
-                  code
+                  t.label
                 )}`}
               >
-                <span className="font-semibold text-sm">{code}</span>
+                <span className="font-semibold text-sm">
+                  {capitalizeFirst(t.label)}
+                </span>
 
-                {/* Delete */}
                 <button
-                  onClick={() => deleteAuditType(code)}
+                  onClick={() => handleDeleteAuditType(Number(t.value))}
                   className="absolute top-2 right-2 text-gray-600 hover:text-red-600 
-            opacity-0 group-hover:opacity-100 transition"
+                  opacity-0 group-hover:opacity-100 transition"
                 >
                   ✖
                 </button>
