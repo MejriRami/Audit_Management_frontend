@@ -21,7 +21,7 @@ import Input from "../../components/form/input/InputField";
 import { TimeIcon } from "../../icons";
 import TextArea from "../../components/form/input/TextArea";
 import FileInput from "../../components/form/input/FileInput";
-import { getFrameworks } from "../../api/frameworks";
+//import { getFrameworks } from "../../api/frameworks";
 import MultiSelect from "../../components/form/MultiSelect";
 import { getAuditors } from "../../api/users";
 import Select from "../../components/form/Select";
@@ -110,7 +110,7 @@ export default function FormElements() {
   }, []);
   const fetchFrameworks = async () => {
     try {
-      const data = await getFrameworks();
+      const data = await [];
       const formatted = data.map((fw: any) => ({
         label: fw.code, // what is shown in dropdown
         value: fw.id, // what is returned on select

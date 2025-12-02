@@ -8,7 +8,7 @@ import MultiSelect from "../MultiSelect.tsx";
 import TextArea from "../input/TextArea.tsx";
 import FileInput from "../input/FileInput.tsx";
 import { AddQuestionnaire as addQuestionnaireAPI } from "../../../api/Questionnaire.ts";
-import { getFrameworks } from "../../../api/frameworks.ts";
+//import { getFrameworks } from "../../../api/frameworks.ts";
 import { getAuditors } from "../../../api/users.ts";
 import { Auditor } from "../../../types.ts";
 import PageMeta from "../../common/PageMeta.tsx";
@@ -56,7 +56,7 @@ export default function AddQuestionnaire({ onAdded }: QuestionnaireProps) {
   // Fetch list of frameworks
   const fetchFrameworks = async () => {
     try {
-      const data = await getFrameworks();
+      const data = await [];
       const formatted = data.map((fw: any) => ({
         label: fw.code, // what is shown in dropdown
         value: fw.id, // what is returned on select
