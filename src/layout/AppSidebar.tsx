@@ -46,11 +46,11 @@ const navItems: NavItem[] = [
     icon: <ListChecks className="w-5 h-5" />,
     path: "/questionnaire",
   },
-  {
-    name: "Create Questionnaire",
-    icon: <PageIcon className="w-5 h-5" />,
-    path: "/add-questionnaire",
-  },
+  // {
+  //   name: "Create Questionnaire",
+  //   icon: <PageIcon className="w-5 h-5" />,
+  //   path: "/add-questionnaire",
+  // },
 
   {
     name: "Audits",
