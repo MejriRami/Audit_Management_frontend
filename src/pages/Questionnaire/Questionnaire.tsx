@@ -14,14 +14,15 @@ import {
   getAllQuestionnaire,
   updateQuestionnaire,
 } from "../../api/Questionnaire";
-import {
-  Auditor,
-  Question,
-  Questionnaire,
-  QuestionnaireUpdate,
-} from "../../types";
-
-import { getFrameworks } from "../../api/frameworks";
+import { Modal } from "../../components/ui/modal";
+import { Auditor, Questionnaire } from "../../types";
+import Label from "../../components/form/Label";
+import Input from "../../components/form/input/InputField";
+import { TimeIcon } from "../../icons";
+import TextArea from "../../components/form/input/TextArea";
+import FileInput from "../../components/form/input/FileInput";
+//import { getFrameworks } from "../../api/frameworks";
+import MultiSelect from "../../components/form/MultiSelect";
 import { getAuditors } from "../../api/users";
 import ConfirmDialog from "../../components/form/ConfirmDialogProps";
 import QuestionsModal from "../../components/Questions.tsx/QuestionsModal";
@@ -63,13 +64,11 @@ export default function FormElements() {
 
   const fetchFrameworks = async () => {
     try {
-      const data = await getFrameworks();
-      const formatted = data.map(
-        (fw: { code: string; label: string; id: number }) => ({
-          label: fw.code, // what is shown in dropdown
-          value: fw.id, // what is returned on select
-        })
-      );
+      const data = await [];
+      const formatted = data.map((fw: any) => ({
+        label: fw.code, // what is shown in dropdown
+        value: fw.id, // what is returned on select
+      }));
       setFrameworkOptions(formatted);
     } catch (error) {
       console.error(error);

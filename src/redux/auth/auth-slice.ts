@@ -6,9 +6,9 @@ const initialState: AuthState = {
   token: null,
   success: false,
   error: false,
-  user: false,
   toast: '',
-  role: ''
+  role: '',
+  user: null
 };
 
 const authSlice = createSlice({
@@ -71,6 +71,21 @@ const authSlice = createSlice({
       state.error = true;
       state.success = false;
       state.toast = 'Échec de la réinitialisation du mot de passe';
+    },
+    meRequest(state) {
+      state.error = false;
+      state.success = false;
+      state.user = null;
+    },
+    meSuccess(state, action) {
+      state.user = action.payload;
+      state.success = true;
+      state.error = false;
+    },
+    meFailure(state) {
+      state.user = null;
+      state.success = false;
+      state.error = true;
     }
   }
 });
@@ -84,7 +99,10 @@ export const {
   setIsAuth,
   resetPasswordRequest,
   resetPasswordSuccess,
-  resetPasswordFailure
+  resetPasswordFailure,
+  meRequest,
+  meSuccess,
+  meFailure
 } = authSlice.actions;
 
 export default authSlice.reducer;
