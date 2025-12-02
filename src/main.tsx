@@ -8,6 +8,10 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { Provider } from "react-redux";
 import { store } from "./redux/store.ts";
+import { authService } from "./services/authService.ts";
+import "./services/axiosInterceptors.ts";
+
+authService.setup(localStorage.getItem("token"));
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
