@@ -4,50 +4,65 @@ import Input from "../form/input/InputField";
 import Select from "../form/Select";
 // import TextArea from "../form/input/TextArea";
 import FileInput from "../form/input/FileInput";
-import MultiSelect from "../form/MultiSelect";
-import { Questionnaire, QuestionnaireUpdate } from "../../types";
 import { TimeIcon } from "../../icons";
+import { Questionnaire } from "../../redux/questionnaire/questionnaire-slice-types";
+import QuestionnaireInitialForm from "../initialForms/QuestionnaireInitialForm";
+import { useEffect } from "react";
+import { getQuestionnaireById, updateQuestionnaire } from "../../redux/questionnaire/questionnaire";
+import { useDispatch, useSelector } from "react-redux";
+import MultiSelectAuditors from "../form/MultiSelectAuditors";
+import Button from "../ui/button/Button";
 
 interface EditQuestionnaireModalProps {
   isOpen: boolean;
   onClose: () => void;
-  questionnaire: Questionnaire | null;
+  selectedQuestionnaire: Questionnaire | null;
   frameworkOptions: { label: string; value: string }[];
   auditTypeOptions: { label: string; value: string }[];
-  auditorOptions: { value: string; text: string; selected: boolean }[];
-  onUpdate: (updated: QuestionnaireUpdate) => void;
-  setQuestionnaire: React.Dispatch<React.SetStateAction<Questionnaire | null>>;
+  auditorOptions: { label: string; value: string;}[];
 }
 
 export default function EditQuestionnaireModal({
   isOpen,
   onClose,
-  questionnaire,
+  selectedQuestionnaire,
   frameworkOptions,
   auditTypeOptions,
-  auditorOptions,
-  onUpdate,
-  setQuestionnaire,
+  auditorOptions
 }: EditQuestionnaireModalProps) {
-  if (!questionnaire) return null;
+  const dispatch = useDispatch();
+  const { formQuestionnaire, handleInputValue, handleSelectChange, setFormQuestionnaire, handleMultiSelectInput } = QuestionnaireInitialForm();
+  const { questionnaire } = useSelector((state: any) => state.questionnaire);
 
-  const handleUpdate = () => {
-    // Convert framework_id to number before sending
-    const payload: QuestionnaireUpdate = {
-      id: questionnaire.id,
-      name: questionnaire.name,
-      framework_id: questionnaire.framework_id
-        ? Number(questionnaire.framework_id)
-        : undefined,
-      type: questionnaire.type,
-      status: questionnaire.status,
-      target_duration: questionnaire.target_duration,
-      score_calculation: questionnaire.score_calculation,
-      auditors_emails: questionnaire.auditors,
+  if (!selectedQuestionnaire) 
+    return null;
+
+  useEffect(() => {
+    if(isOpen && selectedQuestionnaire?.id) {
+      getQuestionnaireById(selectedQuestionnaire.id, dispatch)
+    }
+  }, [selectedQuestionnaire?.id, dispatch, setFormQuestionnaire]);
+
+  useEffect(() => {
+    if (questionnaire) {
+      setFormQuestionnaire(questionnaire);
+    }
+  },[questionnaire, setFormQuestionnaire]);
+
+ const handleUpdateQuestionnaire = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Implement the update logic here
+    const adjustedFormQuestionnaire = {
+      ...formQuestionnaire,
+      target_duration: formQuestionnaire.target_duration.endsWith(':00') ? 
+        formQuestionnaire.target_duration 
+        : formQuestionnaire.target_duration + ":00",
+      auditor_emails: formQuestionnaire.auditors.map(a => a.email)
     };
-
-    onUpdate(payload);
-  };
+    console.log(adjustedFormQuestionnaire);
+    updateQuestionnaire(formQuestionnaire?.id, adjustedFormQuestionnaire, dispatch);
+    onClose();
+  }
 
   return (
     <Modal
@@ -55,7 +70,10 @@ export default function EditQuestionnaireModal({
       onClose={onClose}
       className="max-w-[700px] p-6 lg:p-10"
     >
-      <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
+      <form 
+        className="flex flex-col px-2 overflow-y-auto custom-scrollbar"
+        onSubmit={handleUpdateQuestionnaire}
+      >
         <div>
           <h5 className="mb-2 font-semibold text-gray-800 dark:text-white/90 text-2xl">
             Edit Questionnaire
@@ -72,10 +90,9 @@ export default function EditQuestionnaireModal({
               <Label>Questionnaire Name</Label>
               <Input
                 type="text"
-                value={questionnaire.name}
-                onChange={(e) =>
-                  setQuestionnaire({ ...questionnaire, name: e.target.value })
-                }
+                value={formQuestionnaire?.name}
+                onChange={handleInputValue}
+                name="name"
               />
             </div>
 
@@ -84,10 +101,8 @@ export default function EditQuestionnaireModal({
               <Label>Select Framework</Label>
               <Select
                 options={frameworkOptions}
-                defaultValue={questionnaire.framework_id || ""}
-                onChange={(value) =>
-                  setQuestionnaire({ ...questionnaire, framework_id: value })
-                }
+                defaultValue={formQuestionnaire?.framework_id}
+                onChange={(e: any) => handleSelectChange("framework_id", e)}
               />
             </div>
 
@@ -95,10 +110,9 @@ export default function EditQuestionnaireModal({
             <div className="space-y-4">
               <Label>Status</Label>
               <Input
-                value={questionnaire.status}
-                onChange={(e) =>
-                  setQuestionnaire({ ...questionnaire, status: e.target.value })
-                }
+                value={formQuestionnaire?.status}
+                onChange={handleInputValue}
+                name="status"
               />
             </div>
 
@@ -107,13 +121,8 @@ export default function EditQuestionnaireModal({
               <Label>Select Type</Label>
               <Select
                 options={auditTypeOptions}
-                defaultValue={questionnaire.type || ""}
-                onChange={(e) =>
-                  setQuestionnaire({
-                    ...questionnaire,
-                    type: e,
-                  })
-                }
+                defaultValue={formQuestionnaire?.type_id || ""}
+                onChange={(e: any) => handleSelectChange("type_id", e)}
               />
             </div>
 
@@ -123,13 +132,9 @@ export default function EditQuestionnaireModal({
               <div className="relative">
                 <Input
                   type="time"
-                  value={questionnaire.target_duration}
-                  onChange={(e) =>
-                    setQuestionnaire({
-                      ...questionnaire,
-                      target_duration: e.target.value,
-                    })
-                  }
+                  value={formQuestionnaire?.target_duration}
+                  onChange={handleInputValue}
+                  name="target_duration"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2">
                   <TimeIcon className="size-6 text-gray-500" />
@@ -160,16 +165,11 @@ export default function EditQuestionnaireModal({
 
             {/* AUDITORS */}
             <div className="space-y-4 col-span-3">
-              <MultiSelect
+              <MultiSelectAuditors
                 label="Auditors"
-                options={auditorOptions}
-                defaultSelected={questionnaire.auditors?.map((a) => a.email)}
-                onChange={(selectedEmails) =>
-                  setQuestionnaire({
-                    ...questionnaire,
-                    auditors: selectedEmails.map((email) => ({ email })),
-                  })
-                }
+                options={auditorOptions.map(a => ({ value: String(a.value), text: a.label }))}
+                defaultSelected={formQuestionnaire?.auditors?.map(a => String(a.id)) ?? []} // controlled
+                onChange={(selectedIds) => handleMultiSelectInput("auditors", selectedIds)}
               />
             </div>
           </div>
@@ -184,14 +184,13 @@ export default function EditQuestionnaireModal({
             Close
           </button>
 
-          <button
-            onClick={handleUpdate}
+          <Button
             className="px-4 py-2 rounded text-white bg-gradient-to-r from-orange-400 to-orange-500"
           >
             Update Questionnaire
-          </button>
+          </Button>
         </div>
-      </div>
+      </form>
     </Modal>
   );
 }
