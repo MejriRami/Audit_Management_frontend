@@ -94,22 +94,6 @@ export interface Framework {
   code: string;
 }
 
-
-export interface Questionnaire {
-  id: number;
-  name: string;
-  version: number;
-  status: string;
-  target_duration: string; // "HH:MM:SS"
-  score_calculation?: string;
-  guideline_file?: string;
-  type: string; // audit type value
-  framework_id?: string; // dropdown value
-  framework?: {id:string,label:string}; // display code
-  auditors?: Auditor[];
-  questions: Question[];
-}
-
 export interface QuestionnaireUpdate {
   id: number;
   name?: string;
@@ -124,6 +108,7 @@ export interface QuestionnaireUpdate {
 }
 
 export interface Auditor {
+  id: number;
   email: string;
 }
 
