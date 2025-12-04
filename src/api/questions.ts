@@ -1,7 +1,7 @@
 import { Question } from "../types";
 
  
-const BASE_URL = "http://localhost:8000/question";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/question`;
 
 export async function fetchQuestions() {
   const res = await fetch(BASE_URL);
@@ -22,8 +22,6 @@ export async function createQuestion(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(question),
   });
-
-  console.log("res", res);
 
   if (!res.ok) {
     const errResponse = await res.json();  
