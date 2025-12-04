@@ -6,6 +6,9 @@ import { DatePickerOnly } from "../../components/calendar/DatePickerOnly";
 import { TimePicker } from "../../components/calendar/TimePicker";
 import Select from "../../components/form/Select";
 import { useEffect, useState } from "react";
+import { getAllQuestionnaireNames } from "../../api/Questionnaire";
+import { QuestionnaireList } from "../../types";
+import { AuditPlanCreate } from "../../api/audit";
 
 interface PlanModalProps {
   isAuditModalOpen: boolean;
@@ -15,20 +18,73 @@ interface PlanModalProps {
     text: string;
     selected: boolean;
   }[];
-  // questionnaire: QuestionnaireType | null;
+}
+
+interface AuditPlanForm {
+  auditeeEmail: string;
+  plant: string | null;
+  sector: string;
+  questionnaireId: string | null;
+  auditDate: Date | null;
+  startTime: Date | null;
+  endTime: Date | null;
+  // auditors: string[]; // store selected auditor emails
 }
 
 export default function PlanAudit({
   isAuditModalOpen,
   closeAuditModalOpen,
-  auditorOptions,
-}: // questionnaire,
-PlanModalProps) {
-  const [auditDate, setAuditDate] = useState<Date | null>(null);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [endTime, setEndTime] = useState<Date | null>(null);
+}: PlanModalProps) {
+  const [questionnaires, setQuestionnaires] = useState<QuestionnaireList[]>([]);
+  const [form, setForm] = useState<AuditPlanForm>({
+    auditeeEmail: "",
+    plant: null,
+    sector: "",
+    questionnaireId: null,
+    auditDate: null,
+    startTime: null,
+    endTime: null,
+    // auditors: [],
+  });
 
-  // Example of reserved slots for specific days
+  // Fetch questionnaires
+  useEffect(() => {
+    const fetchQuestionnaires = async () => {
+      try {
+        const data = await getAllQuestionnaireNames();
+        setQuestionnaires(data);
+      } catch (error) {
+        console.error("Failed to fetch questionnaires", error);
+      }
+    };
+    fetchQuestionnaires();
+  }, []);
+
+  // Validate time
+  useEffect(() => {
+    if (form.startTime && form.endTime && form.endTime <= form.startTime) {
+      alert("End time must be AFTER start time.");
+      setForm((prev) => ({ ...prev, endTime: null }));
+    }
+  }, [form.startTime, form.endTime]);
+
+  const plantOptions = [
+    { value: "anhui", label: "Anhui" },
+    { value: "chennai", label: "Chennai" },
+    { value: "cyclam", label: "Cyclam" },
+    { value: "daegu", label: "Daegu" },
+    { value: "frankfort", label: "Frankfort" },
+    { value: "galeana", label: "Galeana" },
+    { value: "kunshan", label: "Kunshan" },
+    { value: "monterrey", label: "Monterrey" },
+    { value: "nadhour", label: "Nadhour" },
+    { value: "poitiers", label: "Poitiers" },
+    { value: "rayones", label: "Rayones" },
+    { value: "same", label: "Same" },
+    { value: "sceet", label: "Sceet" },
+    { value: "tianjin", label: "Tianjin" },
+  ];
+
   const blockedSlots = [
     { date: "2025-11-20", start: "08:00", end: "09:00" },
     { date: "2025-11-20", start: "09:00", end: "10:00" },
@@ -38,21 +94,38 @@ PlanModalProps) {
     { date: "2025-11-20", start: "13:00", end: "14:00" },
     { date: "2025-11-20", start: "14:00", end: "15:00" },
     { date: "2025-11-20", start: "15:00", end: "16:00" },
-    { date: "2025-11-20", start: "16:00", end: "17:00" }, // fully booked
-    { date: "2025-11-19", start: "08:00", end: "09:00" }, // partially booked
+    { date: "2025-11-20", start: "16:00", end: "17:00" },
+    { date: "2025-11-19", start: "08:00", end: "09:00" },
   ];
 
-  useEffect(() => {
-    if (startTime && endTime && endTime <= startTime) {
-      alert("End time must be AFTER start time.");
-      setEndTime(null);
-    }
-  }, [startTime, endTime]);
-  const plantOptions = [
-    { value: "Plant A", label: "Plant A" },
-    { value: "Plant B", label: "Plant B" },
-    { value: "Plant C", label: "Plant C" },
-  ];
+  const handleSubmit = async () => {
+    console.log(form);
+    //   if (!form.auditeeEmail  || !form.plant || !form.questionnaireId) {
+    //     alert("Please fill all required fields.");
+    //     return;
+    //   }
+
+    //   try {
+    //     // Map auditee email to auditee_id if needed (depends on your backend)
+    //     const payload: AuditPlanCreate = {
+    //       auditee_id: Number(form.auditeeEmail), // Replace with actual ID mapping
+    //       plant: form.plant,
+    //       sector: form.sector,
+    //       questionnaire_id: form.questionnaireId,
+    //       audit_date: form.auditDate,
+    //       start_time: form.startTime,
+    //       end_time: form.endTime,
+    //     };
+
+    //     const result = await planAudit(payload);
+    //     console.log("Audit planned successfully:", result);
+    //     alert("Audit planned successfully!");
+    //     closeAuditModalOpen();
+    //   } catch (error) {
+    //     console.error("Failed to plan audit:", error);
+    //     alert("Failed to plan audit. Check console for details.");
+    //   }
+  };
   return (
     <Modal
       isOpen={isAuditModalOpen}
@@ -73,67 +146,96 @@ PlanModalProps) {
         {/* Form */}
         <div className="mt-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Auditee Email */}
             <div className="space-y-4">
               <Label htmlFor="auditee">Auditee Email</Label>
               <Input
                 type="email"
                 id="auditee"
                 placeholder="Enter auditee email"
+                value={form.auditeeEmail}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, auditeeEmail: e.target.value }))
+                }
               />
             </div>
 
-            {/* Auditors Select */}
             <div className="space-y-4">
-              <MultiSelect
-                label="Auditors"
-                options={auditorOptions}
-                placeholder="Select an auditor"
+              <Label htmlFor="plant">Plant</Label>
+              <Select
+                options={plantOptions}
+                placeholder="Select a plant"
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, plant: value }))
+                }
+                className="dark:bg-dark-900"
               />
             </div>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Label htmlFor="sector">Sector</Label>
+              <Input
+                placeholder="Enter sector name"
+                value={form.sector}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, sector: e.target.value }))
+                }
+                className="dark:bg-dark-900"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <Label htmlFor="questionnaire">Questionnaire</Label>
+              <Select
+                options={questionnaires.map((q) => ({
+                  value: q.id.toString(),
+                  label: q.name,
+                }))}
+                placeholder="Select a questionnaire"
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, questionnaireId: value }))
+                }
+                className="dark:bg-dark-900"
+              />
+            </div>
+          </div>
+
           {/* Date & Time */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DatePickerOnly
               id="auditDate"
               label="Audit Date"
-              value={auditDate}
-              onChange={setAuditDate}
-              blockedSlots={blockedSlots} // disable fully booked days
+              value={form.auditDate}
+              onChange={(date) =>
+                setForm((prev) => ({ ...prev, auditDate: date }))
+              }
+              blockedSlots={blockedSlots}
             />
 
             <TimePicker
               label="Start Time"
-              value={startTime}
-              onChange={setStartTime}
-              selectedDate={auditDate}
+              value={form.startTime}
+              onChange={(time) =>
+                setForm((prev) => ({ ...prev, startTime: time }))
+              }
+              selectedDate={form.auditDate}
               blockedSlots={blockedSlots}
-              compareTime={endTime}
+              compareTime={form.endTime}
               mode="start"
             />
 
             <TimePicker
               label="End Time"
-              value={endTime}
-              onChange={setEndTime}
-              selectedDate={auditDate}
+              value={form.endTime}
+              onChange={(time) =>
+                setForm((prev) => ({ ...prev, endTime: time }))
+              }
+              selectedDate={form.auditDate}
               blockedSlots={blockedSlots}
-              compareTime={startTime}
+              compareTime={form.startTime}
               mode="end"
             />
-          </div>
-          {/* Plant Select */}{" "}
-          <div className="space-y-4">
-            {" "}
-            <Label htmlFor="plant">Plant</Label>{" "}
-            <Select
-              options={plantOptions}
-              placeholder="Select a plant" // value={auditPlan.plant || ""} // onChange={(value) => // setAuditPlan((prev) => ({ ...prev, plant: value })) // }
-              onChange={() => {
-                console.log();
-              }}
-              className="dark:bg-dark-900"
-            />{" "}
           </div>
         </div>
 
@@ -149,7 +251,8 @@ PlanModalProps) {
 
           <button
             type="button"
-            className="px-4 py-2  bg-indigo-600 text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg dark:from-[#B55A00] dark:to-[#8A4600]"
           >
             Add Audit Plan
           </button>

@@ -14,8 +14,8 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
   if (!audit) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-4xl w-full p-6 overflow-y-auto max-h-[70vh]">
+    <div className="fixed inset-0 flex  items-center justify-center overflow-y-auto modal z-99999 backdrop-blur-[2px]">
+      <div className="bg-gray-300 dark:bg-gray-900 rounded-xl shadow-xl max-w-4xl w-full p-6 overflow-y-auto max-h-[70vh]">
         {/* Header */}
         <div className="flex justify-between items-center mb-6 border-b pb-3">
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
@@ -33,10 +33,10 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <h3 className="font-medium text-gray-700 dark:text-gray-200">
-              Framework
+              Questionnaire Name
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {audit.framework || "N/A"}
+              {audit.questionnaire?.name || "N/A"}
             </p>
           </div>
           <div>
@@ -44,7 +44,7 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
               Entity
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {audit.entity || "N/A"}
+              {audit.plant || "N/A"}
             </p>
           </div>
         </div>
@@ -52,7 +52,7 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
         {/* Sessions & Participants */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <h3 className="font-medium text-gray-700 dark:text-gray-200">
+            {/* <h3 className="font-medium text-gray-700 dark:text-gray-200">
               Sessions
             </h3>
             <ul className="list-disc pl-5 mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
@@ -66,14 +66,15 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
               ) : (
                 <li>No sessions recorded.</li>
               )}
-            </ul>
+            </ul> */}
           </div>
+
           <div>
             <h3 className="font-medium text-gray-700 dark:text-gray-200">
               Participants
             </h3>
             <ul className="list-disc pl-5 mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
-              {audit.participants?.length ? (
+              {/* {audit.participants?.length ? (
                 audit.participants.map((p, idx) => (
                   <li key={idx}>
                     {p.user.email} -{" "}
@@ -84,7 +85,15 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
                 ))
               ) : (
                 <li>No participants recorded.</li>
-              )}
+              )} */}
+              <li>
+                <span className="font-medium">Auditor : </span>
+                {audit.auditor?.email}
+              </li>
+              <li>
+                <span className="font-medium">Auditee : </span>
+                {audit.auditee?.email}
+              </li>
             </ul>
           </div>
         </div>
