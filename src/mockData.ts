@@ -5,7 +5,8 @@ export const mockAudits: Audit[] = [
   {
     id: 1,
     framework: "ISO",
-    entity: "MAIN SITE",
+    plant: "MAIN SITE",
+    sector:"process",
     status: "confirmed",
     finalScore: 85,
     participants: [
@@ -26,7 +27,9 @@ export const mockAudits: Audit[] = [
   {
     id: 2,
     framework: "IATF",
-    entity: "SUPPLIER A",
+    plant: "SUPPLIER A",
+        sector:"glasses",
+
     status: "planned",
     finalScore: 90,
     participants: [
@@ -46,7 +49,9 @@ export const mockAudits: Audit[] = [
   {
     id: 3,
     framework: "ISO",
-    entity: "BRANCH OFFICE",
+    plant: "BRANCH OFFICE",
+        sector:"x",
+
     status: "postponed",
     finalScore: 78,
     participants: [
