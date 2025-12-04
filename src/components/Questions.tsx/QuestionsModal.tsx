@@ -1,12 +1,13 @@
 import { Modal } from "../ui/modal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ConfirmDialog from "../form/ConfirmDialogProps";
-import { Question, Questionnaire } from "../../types";
+import { Question } from "../../types";
 import {
   createQuestion,
   deleteQuestion,
   updateQuestion,
 } from "../../api/questions";
+import { Questionnaire } from "../../redux/questionnaire/questionnaire-slice-types";
 
 interface QuestionsModalProps {
   isOpen: boolean;
@@ -19,75 +20,63 @@ export default function QuestionsModal({
   onClose,
   questionnaire,
 }: QuestionsModalProps) {
+  const [localQuestions, setLocalQuestions] = useState<Question[]>(
+    questionnaire?.questions || []
+  );
+
+  useEffect(() => {
+    setLocalQuestions(questionnaire?.questions || []);
+  }, [questionnaire]);
+
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<Partial<Question>>({});
-
   const [isAdding, setIsAdding] = useState(false);
-
   const [newQuestion, setNewQuestion] = useState<Partial<Question>>({});
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  /* UPDATE INPUT */
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    setEditedRow((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setEditedRow((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNewInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleNewInputChange = (e: any) => {
     const { name, value } = e.target;
-    setNewQuestion((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setNewQuestion((prev) => ({ ...prev, [name]: value }));
   };
 
-  /** --- EDIT EXISTING QUESTION --- */
+  /* EDIT QUESTION */
   const handleEdit = (row: Question) => {
     setEditRowId(row.id);
-    setEditedRow({ ...row });
+    setEditedRow(row);
   };
 
   const handleSave = async () => {
     if (!questionnaire || !editRowId) return;
 
     try {
-      // 1. Call backend
-      const updated = await updateQuestion(editRowId, editedRow);
+      await updateQuestion(editRowId, editedRow);
 
-      // 2. Update local questionnaire state safely
-      questionnaire.questions = questionnaire.questions.map((q) =>
-        q.id === editRowId ? { ...q, ...editedRow } : q
+      setLocalQuestions((prev) =>
+        prev.map((q) =>
+          q.id === editRowId ? { ...q, ...editedRow } : q
+        )
       );
 
-      console.log("Updated question:", updated);
-
-      // 3. reset edit mode
       setEditRowId(null);
       setEditedRow({});
     } catch (err) {
       console.error(err);
-      alert("Failed to update question. Check console.");
     }
   };
 
-  const handleCancel = () => {
-    setEditRowId(null);
-    setEditedRow({});
-  };
-
-  /** --- ADD NEW QUESTION --- */
+  /* ADD NEW QUESTION */
   const handleAddNew = () => {
     setIsAdding(true);
     setNewQuestion({
       description: "",
       chapter: "",
-      weight: undefined,
-      critical_value: undefined,
+      weight: 0,
+      critical_value: 0,
     });
   };
 
@@ -95,29 +84,14 @@ export default function QuestionsModal({
     if (!questionnaire) return;
 
     try {
-      // 1. Call backend to create the question
       const created = await createQuestion(newQuestion, questionnaire.id);
 
-      // Ensure questions is an array before attempting to push
-      if (!Array.isArray(questionnaire.questions)) {
-        questionnaire.questions = []; // Initialize as an empty array if it's not already an array
-      }
+      setLocalQuestions((prev) => [...prev, created]);
 
-      // 2. Add the new question to the questionnaire's questions array
-      questionnaire.questions.push(created);
-
-      console.log("New question added:", newQuestion);
-      console.log("New question created:", created);
-
-      // 3. Close add form
       setIsAdding(false);
-
-      // 4. Reset fields
       setNewQuestion({});
     } catch (err: any) {
-      // Show the error message from the backend
-      console.error("Failed to create question:", err.message); // Log the error message
-      alert(err.message); // Show the error message to the user
+      console.error("Failed to create question:", err.message);
     }
   };
 
@@ -126,22 +100,21 @@ export default function QuestionsModal({
     setNewQuestion({});
   };
 
+  /* DELETE QUESTION */
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+
   const handleDeleteClick = async (id: number) => {
     setDeleteId(id);
-    const res = await deleteQuestion(id);
-    console.log("Delete response:", res);
+    await deleteQuestion(id);
     setIsConfirmOpen(true);
   };
+
   const handleConfirmDelete = () => {
-    if (!questionnaire || deleteId === null) return;
+    if (!deleteId) return;
 
-    questionnaire.questions = questionnaire.questions.filter(
-      (q) => q.id !== deleteId
-    );
+    setLocalQuestions((prev) => prev.filter((q) => q.id !== deleteId));
 
-    // Reset edit/add states if needed
     if (editRowId === deleteId) {
       setEditRowId(null);
       setEditedRow({});
@@ -197,7 +170,7 @@ export default function QuestionsModal({
               Type:
             </span>
             <p className="text-gray-600 dark:text-gray-400">
-              {questionnaire?.type || "N/A"}
+              {questionnaire?.auditType?.value || "N/A"}
             </p>
           </div>
         </div>
@@ -224,9 +197,6 @@ export default function QuestionsModal({
               <thead className="bg-gray-100 dark:bg-gray-800/70">
                 <tr>
                   <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
-                    #
-                  </th>
-                  <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                     Description
                   </th>
                   <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
@@ -247,9 +217,6 @@ export default function QuestionsModal({
               <tbody>
                 {isAdding && (
                   <tr className="border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-gray-800/40">
-                    <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
-                      NEW
-                    </td>
                     <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
                       <input
                         name="description"
@@ -317,15 +284,12 @@ export default function QuestionsModal({
                   </tr>
                 )}
 
-                {questionnaire?.questions?.length ? (
-                  questionnaire.questions.map((q, index) => (
+                {localQuestions?.length ? (
+                  localQuestions?.map((q) => (
                     <tr
                       key={q.id}
                       className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/40"
                     >
-                      <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700">
-                        {index + 1}
-                      </td>
                       <td className="px-4 py-2 border-r border-gray-200 dark:border-gray-700 min-w-[250px]">
                         {editRowId === q.id ? (
                           <input
@@ -391,7 +355,7 @@ export default function QuestionsModal({
                               Save
                             </button>
                             <button
-                              onClick={handleCancel}
+                              onClick={handleCancelNew}
                               className="text-gray-600 hover:text-gray-800"
                             >
                               Cancel

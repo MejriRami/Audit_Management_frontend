@@ -18,6 +18,7 @@ import EditQuestionnaireModal from "../../components/questionnaire/edit-question
 import { getFrameworks } from "../../redux/framework/framework";
 import Enum from "../../components/enum/Enum";
 import { resetQuestioannairesState } from "../../redux/questionnaire/questionnaire-slice";
+import QuestionsModal from "../../components/Questions.tsx/QuestionsModal";
 
 export default function FormElements() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function FormElements() {
   const [isOpen, setIsOpen] = useState(false);
   const { frameworkOptions, auditTypeOptions, auditorOptions } = Enum();
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire>({} as Questionnaire);
+  const [isModalOpenQuestions, setIsModalOpenQuestions] = useState(false);
 
   const handleClick = () => {
     navigate("/add-questionnaire");
@@ -47,6 +49,15 @@ export default function FormElements() {
   const handleEditQuestionnaire = (q: Questionnaire) => {
     setIsOpen(true);
     setSelectedQuestionnaire(q);
+  }
+
+  const closeModalQuestions = () => {
+    setIsModalOpenQuestions(false);
+  }
+
+  const openModalQuestions = (q: Questionnaire) => {
+    setSelectedQuestionnaire(q);
+    setIsModalOpenQuestions(true);
   }
 
   useEffect(() => {
@@ -112,17 +123,17 @@ export default function FormElements() {
                           >
                             {/* Sticky ID */}
                             <TableCell className="sticky left-0 z-20 w-[80px] bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                              {q.name}
+                              <button
+                                className="text-gray-700 dark:text-gray-200 hover:underline text-sm font-medium transition-transform duration-200"
+                                onClick={() => openModalQuestions(q)}
+                              >
+                                {q.name}
+                              </button>
                             </TableCell>
 
                             {/* Sticky Name */}
                             <TableCell className="sticky left-[80px] z-20 w-[250px] bg-white dark:bg-gray-900 group-hover:bg-blue-50 dark:group-hover:bg-white/[0.05] px-4 py-3">
-                              <button
-                                className="text-gray-700 dark:text-gray-200 hover:underline text-sm font-medium transition-transform duration-200"
-                                //onClick={() => openModal(q)}
-                              >
-                                {q.version}
-                              </button>
+                               {q.version}
                             </TableCell>
 
                             {/* Normal Columns */}
@@ -188,11 +199,11 @@ export default function FormElements() {
           </div>
         </ComponentCard>
 
-        {/* <QuestionsModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
+        <QuestionsModal
+          isOpen={isModalOpenQuestions}
+          onClose={closeModalQuestions}
           questionnaire={selectedQuestionnaire}
-        /> */}
+        />
 
         {/* Edit Questionnaire Modal */}
         <EditQuestionnaireModal
