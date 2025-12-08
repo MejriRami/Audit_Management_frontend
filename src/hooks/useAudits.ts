@@ -18,10 +18,16 @@ export function useAudits(filters: AuditFilters) {
   const [filteredAudits, setFilteredAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-const uniqueAuditees = useMemo(
-  () => [...new Set(allAudits.map(a => a.auditee?.email ?? ""))],
-  [allAudits]
-);
+  const uniqueAuditees = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          allAudits.flatMap(a => a.auditees ?? [])
+        )
+      ),
+    [allAudits]
+  );
+
 const uniqueAuditors = useMemo(
   () => [...new Set(allAudits.map(a => a.auditor?.email ?? ""))],
   [allAudits]
@@ -125,9 +131,10 @@ const uniqueQuestionnaires = [
 
 if (filters.auditee) {
   result = result.filter((audit) =>
-    audit.auditee?.email === filters.auditee
+    audit.auditees?.includes(filters.auditee)
   );
 }
+
 if (filters.auditor) {
   result = result.filter((audit) =>
     audit.auditor?.email === filters.auditor

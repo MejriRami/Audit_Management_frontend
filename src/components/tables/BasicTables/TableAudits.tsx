@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -12,6 +12,9 @@ import { Audit } from "../../../types";
 
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
+import RescheduleAuditModal from "../../modals/RescheduleModal";
+import AuditHistoryModal from "../../modals/AuditHistoryModal";
+import { useSelector } from "react-redux";
 
 export default function TableAudits({ audits }: { audits: Audit[] }) {
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null);
@@ -47,10 +50,17 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         return "light";
     }
   };
+  const [rescheduleAudit, setRescheduleAudit] = useState<Audit | null>(null);
 
-  // COLUMNS
-  const ONGOING_HEADERS = [
-    "#Audit ID",
+  const onReschedule = (audit: Audit) => {
+    setRescheduleAudit(audit);
+  };
+  const [historyAudit, setHistoryAudit] = useState<Audit | null>(null);
+  const user = useSelector((state: any) => state.auth.user);
+
+  // -------------------- add new header --------------------
+  const ONGOING_HEADERS: string[] = [
+    "#Audit Identifer",
     "Auditor",
     "Auditee",
     "Plant",
@@ -58,6 +68,9 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
     "Planned Start",
     "Planned End",
     "Status",
+    "Event Created",
+    "Action",
+    "History",
     "Details",
   ];
 
@@ -70,13 +83,16 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
     "Planned Start",
     "Planned End",
     "Final Score",
+    "Event Created", // <--- new column
     "Action",
   ];
 
-  // ROW RENDERERS
+  // -------------------- update row renderers --------------------
   const renderOngoingRow = (audit: Audit) => (
     <TableRow key={audit.id}>
-      <TableCell className="px-4 py-3">{audit.id}</TableCell>
+      <TableCell className="text-gray-500 text-xs px-4">
+        {audit.audit_number}
+      </TableCell>
 
       {/* Auditor */}
       <TableCell className="px-5 py-4">
@@ -88,13 +104,14 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         </div>
       </TableCell>
 
-      {/* Auditee */}
+      {/* Auditees */}
       <TableCell className="px-5 py-4">
         <div className="text-sm">
-          <div className="font-medium">
-            {audit.auditee?.first_name} {audit.auditee?.last_name}
-          </div>
-          <div className="text-gray-500 text-xs">{audit.auditee?.email}</div>
+          {audit.auditees?.map((email, index) => (
+            <div key={index} className="text-gray-500 text-xs">
+              {email}
+            </div>
+          ))}
         </div>
       </TableCell>
 
@@ -115,10 +132,45 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         </Badge>
       </TableCell>
 
+      {/* EVENT CREATED */}
+      <TableCell className="px-4 py-3">
+        <Badge size="sm" color={audit.event_created ? "success" : "light"}>
+          {audit.event_created ? "Yes" : "No"}
+        </Badge>
+      </TableCell>
+      {/* RESCHEDULE BUTTON */}
       <TableCell className="px-4 py-3">
         <button
-          className="text-blue-600 font-medium underline"
+          disabled={user?.email !== audit?.auditor?.email}
+          onClick={() =>
+            user?.email === audit?.auditor?.email && onReschedule(audit)
+          }
+          className={`rounded-full text-white text-xs font-medium px-3 py-1 transition
+    ${
+      user?.email === audit?.auditor?.email
+        ? "bg-yellow-500 hover:bg-yellow-600"
+        : "bg-gray-400 cursor-not-allowed"
+    }`}
+        >
+          Reschedule
+        </button>
+      </TableCell>
+
+      <TableCell className="px-4 py-3">
+        <button
+          onClick={() => setHistoryAudit(audit)}
+          className="px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold 
+               hover:bg-purple-200 transition shadow-sm"
+        >
+          History
+        </button>
+      </TableCell>
+
+      <TableCell className="px-4 py-3">
+        <button
           onClick={() => setSelectedAudit(audit)}
+          className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold
+               hover:bg-blue-200 transition shadow-sm"
         >
           View
         </button>
@@ -128,7 +180,7 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
 
   const renderCompletedRow = (audit: Audit) => (
     <TableRow key={audit.id}>
-      <TableCell className="px-4 py-3">{audit.id}</TableCell>
+      <TableCell className="px-4 py-3">{audit.audit_number}</TableCell>
 
       {/* Auditor */}
       <TableCell className="px-5 py-4">
@@ -140,13 +192,14 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         </div>
       </TableCell>
 
-      {/* Auditee */}
+      {/* Auditees */}
       <TableCell className="px-5 py-4">
         <div className="text-sm">
-          <div className="font-medium">
-            {audit.auditee?.first_name} {audit.auditee?.last_name}
-          </div>
-          <div className="text-gray-500 text-xs">{audit.auditee?.email}</div>
+          {audit.auditees?.map((email, index) => (
+            <div key={index} className="text-gray-500 text-xs">
+              {email}
+            </div>
+          ))}
         </div>
       </TableCell>
 
@@ -160,10 +213,18 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         {audit.planned_end_date || "-"}
       </TableCell>
 
-      {/* No status here */}
+      {/* Final Score */}
       <TableCell className="px-4 py-3 font-semibold text-green-600">
         {audit.finalScore ?? "-"}
       </TableCell>
+
+      {/* EVENT CREATED */}
+      <TableCell className="px-4 py-3">
+        <Badge size="sm" color={audit.event_created ? "success" : "light"}>
+          {audit.event_created ? "Yes" : "No"}
+        </Badge>
+      </TableCell>
+
       <TableCell className="px-4 py-3 font-semibold text-gray-600">
         <button className="rounded-lg bg-yellow-400 text-white text-xs font-small hover:bg-yellow-700 transition">
           generate a report
@@ -206,6 +267,18 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         <AuditDetailsModal
           audit={selectedAudit}
           onClose={() => setSelectedAudit(null)}
+        />
+      )}
+      {rescheduleAudit && (
+        <RescheduleAuditModal
+          audit={rescheduleAudit}
+          onClose={() => setRescheduleAudit(null)}
+        />
+      )}
+      {historyAudit && (
+        <AuditHistoryModal
+          audit={historyAudit}
+          onClose={() => setHistoryAudit(null)}
         />
       )}
 

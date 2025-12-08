@@ -26,11 +26,14 @@ import AddQuestionnaire from "./components/questionnaire/add-questionnaire";
 import AuditChecklist from "./components/audit/FillAudit";
 import ResetPassword from "./pages/AuthPages/ResetPassword";
 import RequireAuth from "./components/auth/RequireAuth";
+import { Toaster } from "react-hot-toast";
 export default function App() {
   return (
     <>
       <Router>
         <ScrollToTop />
+        <Toaster position="top-right" />
+
         <Routes>
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
@@ -75,7 +78,7 @@ export default function App() {
             </Route>
             {/* Fallback Route */}
             <Route path="*" element={<NotFound />} />
-          </Route>  
+          </Route>
         </Routes>
       </Router>
     </>

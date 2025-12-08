@@ -1,14 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
+
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import PageMeta from "../../components/common/PageMeta";
 import TableAudits from "../../components/tables/BasicTables/TableAudits";
 import TableCorrectiveActions from "../../components/tables/BasicTables/TableCorrectiveActions";
 import { mockCorrectiveActions } from "../../mockData";
-import { Audit, Auditor } from "../../types";
 import PlanAudit from "../Audit/PlanAudit";
-import { getAuditors } from "../../api/users";
-import { AuditFilters, useAudits } from "../../hooks/useAudits";
+
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import {
+  fetchAudits,
+  setAuditFilters as setAuditFiltersAction,
+  clearAuditFilters as clearAuditFiltersAction,
+} from "../../redux/audit/audit-slice";
+import { AuditFilters } from "../../redux/audit/audit-slice-types";
+import {
+  selectAuditsLoading,
+  selectAuditsError,
+  selectAuditFilters,
+  selectFilteredAudits,
+  selectUniqueQuestionnaires,
+  selectUniqueAuditors,
+  selectUniqueAuditees,
+} from "../../redux/audit/audit-selectors";
 
 type EntityFilters = {
   search: string;
@@ -17,118 +32,84 @@ type EntityFilters = {
 };
 
 export default function BasicTables() {
+  const dispatch = useAppDispatch();
+
   const [activeTab, setActiveTab] = useState<"audits" | "corrective_actions">(
     "audits"
   );
-
-  // This `search` input is synchronized into auditFilters (single source of truth)
-  const [search, setSearch] = useState("");
-
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const closeAuditModalOpen = () => setIsAuditModalOpen(false);
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Separate filters for audits tab (single filter object used by useAudits)
-  const [auditFilters, setAuditFilters] = useState<AuditFilters>({
-    search: "",
-    status: "",
-    plant: "",
-    questionnaire: "",
-    dateFrom: "",
-    dateTo: "",
-    auditor: "",
-    auditee: "",
-  });
-
-  // entity filters kept for future (not used for audits in this rewrite)
+  // kept for future (for corrective actions / entities)
   const [entityFilters, setEntityFilters] = useState<EntityFilters>({
     search: "",
     type: "",
     parent: "",
   });
 
-  // show/hide filters panel
-  const [showFilters, setShowFilters] = useState(false);
+  // ----- Redux audit state via selectors -----
+  const auditsLoading = useAppSelector(selectAuditsLoading);
+  const auditsError = useAppSelector(selectAuditsError);
+  const auditFilters = useAppSelector(selectAuditFilters);
+  const filteredAudits = useAppSelector(selectFilteredAudits);
+  const uniqueQuestionnaires = useAppSelector(selectUniqueQuestionnaires);
+  const uniqueAuditors = useAppSelector(selectUniqueAuditors);
+  const uniqueAuditees = useAppSelector(selectUniqueAuditees);
 
-  // Keep auditor options for PlanAudit modal
-  const [auditorOptions, setAuditorOptions] = useState<
-    { value: string; text: string; selected: boolean }[]
-  >([]);
-
-  const {
-    audits,
-
-    loading: auditsLoading,
-    error: auditsError,
-    uniqueAuditees,
-    uniqueAuditors,
-    uniqueQuestionnaires,
-  } = useAudits(auditFilters);
-
-  // Keep local `filters` variable only for UI selects (mirrors auditFilters when audits active)
-  // Not strictly necessary, but keeps controlled components simple
-  const [filters, setFilters] = useState(auditFilters);
-
-  // Synchronize the top-level search input into auditFilters.search
+  // Fetch audits on mount
   useEffect(() => {
-    setAuditFilters((prev) => ({ ...prev, search }));
-    setFilters((prev) => ({ ...(prev as AuditFilters), search }));
-  }, [search]);
-
-  // Ensure UI filters reflect active tab
-  useEffect(() => {
-    if (activeTab === "audits") {
-      setFilters(auditFilters);
-    } else {
-      // when switching to corrective_actions we keep filters local for future use
-      setFilters((prev) => ({ ...(prev as any), search: "" }));
-    }
-  }, [activeTab, auditFilters]);
-
-  // Update a specific filter key (works for audits tab)
-  const handleFilterChange = (key: string, value: string) => {
-    if (activeTab === "audits") {
-      setAuditFilters((prev) => ({ ...prev, [key]: value }));
-      setFilters((prev) => ({ ...(prev as AuditFilters), [key]: value }));
-    } else {
-      // not currently used (entity filters commented in UI)
-      setEntityFilters((prev) => ({ ...prev, [key]: value }));
-    }
-  };
-
-  const handleResetFilters = () => {
-    if (activeTab === "audits") {
-      const reset: AuditFilters = {
-        search: "",
-        status: "",
-        plant: "",
-        questionnaire: "",
-        dateFrom: "",
-        dateTo: "",
-        auditor: "",
-        auditee: "",
-      };
-      setAuditFilters(reset);
-      setFilters(reset);
-      setSearch("");
-    } else {
-      const reset: EntityFilters = { search: "", type: "", parent: "" };
-      setEntityFilters(reset);
-      setFilters((prev) => ({ ...(prev as any), search: "" }));
-    }
-  };
+    dispatch(fetchAudits());
+  }, [dispatch]);
 
   const handlePlanAudit = () => setIsAuditModalOpen(true);
   const handleReschedule = () => {
     console.log("Open modal to reschedule audit...");
   };
 
-  // Corrective actions filtered client-side from mock data (keeps behavior you had)
+  // ---- Handlers for filters ----
+
+  const handleSearchChange = (value: string) => {
+    if (activeTab === "audits") {
+      dispatch(setAuditFiltersAction({ search: value }));
+    } else {
+      setEntityFilters((prev) => ({ ...prev, search: value }));
+    }
+  };
+
+  const handleFilterChange = (key: keyof AuditFilters, value: string) => {
+    if (activeTab === "audits") {
+      dispatch(
+        setAuditFiltersAction({ [key]: value } as Partial<AuditFilters>)
+      );
+    } else {
+      setEntityFilters((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handleResetFilters = () => {
+    if (activeTab === "audits") {
+      dispatch(clearAuditFiltersAction());
+    } else {
+      const reset: EntityFilters = { search: "", type: "", parent: "" };
+      setEntityFilters(reset);
+    }
+  };
+
+  // ----- Corrective actions filtered client-side ----- //
   const filteredCorrectiveActions = useMemo(() => {
-    const term = search.toLowerCase();
+    const term =
+      activeTab === "audits"
+        ? auditFilters.search.toLowerCase()
+        : entityFilters.search.toLowerCase();
+
     return mockCorrectiveActions.filter((c) =>
       c.auditFramework.toLowerCase().includes(term)
     );
-  }, [search]);
+  }, [activeTab, auditFilters.search, entityFilters.search]);
+
+  const currentSearch =
+    activeTab === "audits" ? auditFilters.search : entityFilters.search;
 
   return (
     <>
@@ -158,6 +139,7 @@ export default function BasicTables() {
         <ComponentCard
           title={activeTab === "audits" ? "Audits" : "Corrective Actions"}
         >
+          {/* Tabs */}
           <div className="flex mb-4 gap-4">
             {(["audits", "corrective_actions"] as const).map((tab) => (
               <button
@@ -174,12 +156,13 @@ export default function BasicTables() {
             ))}
           </div>
 
+          {/* Search + Filters toggle */}
           <div className="flex gap-2 mb-4">
             <input
               type="text"
               placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={currentSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="px-4 py-2 border rounded-lg flex-1"
             />
 
@@ -199,17 +182,17 @@ export default function BasicTables() {
             </div>
           </div>
 
-          {/* ---------- Filters Section ---------- */}
+          {/* Filters Section */}
           {showFilters && (
             <div className="mb-4 p-4 border rounded bg-gray-50 dark:bg-gray-800 flex gap-4 flex-wrap items-end">
               {activeTab === "audits" ? (
                 <>
-                  {/* Audit filters */}
+                  {/* Status */}
                   <div>
                     <label className="block mb-1">Status:</label>
                     <select
                       className="p-2 border rounded w-full"
-                      value={(filters as AuditFilters).status}
+                      value={auditFilters.status}
                       onChange={(e) =>
                         handleFilterChange("status", e.target.value)
                       }
@@ -220,19 +203,17 @@ export default function BasicTables() {
                       <option value="waiting_for_corrective_actions">
                         Waiting for CAR
                       </option>
-                      {/* <option value="cancelled">Cancelled</option>{" "} */}
-                      {/*same as postponed ,ONE OF THEM MUST BE IGNORED */}
-                      {/* <option value="completed">Completed</option> */}
                       <option value="rescheduled">Rescheduled</option>
                       <option value="postponed">Postponed</option>
                     </select>
                   </div>
 
+                  {/* Plant */}
                   <div>
                     <label className="block mb-1">Plant:</label>
                     <select
                       className="p-2 border rounded w-full"
-                      value={(filters as AuditFilters).plant}
+                      value={auditFilters.plant}
                       onChange={(e) =>
                         handleFilterChange("plant", e.target.value)
                       }
@@ -255,29 +236,32 @@ export default function BasicTables() {
                     </select>
                   </div>
 
+                  {/* Questionnaire */}
                   <div>
                     <label className="block mb-1">Questionnaire:</label>
                     <select
                       className="p-2 border rounded w-full"
-                      value={filters.questionnaire}
+                      value={auditFilters.questionnaire}
                       onChange={(e) =>
                         handleFilterChange("questionnaire", e.target.value)
                       }
                     >
                       <option value="">All</option>
 
-                      {uniqueQuestionnaires.map((email) => (
-                        <option key={email} value={email}>
-                          {email}
+                      {uniqueQuestionnaires.map((q) => (
+                        <option key={q} value={q}>
+                          {q}
                         </option>
                       ))}
                     </select>
                   </div>
+
+                  {/* Auditor */}
                   <div>
                     <label className="block mb-1">Auditor:</label>
                     <select
                       className="p-2 border rounded w-full"
-                      value={filters.auditor}
+                      value={auditFilters.auditor}
                       onChange={(e) =>
                         handleFilterChange("auditor", e.target.value)
                       }
@@ -291,11 +275,13 @@ export default function BasicTables() {
                       ))}
                     </select>
                   </div>
+
+                  {/* Auditee */}
                   <div>
                     <label className="block mb-1">Auditee:</label>
                     <select
                       className="p-2 border rounded w-full"
-                      value={filters.auditee}
+                      value={auditFilters.auditee}
                       onChange={(e) =>
                         handleFilterChange("auditee", e.target.value)
                       }
@@ -310,13 +296,14 @@ export default function BasicTables() {
                     </select>
                   </div>
 
+                  {/* Date range */}
                   <div>
                     <label className="block mb-1">Date:</label>
                     <div className="flex gap-2">
                       <input
                         type="date"
                         className="p-2 border rounded"
-                        value={(filters as AuditFilters).dateFrom}
+                        value={auditFilters.dateFrom}
                         onChange={(e) =>
                           handleFilterChange("dateFrom", e.target.value)
                         }
@@ -325,7 +312,7 @@ export default function BasicTables() {
                       <input
                         type="date"
                         className="p-2 border rounded"
-                        value={(filters as AuditFilters).dateTo}
+                        value={auditFilters.dateTo}
                         onChange={(e) =>
                           handleFilterChange("dateTo", e.target.value)
                         }
@@ -334,15 +321,31 @@ export default function BasicTables() {
                   </div>
                 </>
               ) : (
-                <>
-                  {/* Entity filters (kept commented in original — left for future) */}
-                </>
+                <>{/* future entity filters */}</>
               )}
             </div>
           )}
+          {/* Inside <ComponentCard> just before the table content */}
 
+          {auditsError && activeTab === "audits" && (
+            <div className="mb-4 rounded border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
+              Failed to load audits: {auditsError}
+            </div>
+          )}
+
+          {auditsLoading && activeTab === "audits" && <InlineLoader />}
+
+          {/* Table content */}
           {activeTab === "audits" ? (
-            <TableAudits audits={audits} />
+            auditsLoading ? (
+              <InlineLoader />
+            ) : filteredAudits.length === 0 ? (
+              <div className="py-8 text-center text-sm text-gray-500">
+                No audits match your filters.
+              </div>
+            ) : (
+              <TableAudits audits={filteredAudits} />
+            )
           ) : (
             <TableCorrectiveActions
               correctiveActions={filteredCorrectiveActions}
@@ -353,9 +356,16 @@ export default function BasicTables() {
         <PlanAudit
           isAuditModalOpen={isAuditModalOpen}
           closeAuditModalOpen={closeAuditModalOpen}
-          auditorOptions={auditorOptions}
         />
       </div>
     </>
+  );
+}
+// somewhere reusable, or inline in BasicTables file
+function InlineLoader() {
+  return (
+    <div className="flex justify-center items-center py-8 text-gray-500">
+      <span className="animate-pulse">Loading audits...</span>
+    </div>
   );
 }

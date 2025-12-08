@@ -2,6 +2,7 @@ import { Auditor, Question } from "../../types";
 
 export interface QuestionnaireState {
     questionnairesList: Questionnaire[];
+    questionnaireListName:QuestionnairesNames[];
     questionnaire: Questionnaire | null;
     success: boolean;
     error: boolean;
@@ -23,3 +24,8 @@ export interface Questionnaire {
   auditors: Auditor[];
   questions: Question[];
 }
+
+export interface QuestionnairesNames{
+  id: number;
+  name: string;
+} 

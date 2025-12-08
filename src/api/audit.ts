@@ -1,13 +1,14 @@
 import axios from "axios";
-import { Audit } from "../types";
+import { Audit, AuditRescheduleHistory } from "../types";
 
 // ----------------- Types -----------------
 
 export interface AuditPlanCreate {
-  auditee_id: number;
+  auditee_emails: string[] ;
   auditor_id: number;
   plant: string;
   sector: string;
+  hardware_email?:string;
   questionnaire_id: number;
   audit_date: string; // ISO date: "YYYY-MM-DD"
   start_time: string; // "HH:mm:ss"
@@ -19,6 +20,8 @@ export interface AuditResponse {
   status: string;
   planned_start_date: string; // ISO datetime
   planned_end_date: string;   // ISO datetime
+  event_created:boolean;
+  audit_number:string;
 }
 
 // ----------------- API Call -----------------
@@ -46,5 +49,20 @@ export const getAudits = async (): Promise<Audit[]> => {
   } catch (err) {
     console.error("Error fetching audits:", err);
     throw err;
+  }
+};
+
+// ----------------- New: Fetch Audit Reschedule History -----------------
+export const getAuditHistory = async (auditId: number): Promise<AuditRescheduleHistory[]> => {
+  try {
+    const res = await fetch(`${API_BASE}/audits/${auditId}/history`);
+    if (!res.ok) throw new Error("Failed to fetch audit history");
+    const data = await res.json();
+
+    // Ensure we always return an array
+    return Array.isArray(data) ? data : data?.history ?? [];
+  } catch (err) {
+    console.error("Error fetching audit history:", err);
+    return [];
   }
 };
