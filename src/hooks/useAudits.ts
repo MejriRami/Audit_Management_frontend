@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Audit } from "../types";
+import { getAudits } from "../api/audit";
 
-interface AuditFilters {
+export interface AuditFilters {
   search: string;
   status: string;
-  entity: string;
-  framework: string;
+  plant: string;
+  questionnaire: string;
   dateFrom: string;
   dateTo: string;
+  auditor:string;
+  auditee:string;
 }
 
 export function useAudits(filters: AuditFilters) {
@@ -15,101 +18,132 @@ export function useAudits(filters: AuditFilters) {
   const [filteredAudits, setFilteredAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const uniqueAuditees = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          allAudits.flatMap(a => a.auditees ?? [])
+        )
+      ),
+    [allAudits]
+  );
 
-  const API_BASE_URL = "http://localhost:8000";
+const uniqueAuditors = useMemo(
+  () => [...new Set(allAudits.map(a => a.auditor?.email ?? ""))],
+  [allAudits]
+);
+const uniqueQuestionnaires = [
+  ...new Set(allAudits.map(a => a.questionnaire?.name ?? "")),
+];
 
-  // --- Fetch all audits once ---
+
+  // Fetch all audits once
   useEffect(() => {
+    let mounted = true;
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE_URL}/audit/get_all`);
-        if (!res.ok) throw new Error("Failed to fetch audits");
-        const data = await res.json();
-        setAllAudits(data);
-        setFilteredAudits(data);
-        console.log("columns are ",data)
+        const res = await getAudits();
+        console.log("audits are ",res)
+        if (!mounted) return;
+        setAllAudits(res ?? []);
+        setFilteredAudits(res ?? []);
       } catch (err: any) {
-        setError(err.message);
+        if (!mounted) return;
+        setError(err?.message ?? "Failed to fetch audits");
       } finally {
+        if (!mounted) return;
         setLoading(false);
       }
     };
     fetchData();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // --- Apply filters locally ---
+  // Apply filters locally (single place for filtering)
   useEffect(() => {
-    let result = [...allAudits];
+    // operate on a copy
+    let result = allAudits.slice();
 
-    // Search across multiple fields
+    // Normalize helper
+    const normalize = (v?: string) =>
+      (v ?? "").toString().trim().toLowerCase();
+
+    // Search across multiple fields (if present)
     if (filters.search) {
-      const term = filters.search.toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.framework?.toLowerCase().includes(term) ||
-          a.status?.toLowerCase().includes(term) ||
-          a.entity?.toLowerCase().includes(term) ||
-          // a.questionnaire?.toLowerCase().includes(term) ||
+      const term = normalize(filters.search);
+      result = result.filter((a) => {
+        return (
+          normalize(a.questionnaire?.name).includes(term) ||
+          normalize(a.status).includes(term) ||
+          normalize(a.plant).includes(term) ||
+          // if questionnaire exists and is string: include it
+          (a as any).questionnaire?.toString().toLowerCase().includes(term) ||
           String(a.id).includes(term)
-      );
+        );
+      });
     }
 
-    //  Status Filter
+    // Status filter (exact match but normalized)
     if (filters.status) {
-      result = result.filter(
-        (a) => a.status?.toLowerCase() === filters.status.toLowerCase()
-      );
-    console.log("heloo")
-    console.log(result)
-
+      const s = normalize(filters.status);
+      result = result.filter((a) => normalize(a.status) === s);
     }
 
-
-    // Entity Filter
-    if (filters.entity) {
-      result = result.filter(
-        (a) => a.entity?.toLowerCase() === filters.entity.toLowerCase()
-      );
+    //plant filter
+    if (filters.plant) {
+      const e = normalize(filters.plant);
+      result = result.filter((a) => normalize(a.plant) === e);
     }
 
-    // Framework Filter
-    if (filters.framework) {
-      result = result.filter(
-        (a) => a.framework?.toLowerCase() === filters.framework.toLowerCase()
-      );
+    // Framework filter
+    if (filters.questionnaire) {
+      const f = normalize(filters.questionnaire);
+      result = result.filter((a) => normalize(a.questionnaire?.name) === f);
     }
 
-    // Date range filter (based on sessions)
- if (filters.dateFrom || filters.dateTo) {
+    // Date range filter (based on sessions array)
+  if (filters.dateFrom || filters.dateTo) {
   const fromDate = filters.dateFrom
-    ? new Date(`${filters.dateFrom}T00:00:00`) // start of day local
+    ? new Date(`${filters.dateFrom}T00:00:00`)
     : null;
   const toDate = filters.dateTo
-    ? new Date(`${filters.dateTo}T23:59:59`) // end of day local
+    ? new Date(`${filters.dateTo}T23:59:59`)
     : null;
 
   result = result.filter((audit) => {
-    if (!audit.sessions || audit.sessions.length === 0) return false;
+    if (!audit.planned_start_date || !audit.planned_end_date) return false;
 
-    // Check if any session overlaps range
-    return audit.sessions.some((session) => {
-      const start = new Date(session.start_time);
-      const end = new Date(session.end_time);
+    const start = new Date(audit.planned_start_date);
+    const end = new Date(audit.planned_end_date);
 
-      // Audit is included if any session overlaps the range
-      const startsAfterFrom = !fromDate || end >= fromDate;
-      const endsBeforeTo = !toDate || start <= toDate;
+    // Overlap logic
+    const overlaps =
+      (!fromDate || end >= fromDate) &&
+      (!toDate || start <= toDate);
 
-      return startsAfterFrom && endsBeforeTo;
-    });
+    return overlaps;
   });
+}
+
+if (filters.auditee) {
+  result = result.filter((audit) =>
+    audit.auditees?.includes(filters.auditee)
+  );
+}
+
+if (filters.auditor) {
+  result = result.filter((audit) =>
+    audit.auditor?.email === filters.auditor
+  );
 }
 
 
     setFilteredAudits(result);
   }, [filters, allAudits]);
 
-  return { audits: filteredAudits, loading, error };
+return { audits: filteredAudits, uniqueAuditees,uniqueAuditors,uniqueQuestionnaires, loading, error };
 }

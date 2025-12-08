@@ -2,7 +2,8 @@
 // -------------------- Users & Participants --------------------
 export interface User {
   id: number;
-  name: string;
+  first_name: string;
+  last_name:string;
   email: string;
 }
 
@@ -33,15 +34,21 @@ export interface Finding {
 
 // -------------------- Audit --------------------
 export interface Audit {
+  audit_number: string;
+  event_created: boolean;
   id: number;
-  framework?: string;
-  entity?: string;
+  questionnaire?: {  name: string};
+  plant?: string;
+  sector?:string;
   status?: string;
   finalScore?: number;
-  participants?: Participant[];
+  auditor?: User;
+  auditees?:string[];
   sessions?: { start_time: string; end_time: string }[];
   questions_and_responses?: QuestionResponse[];
   findings?: Finding[];
+  planned_start_date?:string;
+  planned_end_date?:string;
 }
 
 // -------------------- Corrective Actions Table --------------------
@@ -94,6 +101,25 @@ export interface Framework {
   code: string;
 }
 
+export interface QuestionnaireList {
+  id: number;
+  name: string;
+}
+export interface Questionnaire {
+  id: number;
+  name: string;
+  version: number;
+  status: string;
+  target_duration: string; // "HH:MM:SS"
+  score_calculation?: string;
+  guideline_file?: string;
+  type: string; // audit type value
+  framework_id?: string; // dropdown value
+  framework?: {id:string,label:string}; // display code
+  auditors?: Auditor[];
+  questions: Question[];
+}
+
 export interface QuestionnaireUpdate {
   id: number;
   name?: string;
@@ -108,7 +134,6 @@ export interface QuestionnaireUpdate {
 }
 
 export interface Auditor {
-  id: number;
   email: string;
 }
 
@@ -123,11 +148,12 @@ export interface Question {
 }
 
 
-export interface ScheduleHistory {
-  id: string;
-  oldDate: string;
-  newDate: string;
-  changedAt: string;
+ export interface AuditRescheduleHistory {
+  id: number;
+  action_type: string;
+  old_date: string | null;
+  new_date: string | null;
+  reason: string | null;
+  changed_by: string | null;
+  created_at: string;
 }
-
- 

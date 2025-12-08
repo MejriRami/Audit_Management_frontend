@@ -8,7 +8,7 @@ interface Option {
 interface SelectProps {
   options: Option[];
   placeholder?: string;
-  onChange: (value: string | number) => void;
+  onChange: (value: string) => void;
   className?: string;
   defaultValue?: string | number;
 }

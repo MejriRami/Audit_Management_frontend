@@ -25,3 +25,8 @@ export type UpdateQuestionnaire = (
   dispatch: Dispatch<any>
 ) => Promise<boolean>;
 
+export type GetQuestionnairesByName=(
+ dispatch: Dispatch<any>
+) => Promise<boolean>;
+
+

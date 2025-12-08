@@ -6,12 +6,15 @@ import {
      deleteQuestionnaireRequest,
      deleteQuestionnaireSuccess,
      getQuestionnaireByIdFailure, getQuestionnaireByIdRequest, getQuestionnaireByIdSuccess,
+     getQuestionnairesByNameFailure,
+     getQuestionnairesByNameRequest,
+     getQuestionnairesByNameSuccess,
      getQuestionnairesFailure, getQuestionnairesRequest, getQuestionnairesSuccess, 
      updateQuestionnaireFailure,
      updateQuestionnaireRequest,
      updateQuestionnaireSuccess
 } from "./questionnaire-slice";
-import { AddQuestionnaire, DeleteQuestionnaire, GetQuestionnaireById, GetQuestionnaires, UpdateQuestionnaire } from "./questionnaire-types";
+import { AddQuestionnaire, DeleteQuestionnaire, GetQuestionnaireById, GetQuestionnaires, GetQuestionnairesByName, UpdateQuestionnaire } from "./questionnaire-types";
 
 
 export const getQuestionnaires: GetQuestionnaires = async (dispatch) => {
@@ -102,6 +105,25 @@ export const updateQuestionnaire: UpdateQuestionnaire = async (questionnaire_id,
   } catch (error: any) {
     const { status, data } = error.response;
     dispatch(updateQuestionnaireFailure(data));
+    if (status === 401) {
+      logUserOut(dispatch);
+    }
+  }
+
+  return false;
+};
+
+export const getQuestionnairesByNames: GetQuestionnairesByName = async (dispatch) => {
+  dispatch(getQuestionnairesByNameRequest());
+  const url = `/questionnaire/names`;
+
+  try {
+    let response = await axiosInstance.get(url);
+    dispatch(getQuestionnairesByNameSuccess(response.data));
+    return true;
+  } catch (error: any) {
+    const { status, data } = error.response;
+    dispatch(getQuestionnairesByNameFailure(data));
     if (status === 401) {
       logUserOut(dispatch);
     }

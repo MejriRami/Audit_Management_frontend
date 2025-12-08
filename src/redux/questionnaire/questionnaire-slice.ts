@@ -3,6 +3,7 @@ import { QuestionnaireState } from "./questionnaire-slice-types";
 
 const initialState : QuestionnaireState    = {
     questionnairesList:[],
+    questionnaireListName:[],
     questionnaire: null,
     success : false,
     error: false,
@@ -92,6 +93,19 @@ const questionnaireSlice = createSlice({
       state.success = false;
       state.error = false;
       state.toast = '';
+    },
+    getQuestionnairesByNameRequest(state) {
+      state.success = false;
+      state.error = false;
+    },
+    getQuestionnairesByNameSuccess(state, action) {
+      state.questionnaireListName = action.payload;
+      state.success = true;
+      state.error = false;
+    },
+    getQuestionnairesByNameFailure(state) {
+      state.success = false;
+      state.error = true;
     }
   }
 })
@@ -112,7 +126,10 @@ export const {
     updateQuestionnaireRequest,
     updateQuestionnaireSuccess,
     updateQuestionnaireFailure,
-    resetQuestioannairesState
+    resetQuestioannairesState,
+    getQuestionnairesByNameSuccess,
+    getQuestionnairesByNameFailure,
+    getQuestionnairesByNameRequest
 } = questionnaireSlice.actions;
 
 export default questionnaireSlice.reducer;
