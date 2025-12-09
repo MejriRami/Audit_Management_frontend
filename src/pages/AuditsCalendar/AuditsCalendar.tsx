@@ -9,6 +9,7 @@ import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import Enum from "../../components/enum/Enum";
 
 type CalendarEventType = "audit" | "auditee-free";
 
@@ -42,269 +43,16 @@ const localizer = dateFnsLocalizer({
 // NOTE: dates are in Nov/Dec 2025 and Jan 2026
 // so they are in the future from 18 Nov 2025.
 // ---------------------------------------------------
-const RAW_EVENTS: CalendarEvent[] = [
-  // -------------------------
-  // 15 FAKE AUDITS (FUTURE)
-  //  Month index: 10 = Nov, 11 = Dec, 0 = Jan (next year)
-  // -------------------------
-  {
-    id: 1,
-    title: "Audit – Packaging Line 1",
-    auditor: "auditor1@company.com",
-    auditee: "plant-manager@site-a.com",
-    start: new Date(2025, 10, 20, 9, 0), // 20 Nov 2025
-    end: new Date(2025, 10, 20, 12, 0),
-    type: "audit",
-    location: "Site A",
-  },
-  {
-    id: 2,
-    title: "Audit – Storage Area",
-    auditor: "auditor1@company.com",
-    auditee: "logistics@site-b.com",
-    start: new Date(2025, 10, 22, 13, 0),
-    end: new Date(2025, 10, 22, 16, 0),
-    type: "audit",
-    location: "Site B",
-  },
-  {
-    id: 3,
-    title: "Audit – Production Line 3",
-    auditor: "auditor2@company.com",
-    auditee: "production@site-c.com",
-    start: new Date(2025, 10, 25, 8, 0),
-    end: new Date(2025, 10, 25, 11, 0),
-    type: "audit",
-    location: "Site C",
-  },
-  {
-    id: 4,
-    title: "Audit – Warehouse",
-    auditor: "auditor3@company.com",
-    auditee: "logistics@site-b.com",
-    start: new Date(2025, 10, 27, 10, 0),
-    end: new Date(2025, 10, 27, 13, 0),
-    type: "audit",
-    location: "Site B",
-  },
-  {
-    id: 5,
-    title: "Audit – Safety Procedures",
-    auditor: "auditor3@company.com",
-    auditee: "plant-manager@site-a.com",
-    start: new Date(2025, 11, 2, 9, 0), // 2 Dec 2025
-    end: new Date(2025, 11, 2, 12, 0),
-    type: "audit",
-    location: "Site A",
-  },
-  {
-    id: 6,
-    title: "Audit – Chemical Storage",
-    auditor: "auditor2@company.com",
-    auditee: "logistics@site-b.com",
-    start: new Date(2025, 11, 4, 14, 0),
-    end: new Date(2025, 11, 4, 17, 0),
-    type: "audit",
-    location: "Site B",
-  },
-  {
-    id: 7,
-    title: "Audit – Equipment Calibration",
-    auditor: "auditor1@company.com",
-    auditee: "production@site-c.com",
-    start: new Date(2025, 11, 6, 8, 30),
-    end: new Date(2025, 11, 6, 11, 30),
-    type: "audit",
-    location: "Site C",
-  },
-  {
-    id: 8,
-    title: "Audit – Quality Lab",
-    auditor: "auditor3@company.com",
-    auditee: "plant-manager@site-a.com",
-    start: new Date(2025, 11, 9, 9, 0),
-    end: new Date(2025, 11, 9, 12, 0),
-    type: "audit",
-    location: "Site A",
-  },
-  {
-    id: 9,
-    title: "Audit – Incoming Materials",
-    auditor: "auditor2@company.com",
-    auditee: "logistics@site-b.com",
-    start: new Date(2025, 11, 11, 13, 0),
-    end: new Date(2025, 11, 11, 16, 0),
-    type: "audit",
-    location: "Site B",
-  },
-  {
-    id: 10,
-    title: "Audit – Dispatch Process",
-    auditor: "auditor1@company.com",
-    auditee: "logistics@site-b.com",
-    start: new Date(2025, 11, 15, 9, 30),
-    end: new Date(2025, 11, 15, 12, 0),
-    type: "audit",
-    location: "Site B",
-  },
-  {
-    id: 11,
-    title: "Audit – Machine Safety",
-    auditor: "auditor3@company.com",
-    auditee: "production@site-c.com",
-    start: new Date(2026, 0, 5, 10, 0), // 5 Jan 2026
-    end: new Date(2026, 0, 5, 13, 0),
-    type: "audit",
-    location: "Site C",
-  },
-  {
-    id: 12,
-    title: "Audit – Environmental Compliance",
-    auditor: "auditor2@company.com",
-    auditee: "plant-manager@site-a.com",
-    start: new Date(2026, 0, 8, 9, 0),
-    end: new Date(2026, 0, 8, 12, 0),
-    type: "audit",
-    location: "Site A",
-  },
-  {
-    id: 13,
-    title: "Audit – Storage Safety",
-    auditor: "auditor1@company.com",
-    auditee: "logistics@site-b.com",
-    start: new Date(2026, 0, 12, 13, 0),
-    end: new Date(2026, 0, 12, 16, 0),
-    type: "audit",
-    location: "Site B",
-  },
-  {
-    id: 14,
-    title: "Audit – Process Validation",
-    auditor: "auditor3@company.com",
-    auditee: "production@site-c.com",
-    start: new Date(2026, 0, 15, 8, 0),
-    end: new Date(2026, 0, 15, 11, 0),
-    type: "audit",
-    location: "Site C",
-  },
-  {
-    id: 15,
-    title: "Audit – Document Control",
-    auditor: "auditor2@company.com",
-    auditee: "plant-manager@site-a.com",
-    start: new Date(2026, 0, 20, 9, 0),
-    end: new Date(2026, 0, 20, 12, 0),
-    type: "audit",
-    location: "HQ",
-  },
-
-  // -------------------------
-  // FAKE AUDITEE FREE SLOTS (also future)
-  //  Spread across Dec 2025 and Jan 2026
-  // -------------------------
-  ...[
-    "plant-manager@site-a.com",
-    "logistics@site-b.com",
-    "production@site-c.com",
-  ].flatMap((auditee, idx) =>
-    Array.from({ length: 7 }).map((_, i) => {
-      const day = 3 + i * 3 + idx; // spread days
-      return {
-        id: 200 + idx * 50 + i,
-        title: "Auditee Free Slot",
-        auditor: "",
-        auditee,
-        start: new Date(2025, 11, day, 9, 0), // December 2025
-        end: new Date(2025, 11, day, 11, 0),
-        type: "auditee-free" as CalendarEventType,
-      } as CalendarEvent;
-    })
-  ),
-];
 
 export default function AuditsCalendar() {
   const [mode, setMode] = useState<Mode>("myAudits");
-  const [selectedAuditor, setSelectedAuditor] = useState<string>(
-    "auditor1@company.com"
-  );
+  const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
   const [selectedAuditee, setSelectedAuditee] = useState<string>("all");
-
-  // 🔹 Start the calendar on the first fake event date
-  const [currentDate, setCurrentDate] = useState<Date>(
-    RAW_EVENTS[0]?.start ?? new Date()
-  );
-
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
-
-  // Auditor options
-  const auditorOptions = useMemo(
-    () =>
-      Array.from(new Set(RAW_EVENTS.map((e) => e.auditor)))
-        .filter((a) => a !== "")
-        .map((email) => ({ value: email, label: email })),
-    []
-  );
-
-  // Auditee options
-  const auditeeOptions = useMemo(
-    () => [
-      { value: "all", label: "Select an auditee" },
-      ...Array.from(new Set(RAW_EVENTS.map((e) => e.auditee))).map((email) => ({
-        value: email,
-        label: email,
-      })),
-    ],
-    []
-  );
-
-  // Events shown in calendar (only ONE type depending on mode)
-  const filteredEvents = useMemo(() => {
-    if (mode === "myAudits") {
-      // Only audits for this auditor
-      return RAW_EVENTS.filter(
-        (e) => e.type === "audit" && e.auditor === selectedAuditor
-      );
-    } else {
-      // Only free slots for the selected auditee
-      if (selectedAuditee === "all") return [];
-      return RAW_EVENTS.filter(
-        (e) => e.type === "auditee-free" && e.auditee === selectedAuditee
-      );
-    }
-  }, [mode, selectedAuditor, selectedAuditee]);
-
-  // Upcoming items (next audits OR next free slots)
-  const upcomingItems = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (mode === "myAudits") {
-      // next audits for this auditor
-      return RAW_EVENTS.filter(
-        (e) =>
-          e.type === "audit" &&
-          e.auditor === selectedAuditor &&
-          e.start >= today
-      )
-        .slice()
-        .sort((a, b) => a.start.getTime() - b.start.getTime())
-        .slice(0, 5);
-    } else {
-      // next free slots for this auditee
-      if (selectedAuditee === "all") return [];
-      return RAW_EVENTS.filter(
-        (e) =>
-          e.type === "auditee-free" &&
-          e.auditee === selectedAuditee &&
-          e.start >= today
-      )
-        .slice()
-        .sort((a, b) => a.start.getTime() - b.start.getTime())
-        .slice(0, 5);
-    }
-  }, [mode, selectedAuditor, selectedAuditee]);
+  const { auditorOptions } = Enum();
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const eventStyleGetter = (event: CalendarEvent) => {
     let bgColor = "#579BFC"; // audits = blue
@@ -376,16 +124,15 @@ export default function AuditsCalendar() {
 
       {/* FILTERS */}
       <ComponentCard title="Filters">
-        {mode === "myAudits" ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-500 uppercase">
-                I am (Auditor)
+                Auditors
               </p>
               <Select
                 options={auditorOptions}
                 defaultValue={selectedAuditor}
-                onChange={(value: string) => setSelectedAuditor(value)}
+                onChange={(value: string | number) => setSelectedAuditor(value)}
                 className="dark:bg-dark-900"
               />
             </div>
@@ -402,31 +149,6 @@ export default function AuditsCalendar() {
               </button>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase">
-                Auditee
-              </p>
-              <Select
-                options={auditeeOptions}
-                defaultValue={selectedAuditee}
-                onChange={(value: string) => setSelectedAuditee(value)}
-                className="dark:bg-dark-900"
-              />
-            </div>
-            <div className="space-y-2 flex items-end">
-              <button
-                onClick={() => {
-                  setSelectedAuditee("all");
-                }}
-                className="w-full inline-flex items-center justify-center rounded-lg border border-gray-200 bg:white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg:white/[0.04]"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        )}
       </ComponentCard>
 
       {/* MAIN CALENDAR (MONTH ONLY) */}
@@ -437,7 +159,6 @@ export default function AuditsCalendar() {
             : "Calendar – Auditee Free Slots"
         }
       >
-        {/* Month navigation + jump */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-2">
             <button
@@ -492,8 +213,7 @@ export default function AuditsCalendar() {
             }
           />
         </div>
-
-        {/* Legend depends on mode */}
+  
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-300">
           {mode === "myAudits" ? (
             <div className="flex items-center gap-2">
@@ -510,7 +230,7 @@ export default function AuditsCalendar() {
       </ComponentCard>
 
       {/* UPCOMING LIST (audits OR free slots) */}
-      <ComponentCard
+      {/* <ComponentCard
         title={
           mode === "myAudits"
             ? "My Next Audits"
@@ -566,10 +286,10 @@ export default function AuditsCalendar() {
             ))}
           </ul>
         )}
-      </ComponentCard>
+      </ComponentCard> */}
 
       {/* EVENT DETAILS POPUP */}
-      <Modal
+      {/* <Modal
         isOpen={selectedEvent !== null}
         onClose={() => setSelectedEvent(null)}
         className="max-w-[600px] p-6 lg:p-8"
@@ -628,7 +348,7 @@ export default function AuditsCalendar() {
             </div>
           </div>
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 }
