@@ -1,4 +1,4 @@
-import { useMemo, useState, ChangeEvent } from "react";
+import { useMemo, useState, ChangeEvent, useEffect } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -6,10 +6,12 @@ import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addMonths } from "date-fns";
+import { format, parse, startOfWeek, getDay, addMonths, set } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Enum from "../../components/enum/Enum";
+import { useDispatch, useSelector } from "react-redux";
+import { getAuditsByAuditor } from "../../redux/audit/audit";
 
 type CalendarEventType = "audit" | "auditee-free";
 
@@ -45,14 +47,25 @@ const localizer = dateFnsLocalizer({
 // ---------------------------------------------------
 
 export default function AuditsCalendar() {
+  const dispatch = useDispatch();
   const [mode, setMode] = useState<Mode>("myAudits");
   const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
   const [selectedAuditee, setSelectedAuditee] = useState<string>("all");
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
-  );
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const { auditorOptions } = Enum();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const { items } = useSelector((state: any) => state.audit);
+  const convertToEvent = (audit: any): CalendarEvent => ({
+    id: audit.id,
+    title: `Audit ${audit.audit_number}`,
+    start: new Date(audit.planned_start_date),
+    end: new Date(audit.planned_end_date),
+    auditor: audit?.auditor
+      ? `${audit.auditor.first_name} ${audit.auditor.last_name}`
+      : "—",
+    auditee: audit.auditees?.join(", ") || "—",
+    type: "audit",
+  });
 
   const eventStyleGetter = (event: CalendarEvent) => {
     let bgColor = "#579BFC"; // audits = blue
@@ -85,6 +98,14 @@ export default function AuditsCalendar() {
   };
 
   const monthValue = format(currentDate, "yyyy-MM");
+
+  useEffect(() => {
+    setSelectedAuditor(auditorOptions.map((opt: any) => opt.value)[0]);
+  }, [auditorOptions]);
+
+  useEffect(() => {
+    getAuditsByAuditor(selectedAuditor as number, dispatch)
+  },[dispatch, selectedAuditor])
 
   return (
     <div className="p-6 space-y-8">
@@ -198,13 +219,13 @@ export default function AuditsCalendar() {
         <div className="h-[650px]">
           <BigCalendar
             localizer={localizer}
-            events={filteredEvents as any}
+            events={items?.map((audit: any) => convertToEvent(audit)) || []}
             startAccessor="start"
             endAccessor="end"
             style={{ height: "100%" }}
             eventPropGetter={eventStyleGetter as any}
             popup
-            views={["month"]} // only month view
+            views={["month"]}
             defaultView="month"
             date={currentDate}
             onNavigate={(date) => setCurrentDate(date as Date)}
@@ -230,66 +251,68 @@ export default function AuditsCalendar() {
       </ComponentCard>
 
       {/* UPCOMING LIST (audits OR free slots) */}
-      {/* <ComponentCard
-        title={
-          mode === "myAudits"
-            ? "My Next Audits"
-            : "Next Free Slots for this Auditee"
-        }
-      >
-        {mode === "auditeeAvailability" && selectedAuditee === "all" ? (
-          <p className="text-sm text-gray-500">
-            Select an auditee above to see their free time slots.
-          </p>
-        ) : upcomingItems.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            No upcoming items for the current selection.
-          </p>
-        ) : (
+      { items?.length > 0 && (
+        <ComponentCard
+          title={
+            mode === "myAudits"
+              ? "My Next Audits"
+              : "Next Free Slots for this Auditee"
+          }
+        >
           <ul className="space-y-3">
-            {upcomingItems.map((e) => (
-              <li
-                key={e.id}
-                className="flex items-start justify-between rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm"
-              >
-                <div>
-                  <p className="font-medium text-gray-800 dark:text-gray-100">
-                    {e.title}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {e.start.toLocaleDateString()}{" "}
-                    {e.start.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
-                    –{" "}
-                    {e.end.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Auditor: {e.auditor || "—"} • Auditee: {e.auditee}
-                    {e.location && ` • ${e.location}`}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedEvent(e);
-                    setCurrentDate(e.start);
-                  }}
-                  className="text-xs rounded-md border border-gray-200 dark:border-gray-700 px-3 py-1 hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+              {items?.map((e: any) => (
+                <li
+                  key={e.id}
+                  className="flex items-start justify-between rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm"
                 >
-                  Show in calendar
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </ComponentCard> */}
+                  <div>
+                    <p className="font-medium text-gray-800 dark:text-gray-100">
+                      {e.title}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {new Date(e.planned_start_date).toLocaleDateString()}{" "}
+                      {new Date(e.planned_start_date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      –{" "}
+                      {new Date(e.planned_end_date).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 grid grid-cols-1 gap-2">
+                      <span>
+                        <strong>Auditor:</strong> {e?.auditor.first_name} {e?.auditor.last_name}
+                      </span>
+
+                      <span>
+                        <strong>Auditee:</strong> {e.auditees.join(", ")}
+                      </span>
+
+                      <span>
+                        <strong>Plant:</strong> {e.plant}
+                      </span>
+                   </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const event = convertToEvent(e);
+                      setSelectedEvent(event);
+                      setCurrentDate(event.start);
+                    }}
+                    className="text-xs rounded-md border border-gray-200 dark:border-gray-700 px-3 py-1 hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+                  >
+                    Show in calendar
+                  </button>
+                </li>
+              ))}
+            </ul>
+        </ComponentCard>
+      )}
 
       {/* EVENT DETAILS POPUP */}
-      {/* <Modal
+      <Modal
         isOpen={selectedEvent !== null}
         onClose={() => setSelectedEvent(null)}
         className="max-w-[600px] p-6 lg:p-8"
@@ -348,7 +371,7 @@ export default function AuditsCalendar() {
             </div>
           </div>
         )}
-      </Modal> */}
+      </Modal>
     </div>
   );
 }

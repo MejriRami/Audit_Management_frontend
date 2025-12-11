@@ -1,6 +1,7 @@
 
-import { Audit, AuditPlanCreate, AuditRescheduleHistory } from "./audit-types";
+import { Audit, AuditByAuditor, AuditPlanCreate, AuditRescheduleHistory } from "./audit-types";
 import axiosInstance from "../../services/axiosInstance";
+import { getAuditorsByAuditorFailure, getAuditorsByAuditorRequest, getAuditorsByAuditorSuccess } from "./audit-slice";
 
 // Create audit (plan)
 export const apiPlanAudit = async (payload: AuditPlanCreate): Promise<Audit> => {
@@ -46,3 +47,21 @@ export const apiGetAuditHistory = async (
     return [];
   }
 };
+
+//get audits by auditor id
+export const getAuditsByAuditor: AuditByAuditor = async (auditor_id,dispatch) => {
+  dispatch(getAuditorsByAuditorRequest());
+  const url = `/audits/auditor/${auditor_id}`;
+
+  try {
+    let response = await axiosInstance.get(url);
+    dispatch(getAuditorsByAuditorSuccess(response.data));
+    return true;
+  } catch (error: any) {
+    const { data } = error.response;
+    dispatch(getAuditorsByAuditorFailure(data));
+  }
+
+  return false;
+};
+

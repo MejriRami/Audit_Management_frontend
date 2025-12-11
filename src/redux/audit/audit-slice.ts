@@ -102,6 +102,18 @@ const auditSlice = createSlice({
     clearAuditFilters(state) {
       state.filters = initialFilters;
     },
+    getAuditorsByAuditorRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    getAuditorsByAuditorSuccess(state, action) {
+      state.loading = false;
+      state.items = action.payload;
+    },
+    getAuditorsByAuditorFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    }
   },
   extraReducers: (builder) => {
     // fetchAudits
@@ -158,5 +170,11 @@ const auditSlice = createSlice({
   
 });
 
-export const { setAuditFilters, clearAuditFilters } = auditSlice.actions;
+export const { 
+  setAuditFilters, 
+  clearAuditFilters,
+  getAuditorsByAuditorRequest,
+  getAuditorsByAuditorSuccess,
+  getAuditorsByAuditorFailure
+} = auditSlice.actions;
 export default auditSlice.reducer;
