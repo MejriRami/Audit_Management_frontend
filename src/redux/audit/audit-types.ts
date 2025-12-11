@@ -52,3 +52,8 @@ export type PlanAudit = (
   dispatch: Dispatch<any>
 ) => Promise<boolean>;
 
+export type AuditByAuditor = (
+  auditor_id: number,
+  dispatch: Dispatch<any>
+) => Promise<boolean>;
+
