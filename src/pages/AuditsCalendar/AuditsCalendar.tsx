@@ -1,4 +1,4 @@
-import { useMemo, useState, ChangeEvent, useEffect } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -6,7 +6,7 @@ import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addMonths, set } from "date-fns";
+import { format, parse, startOfWeek, getDay, addMonths} from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Enum from "../../components/enum/Enum";
@@ -50,7 +50,6 @@ export default function AuditsCalendar() {
   const dispatch = useDispatch();
   const [mode, setMode] = useState<Mode>("myAudits");
   const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
-  const [selectedAuditee, setSelectedAuditee] = useState<string>("all");
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const { auditorOptions } = Enum();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
