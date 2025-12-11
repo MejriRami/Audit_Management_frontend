@@ -27,4 +27,7 @@ export interface AuditState {
   // for planning new audits
   planningLoading: boolean;
   planningError: string | null;
+  rescheduleLoading: boolean,
+rescheduleError: string | null,
+
 }

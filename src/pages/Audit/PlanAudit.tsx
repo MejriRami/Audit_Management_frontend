@@ -216,7 +216,9 @@ export default function PlanAudit({
       const formattedDate = form.auditDate.toISOString().split("T")[0];
       const formatTime = (d: Date) =>
         d.toLocaleTimeString("en-GB", { hour12: false });
-
+      if (!user) {
+        throw new Error("User not found");
+      }
       const payload: AuditPlanCreate = {
         auditee_emails: list,
         auditor_id: user.id,
@@ -331,10 +333,12 @@ export default function PlanAudit({
             <div className="space-y-4">
               <Label htmlFor="questionnaire">Questionnaire</Label>
               <Select
-                options={questionnaires?.map((q) => ({
-                  value: q.id.toString(),
-                  label: q.name,
-                }))}
+                options={
+                  questionnaires?.map((q) => ({
+                    value: q.id.toString(),
+                    label: q.name,
+                  })) || []
+                }
                 placeholder="Select a questionnaire"
                 onChange={(value) =>
                   setForm((prev) => ({ ...prev, questionnaireId: value }))
@@ -353,7 +357,6 @@ export default function PlanAudit({
               onChange={(date) =>
                 setForm((prev) => ({ ...prev, auditDate: date }))
               }
-              blockedSlots={blockedSlots}
             />
 
             <TimePicker

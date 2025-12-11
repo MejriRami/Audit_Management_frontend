@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
+import { useDispatch, useSelector } from "react-redux";
+import { rescheduleAudit } from "../../redux/audit/audit-slice";
+import { AppDispatch, RootState } from "../../redux/store";
+import { AuditRescheduleRequest } from "../../redux/audit/audit-types";
+import toast from "react-hot-toast";
 
 interface RescheduleAuditModalProps {
   audit: any;
@@ -21,10 +26,12 @@ const RescheduleAuditModal: React.FC<RescheduleAuditModalProps> = ({
       ? format(new Date(audit.planned_end_date), "yyyy-MM-dd'T'HH:mm")
       : ""
   );
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = async () => {
     setError("");
@@ -44,35 +51,40 @@ const RescheduleAuditModal: React.FC<RescheduleAuditModalProps> = ({
       return;
     }
 
-    setLoading(true);
-
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/audits/${audit.id}/reschedule`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            new_start_date: newStart,
-            new_end_date: newEnd,
-            reason,
-            changed_by: audit.auditor_id, // or current logged-in user!
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to reschedule audit");
+      if (!user) {
+        throw new Error("User not found");
       }
 
+      setLoading(true); // <-- start loading
+
+      const payload: AuditRescheduleRequest = {
+        new_start_date: newStart,
+        new_end_date: newEnd,
+        reason,
+        email: user.email,
+      };
+
+      await dispatch(
+        rescheduleAudit({
+          auditId: audit.id,
+          data: payload,
+        })
+      ).unwrap();
+
+      toast.success("Audit rescheduled successfully!");
+
       onClose();
-      window.location.reload(); // optional
     } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+      const msg =
+        err?.response?.data?.detail ||
+        err?.detail ||
+        err?.message ||
+        (typeof err === "string" ? err : "Failed to reschedule audit.");
+
+      setError(msg);
     } finally {
-      setLoading(false);
+      setLoading(false); // <-- stop loading
     }
   };
 

@@ -20,47 +20,50 @@ export function TimePicker({
   compareTime,
   mode = "start",
 }: TimePickerProps) {
-  // Build time based on selected date
-  const buildTime = (date: Date | null, h: number, m: number) => {
-    if (!date) return null;
-    const dt = new Date(date);
+  if (!selectedDate) {
+    return (
+      <div className="flex flex-col space-y-2 w-full opacity-50">
+        <label className="text-sm">{label}</label>
+        <input
+          disabled
+          className="rounded-xl border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-700"
+          placeholder="Select date first"
+        />
+      </div>
+    );
+  }
+
+  const buildTime = (h: number, m: number) => {
+    const dt = new Date(selectedDate);
     dt.setHours(h, m, 0, 0);
     return dt;
   };
 
-  const minTime = buildTime(selectedDate, 8, 0);
-  const maxTime = buildTime(selectedDate, 17, 0);
+  const minTime = buildTime(7, 0);
+  const maxTime = buildTime(18, 0);
 
-  // Convert "HH:mm" to Date matching selected day
-  const strToDate = (base: Date, time: string) => {
+  const strToDate = (time: string) => {
     const [h, m] = time.split(":").map(Number);
-    const d = new Date(base);
-    d.setHours(h, m, 0, 0);
-    return d;
+    return buildTime(h, m);
   };
 
-  // Block booked times
   const isBlocked = (time: Date) => {
-    if (!selectedDate) return false;
-
-    const day = selectedDate.toLocaleDateString("en-CA"); // ✔ FIXED
+    const day = selectedDate.toLocaleDateString("en-CA");
 
     return blockedSlots.some((slot) => {
       if (slot.date !== day) return false;
 
-      const start = strToDate(selectedDate, slot.start);
-      const end = strToDate(selectedDate, slot.end);
-      return time >= start && time <= end;
+      const start = strToDate(slot.start);
+      const end = strToDate(slot.end);
+
+      return time >= start && time < end;
     });
   };
 
-  // Validate start < end and end > start
-  const isInvalidAfterComparison = (time: Date) => {
+  const isInvalidCompare = (time: Date) => {
     if (!compareTime) return false;
-
-    if (mode === "start") return time >= compareTime; // start < end
-    if (mode === "end") return time <= compareTime; // end > start
-
+    if (mode === "start") return time >= compareTime;
+    if (mode === "end") return time <= compareTime;
     return false;
   };
 
@@ -78,11 +81,9 @@ export function TimePicker({
         timeIntervals={60}
         timeFormat="HH:mm"
         dateFormat="HH:mm"
-        minTime={minTime!}
-        maxTime={maxTime!}
-        filterTime={(time) =>
-          !isBlocked(time) && !isInvalidAfterComparison(time)
-        }
+        minTime={minTime}
+        maxTime={maxTime}
+        filterTime={(t) => !isBlocked(t) && !isInvalidCompare(t)}
         className="w-full rounded-xl border border-gray-300 dark:border-gray-700
                    bg-white dark:bg-gray-800 px-4 py-2 text-gray-900 dark:text-gray-200"
         portalId="datepicker-portal"

@@ -6,7 +6,6 @@ interface DatePickerOnlyProps {
   label: string;
   value: Date | null;
   onChange: (date: Date | null) => void;
-  blockedSlots: { start: string; end: string; date: string }[];
 }
 
 export function DatePickerOnly({
@@ -14,29 +13,12 @@ export function DatePickerOnly({
   label,
   value,
   onChange,
-  blockedSlots,
 }: DatePickerOnlyProps) {
-  // Disable fully booked days
-  const isDayDisabled = (date: Date) => {
-    const day = date.toLocaleDateString("en-CA"); // ✔ LOCAL TIME "YYYY-MM-DD"
-
-    // working hours 8 → 17
-    const workingHours = Array.from({ length: 9 }, (_, i) => i + 8);
-    const hoursCovered = new Set<number>();
-
-    blockedSlots
-      .filter((slot) => slot.date === day)
-      .forEach((slot) => {
-        const [startH] = slot.start.split(":").map(Number);
-        const [endH] = slot.end.split(":").map(Number);
-
-        for (let h = startH; h < endH; h++) {
-          hoursCovered.add(h);
-        }
-      });
-
-    // Disable if all hours are covered
-    return workingHours.every((h) => hoursCovered.has(h));
+  const normalizeDate = (date: Date | null) => {
+    if (!date) return null;
+    const d = new Date(date);
+    d.setHours(12, 0, 0, 0); // prevents day-1 issue
+    return d;
   };
 
   return (
@@ -47,10 +29,9 @@ export function DatePickerOnly({
 
       <DatePicker
         id={id}
-        selected={value}
-        onChange={onChange}
+        selected={value ? normalizeDate(value) : null}
+        onChange={(date) => onChange(normalizeDate(date))}
         minDate={new Date()}
-        filterDate={(d) => !isDayDisabled(d)}
         dateFormat="dd/MM/yyyy"
         className="w-full rounded-xl border border-gray-300 dark:border-gray-700
                    bg-white dark:bg-gray-800 px-4 py-2 text-gray-900 dark:text-gray-200"

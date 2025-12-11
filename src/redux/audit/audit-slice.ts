@@ -6,8 +6,9 @@ import {
   AuditPlanCreate,
 
   AuditRescheduleHistory,
+  AuditRescheduleRequest,
 } from "./audit-types";
-import { apiGetAudits, apiGetAuditHistory, apiPlanAudit } from "./audit";
+import { apiGetAudits, apiGetAuditHistory, apiPlanAudit, apiRescheduleAudit } from "./audit";
 
 // ---------- Thunks ----------
 
@@ -61,6 +62,24 @@ export const fetchAuditHistory = createAsyncThunk<
   }
 });
 
+// Reschedule an Audit
+export const rescheduleAudit = createAsyncThunk<
+  Audit,
+  { auditId: number; data: AuditRescheduleRequest },
+  { rejectValue: string }
+>("audit/rescheduleAudit", async ({ auditId, data }, { rejectWithValue }) => {
+  try {
+    return await apiRescheduleAudit(auditId, data);
+  } catch (error: any) {
+    return rejectWithValue(
+      error?.response?.data?.detail ||
+        error.message ||
+        "Failed to reschedule audit"
+    );
+  }
+});
+
+
 
 // ---------- Initial State ----------
 
@@ -88,6 +107,9 @@ const initialState: AuditState = {
 
   planningLoading: false,
   planningError: null,
+  rescheduleLoading: false,
+rescheduleError: null,
+
 };
 
 // ---------- Slice ----------
@@ -138,21 +160,45 @@ const auditSlice = createSlice({
       });
 
     // fetchAuditHistory
-   builder
-  .addCase(fetchAuditHistory.pending, (state, action) => {
+builder
+  .addCase(fetchAuditHistory.pending, (state) => {
     state.historyLoading = true;
     state.historyError = null;
-    //state.currentHistoryAuditId = action.meta.arg; // the auditId you requested
   })
   .addCase(fetchAuditHistory.fulfilled, (state, action) => {
     state.historyLoading = false;
-    state.historyByAuditId = action.payload; // just the array
+    state.historyByAuditId = action.payload;
   })
   .addCase(fetchAuditHistory.rejected, (state, action) => {
     state.historyLoading = false;
     state.historyError = action.payload || "Failed to fetch audit history";
     state.historyByAuditId = [];
   });
+
+
+  //reschedule Audit
+    builder
+  .addCase(rescheduleAudit.pending, (state) => {
+  state.rescheduleLoading = true;
+  state.rescheduleError = null;
+})
+
+.addCase(rescheduleAudit.fulfilled, (state, action) => {
+  state.rescheduleLoading = false;
+
+  const updatedAudit = action.payload;
+
+  // replace the audit inside the state list
+  const index = state.items.findIndex(a => a.id === updatedAudit.id);
+  if (index !== -1) {
+    state.items[index] = updatedAudit; // update existing audit
+  }
+})
+
+.addCase(rescheduleAudit.rejected, (state, action) => {
+  state.rescheduleLoading = false;
+  state.rescheduleError = action.payload || "Failed to reschedule audit";
+});
 
   },
   

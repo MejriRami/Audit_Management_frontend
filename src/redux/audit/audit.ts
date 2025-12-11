@@ -1,5 +1,5 @@
 
-import { Audit, AuditPlanCreate, AuditRescheduleHistory } from "./audit-types";
+import { Audit, AuditPlanCreate, AuditRescheduleHistory, AuditRescheduleRequest } from "./audit-types";
 import axiosInstance from "../../services/axiosInstance";
 
 // Create audit (plan)
@@ -15,6 +15,18 @@ export const apiPlanAudit = async (payload: AuditPlanCreate): Promise<Audit> => 
   }
 };
 
+// reschedule audit 
+export const apiRescheduleAudit= async(  auditId: number,payload:AuditRescheduleRequest):Promise<Audit>=>{
+  let url=`/audits/${auditId}/reschedule`
+  try{
+    const response= await axiosInstance.patch(url,payload);
+    return response.data;
+  }
+  catch(error:any){
+     console.error("Failed to reschedule audit:", error.response?.data || error.message);
+    throw error;
+  }
+}
 // Fetch all audits
 export const apiGetAudits = async (): Promise<Audit[]> => {
     let url='/audits';
@@ -46,3 +58,5 @@ export const apiGetAuditHistory = async (
     return [];
   }
 };
+
+

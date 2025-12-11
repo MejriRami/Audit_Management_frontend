@@ -52,3 +52,9 @@ export type PlanAudit = (
   dispatch: Dispatch<any>
 ) => Promise<boolean>;
 
+export  interface AuditRescheduleRequest{
+  new_start_date:string;
+  new_end_date:string;
+  reason:string;
+  email:string;
+}
