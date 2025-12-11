@@ -58,3 +58,8 @@ export  interface AuditRescheduleRequest{
   reason:string;
   email:string;
 }
+export type AuditByAuditor = (
+  auditor_id: number,
+  dispatch: Dispatch<any>
+) => Promise<boolean>;
+
