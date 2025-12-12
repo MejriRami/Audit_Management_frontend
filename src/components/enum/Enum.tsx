@@ -15,7 +15,7 @@ const Enum = () => {
     return frameworksList?.length
       ? frameworksList.map((f: any) => ({
           value: f.id,
-          label: f.label,
+          label: f.code.toUpperCase(),
         }))
       : [];
   }, [frameworksList]);
@@ -24,7 +24,7 @@ const Enum = () => {
     return auditTypesList?.length
       ? auditTypesList.map((a: any) => ({
           value: a.id,
-          label: a.value,
+          label: a.value.replace(/\b\w/g, (char: string) => char.toUpperCase()),
         }))
       : [];
   }, [auditTypesList]);
@@ -47,7 +47,7 @@ const Enum = () => {
   return {
     frameworkOptions,
     auditTypeOptions,
-    auditorOptions
+    auditorOptions,
   };
 };
 
