@@ -8,31 +8,29 @@ import {
 } from "../../ui/table";
 import Badge, { BadgeColor } from "../../ui/badge/Badge";
 import AuditDetailsModal from "../../modals/AuditDetailsModal";
-import { Audit } from "../../../types";
-
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { motion, AnimatePresence } from "framer-motion";
 import RescheduleAuditModal from "../../modals/RescheduleModal";
 import AuditHistoryModal from "../../modals/AuditHistoryModal";
+import { Audit } from "../../../types";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
+import Pagination from "../../ui/pagination/pagination";
 
-export default function TableAudits({ audits }: { audits: Audit[] }) {
+interface TableAuditsProps {
+  audits: Audit[];
+}
+
+export default function TableAudits({ audits = [] }: TableAuditsProps) {
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null);
+  const [rescheduleAudit, setRescheduleAudit] = useState<Audit | null>(null);
+  const [historyAudit, setHistoryAudit] = useState<Audit | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
+  const user = useSelector((state: any) => state.auth.user);
 
   const normalizedStatus = (s?: string) => (s ?? "").toLowerCase();
   const displayStatus = (s?: string) =>
     (s ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-  // FILTER GROUPS
-  const ongoingAudits = audits.filter(
-    (a) => normalizedStatus(a.status) !== "completed"
-  );
-  const completedAudits = audits.filter(
-    (a) => normalizedStatus(a.status) === "completed"
-  );
-
-  // BADGE COLOR LOGIC
   const badgeColorForStatus = (status?: string): BadgeColor => {
     const s = normalizedStatus(status);
     switch (s) {
@@ -50,17 +48,41 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
         return "light";
     }
   };
-  const [rescheduleAudit, setRescheduleAudit] = useState<Audit | null>(null);
 
-  const onReschedule = (audit: Audit) => {
-    setRescheduleAudit(audit);
-  };
-  const [historyAudit, setHistoryAudit] = useState<Audit | null>(null);
-  const user = useSelector((state: any) => state.auth.user);
+  const onReschedule = (audit: Audit) => setRescheduleAudit(audit);
 
-  // -------------------- add new header --------------------
+  // Separate ongoing and completed audits
+  const ongoingAudits = audits.filter(
+    (a) => normalizedStatus(a.status) !== "completed"
+  );
+  const completedAudits = audits.filter(
+    (a) => normalizedStatus(a.status) === "completed"
+  );
+
+  // ------------------------ Pagination state ------------------------
+  const [ongoingPage, setOngoingPage] = useState(1);
+  const [ongoingPageSize, setOngoingPageSize] = useState(10);
+
+  const [completedPage, setCompletedPage] = useState(1);
+  const [completedPageSize, setCompletedPageSize] = useState(10);
+
+  const totalPagesOngoing = Math.ceil(ongoingAudits.length / ongoingPageSize);
+  const paginatedOngoing = ongoingAudits.slice(
+    (ongoingPage - 1) * ongoingPageSize,
+    ongoingPage * ongoingPageSize
+  );
+
+  const totalPagesCompleted = Math.ceil(
+    completedAudits.length / completedPageSize
+  );
+  const paginatedCompleted = completedAudits.slice(
+    (completedPage - 1) * completedPageSize,
+    completedPage * completedPageSize
+  );
+
+  // ------------------------ Headers ------------------------
   const ONGOING_HEADERS: string[] = [
-    "#Audit Identifer",
+    "#Audit Identifier",
     "Auditor",
     "Auditee",
     "Plant",
@@ -74,7 +96,7 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
     "Details",
   ];
 
-  const COMPLETED_HEADERS = [
+  const COMPLETED_HEADERS: string[] = [
     "#Audit ID",
     "Auditor",
     "Auditee",
@@ -83,18 +105,16 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
     "Planned Start",
     "Planned End",
     "Final Score",
-    "Event Created", // <--- new column
+    "Event Created",
     "Action",
   ];
 
-  // -------------------- update row renderers --------------------
+  // ------------------------ Row Renderers ------------------------
   const renderOngoingRow = (audit: Audit) => (
     <TableRow key={audit.id}>
       <TableCell className="text-gray-500 text-xs px-4">
         {audit.audit_number}
       </TableCell>
-
-      {/* Auditor */}
       <TableCell className="px-5 py-4">
         <div className="text-sm">
           <div className="font-medium">
@@ -103,42 +123,33 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
           <div className="text-gray-500 text-xs">{audit.auditor?.email}</div>
         </div>
       </TableCell>
-
-      {/* Auditees */}
       <TableCell className="px-5 py-4">
         <div className="text-sm">
-          {audit.auditees?.map((email, index) => (
-            <div key={index} className="text-gray-500 text-xs">
+          {audit.auditees?.map((email, i) => (
+            <div key={i} className="text-gray-500 text-xs">
               {email}
             </div>
           ))}
         </div>
       </TableCell>
-
       <TableCell className="text-sm px-4 py-3">{audit.plant || "-"}</TableCell>
       <TableCell className="text-sm px-4 py-3">{audit.sector || "-"}</TableCell>
-
       <TableCell className="text-xs px-4 py-3">
         {audit.planned_start_date || "-"}
       </TableCell>
       <TableCell className="text-xs px-4 py-3">
         {audit.planned_end_date || "-"}
       </TableCell>
-
-      {/* STATUS BADGE */}
       <TableCell className="px-4 py-3">
         <Badge size="sm" color={badgeColorForStatus(audit.status)}>
           {displayStatus(audit.status)}
         </Badge>
       </TableCell>
-
-      {/* EVENT CREATED */}
       <TableCell className="px-4 py-3">
         <Badge size="sm" color={audit.event_created ? "success" : "light"}>
           {audit.event_created ? "Yes" : "No"}
         </Badge>
       </TableCell>
-      {/* RESCHEDULE BUTTON */}
       <TableCell className="px-4 py-3">
         <button
           disabled={user?.email !== audit?.auditor?.email}
@@ -146,31 +157,27 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
             user?.email === audit?.auditor?.email && onReschedule(audit)
           }
           className={`rounded-full text-white text-xs font-medium px-3 py-1 transition
-    ${
-      user?.email === audit?.auditor?.email
-        ? "bg-yellow-500 hover:bg-yellow-600"
-        : "bg-gray-400 cursor-not-allowed"
-    }`}
+            ${
+              user?.email === audit?.auditor?.email
+                ? "bg-yellow-500 hover:bg-yellow-600"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
         >
           Reschedule
         </button>
       </TableCell>
-
       <TableCell className="px-4 py-3">
         <button
           onClick={() => setHistoryAudit(audit)}
-          className="px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold 
-               hover:bg-purple-200 transition shadow-sm"
+          className="px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold hover:bg-purple-200 transition shadow-sm"
         >
           History
         </button>
       </TableCell>
-
       <TableCell className="px-4 py-3">
         <button
           onClick={() => setSelectedAudit(audit)}
-          className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold
-               hover:bg-blue-200 transition shadow-sm"
+          className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200 transition shadow-sm"
         >
           View
         </button>
@@ -181,8 +188,6 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
   const renderCompletedRow = (audit: Audit) => (
     <TableRow key={audit.id}>
       <TableCell className="px-4 py-3">{audit.audit_number}</TableCell>
-
-      {/* Auditor */}
       <TableCell className="px-5 py-4">
         <div className="text-sm">
           <div className="font-medium">
@@ -191,43 +196,34 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
           <div className="text-gray-500 text-xs">{audit.auditor?.email}</div>
         </div>
       </TableCell>
-
-      {/* Auditees */}
       <TableCell className="px-5 py-4">
         <div className="text-sm">
-          {audit.auditees?.map((email, index) => (
-            <div key={index} className="text-gray-500 text-xs">
+          {audit.auditees?.map((email, i) => (
+            <div key={i} className="text-gray-500 text-xs">
               {email}
             </div>
           ))}
         </div>
       </TableCell>
-
       <TableCell className="text-sm px-4 py-3">{audit.plant || "-"}</TableCell>
       <TableCell className="text-sm px-4 py-3">{audit.sector || "-"}</TableCell>
-
       <TableCell className="text-xs px-4 py-3">
         {audit.planned_start_date || "-"}
       </TableCell>
       <TableCell className="text-xs px-4 py-3">
         {audit.planned_end_date || "-"}
       </TableCell>
-
-      {/* Final Score */}
       <TableCell className="px-4 py-3 font-semibold text-green-600">
         {audit.finalScore ?? "-"}
       </TableCell>
-
-      {/* EVENT CREATED */}
       <TableCell className="px-4 py-3">
         <Badge size="sm" color={audit.event_created ? "success" : "light"}>
           {audit.event_created ? "Yes" : "No"}
         </Badge>
       </TableCell>
-
-      <TableCell className="px-4 py-3 font-semibold text-gray-600">
+      <TableCell className="px-4 py-3">
         <button className="rounded-lg bg-yellow-400 text-white text-xs font-small hover:bg-yellow-700 transition">
-          generate a report
+          Generate Report
         </button>
       </TableCell>
     </TableRow>
@@ -254,35 +250,24 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
             </TableHeader>
 
             <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-              {ongoingAudits
-                .slice()
-                .sort((a, b) => a.id - b.id)
-                .map(renderOngoingRow)}
+              {paginatedOngoing.map(renderOngoingRow)}
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={ongoingPage}
+          totalPages={totalPagesOngoing}
+          pageSize={ongoingPageSize}
+          onPageChange={setOngoingPage}
+          onPageSizeChange={(size) => {
+            setOngoingPageSize(size);
+            setOngoingPage(1);
+          }}
+        />
       </div>
 
-      {selectedAudit && (
-        <AuditDetailsModal
-          audit={selectedAudit}
-          onClose={() => setSelectedAudit(null)}
-        />
-      )}
-      {rescheduleAudit && (
-        <RescheduleAuditModal
-          audit={rescheduleAudit}
-          onClose={() => setRescheduleAudit(null)}
-        />
-      )}
-      {historyAudit && (
-        <AuditHistoryModal
-          audit={historyAudit}
-          onClose={() => setHistoryAudit(null)}
-        />
-      )}
-
-      {/* -------------------- COMPLETED AUDITS COLLAPSIBLE -------------------- */}
+      {/* -------------------- COMPLETED AUDITS -------------------- */}
       <div className="border border-gray-200 bg-white rounded-xl dark:bg-white/[0.03] dark:border-white/10">
         <button
           onClick={() => setShowCompleted(!showCompleted)}
@@ -323,14 +308,45 @@ export default function TableAudits({ audits }: { audits: Audit[] }) {
                   </TableHeader>
 
                   <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                    {completedAudits.map(renderCompletedRow)}
+                    {paginatedCompleted.map(renderCompletedRow)}
                   </TableBody>
                 </Table>
+
+                <Pagination
+                  currentPage={completedPage}
+                  totalPages={totalPagesCompleted}
+                  pageSize={completedPageSize}
+                  onPageChange={setCompletedPage}
+                  onPageSizeChange={(size) => {
+                    setCompletedPageSize(size);
+                    setCompletedPage(1);
+                  }}
+                />
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* -------------------- Modals -------------------- */}
+      {selectedAudit && (
+        <AuditDetailsModal
+          audit={selectedAudit}
+          onClose={() => setSelectedAudit(null)}
+        />
+      )}
+      {rescheduleAudit && (
+        <RescheduleAuditModal
+          audit={rescheduleAudit}
+          onClose={() => setRescheduleAudit(null)}
+        />
+      )}
+      {historyAudit && (
+        <AuditHistoryModal
+          audit={historyAudit}
+          onClose={() => setHistoryAudit(null)}
+        />
+      )}
     </div>
   );
 }
