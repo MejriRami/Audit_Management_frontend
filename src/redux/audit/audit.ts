@@ -1,6 +1,5 @@
 
-import { Audit, AuditPlanCreate, AuditRescheduleHistory, AuditRescheduleRequest } from "./audit-types";
-import { Audit, AuditByAuditor, AuditPlanCreate, AuditRescheduleHistory } from "./audit-types";
+import { Audit, AuditByAuditor, AuditPlanCreate, AuditRescheduleHistory, AuditRescheduleRequest, ExecuteAuditRequest, ExecuteAuditResponse, PickableAudit, UploadResponse } from "./audit-types";
 import axiosInstance from "../../services/axiosInstance";
 import { getAuditorsByAuditorFailure, getAuditorsByAuditorRequest, getAuditorsByAuditorSuccess } from "./audit-slice";
 
@@ -78,3 +77,35 @@ export const getAuditsByAuditor: AuditByAuditor = async (auditor_id,dispatch) =>
   return false;
 };
 
+// Get Audit questions by auditID
+export const apiGetAuditQuestions = async (auditId: number) => {
+  const res = await axiosInstance.get(`/audits/${auditId}/questions`);
+  return res.data;
+};
+
+export const apiGetPickableAuditsByAuditor = async (
+  auditorId: number
+): Promise<PickableAudit[]> => {
+  const res = await axiosInstance.get(`/audits/auditor/${auditorId}/pickable-audits`);
+  return res.data;
+};
+
+export const apiExecuteAudit = async (
+  auditId: number,
+  payload: ExecuteAuditRequest
+): Promise<ExecuteAuditResponse> => {
+  const res = await axiosInstance.post(`/audits/${auditId}/execute`, payload);
+  return res.data;
+};
+
+
+export async function apiUploadFile(file: File): Promise<UploadResponse> {
+  const form = new FormData();
+  form.append("file", file);
+
+  const res = await axiosInstance.post("/files/upload", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return res.data;
+}

@@ -63,3 +63,59 @@ export type AuditByAuditor = (
   dispatch: Dispatch<any>
 ) => Promise<boolean>;
 
+export interface AuditQuestion {
+  id: number;
+  description: string;
+  critical_value: number;
+}
+
+
+export interface AuditeeMini {
+  id: number;
+  email?: string | null;
+}
+
+export interface PickableAudit {
+  id: number;
+  audit_number: string;
+  planned_date: string;         
+  planned_start_time: string;   
+  planned_end_time: string;     
+  status: string;
+  auditees: AuditeeMini[];
+}
+export interface DocumentCreate {
+  filename: string;
+  mimetype: string;
+  size: number;
+  file_url: string;
+}
+
+export interface AuditAnswerCreate {
+  question_id: number;
+  value: number; // -1 allowed
+  finding_text?: string | null;
+  documents: DocumentCreate[];
+  car_reason?: string | null;
+  request_car: boolean;
+}
+
+export interface ExecuteAuditRequest {
+  answers: AuditAnswerCreate[];
+}
+
+export interface ExecuteAuditResponse {
+  message: string;
+  audit_id: number;
+  status: string;
+  answers_created: number;
+  cars_created: number;
+}
+
+
+export type UploadResponse = {
+  filename: string;
+  mimetype: string;
+  size: number;
+  file_url: string;
+};

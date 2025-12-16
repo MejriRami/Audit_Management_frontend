@@ -5,10 +5,15 @@ import {
   Audit,
   AuditPlanCreate,
 
+  AuditQuestion,
+
   AuditRescheduleHistory,
   AuditRescheduleRequest,
+  ExecuteAuditRequest,
+  ExecuteAuditResponse,
+  PickableAudit,
 } from "./audit-types";
-import { apiGetAudits, apiGetAuditHistory, apiPlanAudit, apiRescheduleAudit } from "./audit";
+import { apiGetAudits, apiGetAuditHistory, apiPlanAudit, apiRescheduleAudit, apiGetAuditQuestions, apiGetPickableAuditsByAuditor, apiExecuteAudit } from "./audit";
 
 // ---------- Thunks ----------
 
@@ -79,8 +84,50 @@ export const rescheduleAudit = createAsyncThunk<
   }
 });
 
+//get Audit questions
+export const getAuditQuestions = createAsyncThunk<
+  AuditQuestion[],
+  number,
+  { rejectValue: string }
+>("audit/getAuditQuestions", async (auditId, { rejectWithValue }) => {
+  try {
+    return await apiGetAuditQuestions(auditId);
+  } catch (error: any) {
+    return rejectWithValue(
+      error?.response?.data?.detail ||
+        error.message ||
+        "Failed to load audit questions"
+    );
+  }
+});
+export const fetchPickableAuditsByAuditor = createAsyncThunk<
+  PickableAudit[],
+  number,
+  { rejectValue: string }
+>("audit/fetchPickableAuditsByAuditor", async (auditorId, { rejectWithValue }) => {
+  try {
+    return await apiGetPickableAuditsByAuditor(auditorId);
+  } catch (error: any) {
+    return rejectWithValue(
+      error?.response?.data?.detail || error.message || "Failed to fetch pickable audits"
+    );
+  }
+});
 
 
+export const executeAuditThunk = createAsyncThunk<
+  ExecuteAuditResponse,
+  { auditId: number; data: ExecuteAuditRequest },
+  { rejectValue: string }
+>("audit/executeAudit", async ({ auditId, data }, { rejectWithValue }) => {
+  try {
+    return await apiExecuteAudit(auditId, data);
+  } catch (error: any) {
+    return rejectWithValue(
+      error?.response?.data?.detail || error.message || "Failed to execute audit"
+    );
+  }
+});
 // ---------- Initial State ----------
 
 const initialFilters: AuditFilters = {
@@ -109,6 +156,11 @@ const initialState: AuditState = {
   planningError: null,
   rescheduleLoading: false,
 rescheduleError: null,
+pickableAudits: [],
+pickableLoading: false,
+pickableError: null,
+
+auditQuestions:[]
 
 };
 
@@ -135,7 +187,13 @@ const auditSlice = createSlice({
     getAuditorsByAuditorFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
-    }
+    },
+    removePickableAudit(state, action: PayloadAction<number>) {
+  state.pickableAudits = state.pickableAudits.filter(
+    (a) => a.id !== action.payload
+  );
+}
+
   },
   extraReducers: (builder) => {
     // fetchAudits
@@ -211,16 +269,63 @@ builder
   state.rescheduleLoading = false;
   state.rescheduleError = action.payload || "Failed to reschedule audit";
 });
+builder
+.addCase(getAuditQuestions.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(getAuditQuestions.fulfilled, (state, action) => {
+  state.loading = false;
+  state.auditQuestions = action.payload;
+})
+.addCase(getAuditQuestions.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload || "Failed to load audit questions";
+});
+builder
+  .addCase(fetchPickableAuditsByAuditor.pending, (state) => {
+    state.pickableLoading = true;
+    state.pickableError = null;
+    state.pickableAudits = [];
+  })
+  .addCase(fetchPickableAuditsByAuditor.fulfilled, (state, action) => {
+    state.pickableLoading = false;
+    state.pickableAudits = action.payload;
+  })
+  .addCase(fetchPickableAuditsByAuditor.rejected, (state, action) => {
+    state.pickableLoading = false;
+    state.pickableError = action.payload || "Failed to fetch pickable audits";
+    state.pickableAudits = [];
+  });
+builder
+  
+  .addCase(executeAuditThunk.fulfilled, (state, action) => {
+    const executedAuditId = action.meta.arg.auditId;
+
+    //  remove from pickable list immediately
+    state.pickableAudits = state.pickableAudits.filter(
+      (a) => a.id !== executedAuditId
+    );
+
+    // optional: also update items[] if you keep global audits list
+    const idx = state.items.findIndex((a) => a.id === executedAuditId);
+    if (idx !== -1) {
+      state.items[idx] = { ...state.items[idx], status: action.payload.status } as any;
+    }
+  })
+ 
 
   },
   
 });
+
 
 export const { 
   setAuditFilters, 
   clearAuditFilters,
   getAuditorsByAuditorRequest,
   getAuditorsByAuditorSuccess,
-  getAuditorsByAuditorFailure
+  getAuditorsByAuditorFailure,
+  removePickableAudit
 } = auditSlice.actions;
 export default auditSlice.reducer;

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
-import SignIn from "./pages/AuthPages/SignIn";;
+import SignIn from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
 import Videos from "./pages/UiElements/Videos";
@@ -31,8 +31,12 @@ export default function App() {
     <>
       <Router>
         <ScrollToTop />
-        <Toaster position="top-right" />
-
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            duration: 4000,
+          }}
+        />
         <Routes>
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
