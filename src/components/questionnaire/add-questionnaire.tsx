@@ -4,7 +4,6 @@ import Input from "../form/input/InputField";
 import { TimeIcon } from "../../icons";
 import PageMeta from "../common/PageMeta";
 import PageBreadcrumb from "../common/PageBreadCrumb";
-import TextArea from "../form/input/TextArea";
 import Select from "../form/Select";
 import QuestionnaireInitialForm from "../initialForms/QuestionnaireInitialForm";
 import Enum from "../enum/Enum";
@@ -18,7 +17,13 @@ import { useEffect } from "react";
 export default function AddQuestionnaire() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { formQuestionnaire, handleInputValue, handleSelectChange, handleTextAreaValue, handleMultiSelectInput } = QuestionnaireInitialForm();
+  const {
+    formQuestionnaire,
+    handleInputValue,
+    handleSelectChange,
+
+    handleMultiSelectInput,
+  } = QuestionnaireInitialForm();
   const { frameworkOptions, auditTypeOptions, auditorOptions } = Enum();
   const { toast } = useSelector((state: any) => state.questionnaire);
 
@@ -26,14 +31,16 @@ export default function AddQuestionnaire() {
     e.preventDefault();
     const adjustedFormQuestionnaire = {
       ...formQuestionnaire,
-      target_duration: formQuestionnaire.target_duration.endsWith(':00') ?
-        formQuestionnaire.target_duration
+      target_duration: formQuestionnaire.target_duration.endsWith(":00")
+        ? formQuestionnaire.target_duration
         : formQuestionnaire.target_duration + ":00",
-      auditor_emails: formQuestionnaire.auditors.map(a => a.email),
+      auditor_emails: formQuestionnaire.auditors.map((a) => a.email),
     };
     addQuestionnaire(adjustedFormQuestionnaire, dispatch);
-  }
-
+  };
+  const backToQuestionnaire = () => {
+    navigate("/questionnaire");
+  };
   useEffect(() => {
     if (toast === "Questionnaire added successfully") {
       setTimeout(() => {
@@ -47,6 +54,13 @@ export default function AddQuestionnaire() {
       <PageMeta title="Questionnaire" description="..." />
       <PageBreadcrumb pageTitle="Questionnaire" />
       <div className="max-w-3xl mx-auto my-6 ">
+        <Button
+          className={`px-4 py-2 rounded-lg text-white font-medium transition "bg-gradient-to-r bg-indigo-600 to-indigo-700 hover:opacity-70"`}
+          onClick={backToQuestionnaire}
+        >
+          Back To Questionnaire List
+        </Button>
+        <div className="md:col-span-2 flex justify-end pt-2"></div>
         <ComponentCard
           title="Add a Questionnaire"
           className="dark:bg-gradient-to-br dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"
@@ -72,7 +86,9 @@ export default function AddQuestionnaire() {
                 <Select
                   options={frameworkOptions}
                   placeholder="Select a Framework"
-                  onChange={(value) => handleSelectChange("framework_id", value)}
+                  onChange={(value) =>
+                    handleSelectChange("framework_id", value)
+                  }
                   className="dark:bg-dark-900"
                 />
               </div>
@@ -137,15 +153,19 @@ export default function AddQuestionnaire() {
                   label="Auditors"
                   options={auditorOptions.map((a: any) => ({
                     value: String(a.value),
-                    text: a.label
+                    text: a.label,
                   }))}
-                  defaultSelected={formQuestionnaire?.auditors?.map(a => String(a.id)) ?? []}
-                  onChange={(selectedIds) => handleMultiSelectInput("auditors", selectedIds)}
+                  defaultSelected={
+                    formQuestionnaire?.auditors?.map((a) => String(a.id)) ?? []
+                  }
+                  onChange={(selectedIds) =>
+                    handleMultiSelectInput("auditors", selectedIds)
+                  }
                 />
               </div>
 
               {/* Score Formula */}
-              <div>
+              {/* <div>
                 <Label>Score Calculation</Label>
                 <TextArea
                   placeholder="Enter your score formula"
@@ -154,7 +174,7 @@ export default function AddQuestionnaire() {
                   rows={6}
                   name="score_calculation"
                 />
-              </div>
+              </div> */}
 
               {/* File Upload */}
               {/* <div>

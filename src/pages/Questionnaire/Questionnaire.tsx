@@ -37,7 +37,7 @@ export default function FormElements() {
     "Type",
     "Auditors",
     "Target Duration Time",
-    "Score Calculation",
+    // "Score Calculation",
     "Guide File",
     "Actions",
   ];
@@ -105,10 +105,10 @@ export default function FormElements() {
                       let stickyClasses = "";
                       if (index === 0)
                         stickyClasses =
-                          "sticky left-0 z-40 w-[80px] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]";
-                      else if (index === 1)
-                        stickyClasses =
-                          "sticky left-[80px] z-40 w-[250px] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]";
+                          "sticky left-0 z-40 w-[500px] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]";
+                      // else if (index === 1)
+                      //   stickyClasses =
+                      //     "sticky left-[80px] z-40 w-[250px] shadow-[2px_0_6px_-3px_rgba(0,0,0,0.1)]";
                       else if (index === 9)
                         stickyClasses =
                           "sticky right-0 z-40 w-[200px] shadow-[-2px_0_6px_-3px_rgba(0,0,0,0.1)]";
@@ -177,9 +177,9 @@ export default function FormElements() {
                           <TableCell className="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">
                             {q.target_duration}
                           </TableCell>
-                          <TableCell className="px-6 py-3 text-sm font-medium text-gray-800 dark:text-white">
+                          {/* <TableCell className="px-6 py-3 text-sm font-medium text-gray-800 dark:text-white">
                             {q.score_calculation}
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell className="px-6 py-3 text-sm font-medium text-gray-800 dark:text-white">
                             {q.guideline_file || "N/A"}
                           </TableCell>
