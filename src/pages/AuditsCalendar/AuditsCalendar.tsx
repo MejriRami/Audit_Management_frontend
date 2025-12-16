@@ -6,7 +6,7 @@ import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addMonths} from "date-fns";
+import { format, parse, startOfWeek, getDay, addMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Enum from "../../components/enum/Enum";
@@ -50,7 +50,9 @@ export default function AuditsCalendar() {
   const dispatch = useDispatch();
   const [mode, setMode] = useState<Mode>("myAudits");
   const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null
+  );
   const { auditorOptions } = Enum();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const { items } = useSelector((state: any) => state.audit);
@@ -103,8 +105,8 @@ export default function AuditsCalendar() {
   }, [auditorOptions]);
 
   useEffect(() => {
-    getAuditsByAuditor(selectedAuditor as number, dispatch)
-  },[dispatch, selectedAuditor])
+    getAuditsByAuditor(selectedAuditor as number, dispatch);
+  }, [dispatch, selectedAuditor]);
 
   return (
     <div className="p-6 space-y-8">
@@ -115,7 +117,7 @@ export default function AuditsCalendar() {
       <PageBreadcrumb pageTitle="Audits Calendar" />
 
       {/* MODE SWITCH */}
-      <ComponentCard title="Mode">
+      {/* <ComponentCard title="Mode">
         <div className="flex flex-wrap gap-4">
           <button
             type="button"
@@ -140,35 +142,35 @@ export default function AuditsCalendar() {
             Auditee Availability
           </button>
         </div>
-      </ComponentCard>
+      </ComponentCard> */}
 
       {/* FILTERS */}
       <ComponentCard title="Filters">
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase">
-                Auditors
-              </p>
-              <Select
-                options={auditorOptions}
-                defaultValue={selectedAuditor}
-                onChange={(value: string | number) => setSelectedAuditor(value)}
-                className="dark:bg-dark-900"
-              />
-            </div>
-            <div className="space-y-2 flex items-end">
-              <button
-                onClick={() => {
-                  if (auditorOptions.length > 0) {
-                    setSelectedAuditor(auditorOptions[0].value);
-                  }
-                }}
-                className="w-full inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg:white/[0.04]"
-              >
-                Reset
-              </button>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-gray-500 uppercase">
+              Auditors
+            </p>
+            <Select
+              options={auditorOptions}
+              defaultValue={selectedAuditor}
+              onChange={(value: string | number) => setSelectedAuditor(value)}
+              className="dark:bg-dark-900"
+            />
           </div>
+          <div className="space-y-2 flex items-end">
+            <button
+              onClick={() => {
+                if (auditorOptions.length > 0) {
+                  setSelectedAuditor(auditorOptions[0].value);
+                }
+              }}
+              className="w-full inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg:white/[0.04]"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
       </ComponentCard>
 
       {/* MAIN CALENDAR (MONTH ONLY) */}
@@ -233,7 +235,7 @@ export default function AuditsCalendar() {
             }
           />
         </div>
-  
+
         <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-300">
           {mode === "myAudits" ? (
             <div className="flex items-center gap-2">
@@ -250,7 +252,7 @@ export default function AuditsCalendar() {
       </ComponentCard>
 
       {/* UPCOMING LIST (audits OR free slots) */}
-      { items?.length > 0 && (
+      {items?.length > 0 && (
         <ComponentCard
           title={
             mode === "myAudits"
@@ -259,54 +261,55 @@ export default function AuditsCalendar() {
           }
         >
           <ul className="space-y-3">
-              {items?.map((e: any) => (
-                <li
-                  key={e.id}
-                  className="flex items-start justify-between rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm"
+            {items?.map((e: any) => (
+              <li
+                key={e.id}
+                className="flex items-start justify-between rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900 px-4 py-3 text-sm"
+              >
+                <div>
+                  <p className="font-medium text-gray-800 dark:text-gray-100">
+                    {e.title}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {new Date(e.planned_start_date).toLocaleDateString()}{" "}
+                    {new Date(e.planned_start_date).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    –{" "}
+                    {new Date(e.planned_end_date).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 grid grid-cols-1 gap-2">
+                    <span>
+                      <strong>Auditor:</strong> {e?.auditor.first_name}{" "}
+                      {e?.auditor.last_name}
+                    </span>
+
+                    <span>
+                      <strong>Auditee:</strong> {e.auditees.join(", ")}
+                    </span>
+
+                    <span>
+                      <strong>Plant:</strong> {e.plant}
+                    </span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const event = convertToEvent(e);
+                    setSelectedEvent(event);
+                    setCurrentDate(event.start);
+                  }}
+                  className="text-xs rounded-md border border-gray-200 dark:border-gray-700 px-3 py-1 hover:bg-gray-50 dark:hover:bg-white/[0.04]"
                 >
-                  <div>
-                    <p className="font-medium text-gray-800 dark:text-gray-100">
-                      {e.title}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {new Date(e.planned_start_date).toLocaleDateString()}{" "}
-                      {new Date(e.planned_start_date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
-                      –{" "}
-                      {new Date(e.planned_end_date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 grid grid-cols-1 gap-2">
-                      <span>
-                        <strong>Auditor:</strong> {e?.auditor.first_name} {e?.auditor.last_name}
-                      </span>
-
-                      <span>
-                        <strong>Auditee:</strong> {e.auditees.join(", ")}
-                      </span>
-
-                      <span>
-                        <strong>Plant:</strong> {e.plant}
-                      </span>
-                   </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const event = convertToEvent(e);
-                      setSelectedEvent(event);
-                      setCurrentDate(event.start);
-                    }}
-                    className="text-xs rounded-md border border-gray-200 dark:border-gray-700 px-3 py-1 hover:bg-gray-50 dark:hover:bg-white/[0.04]"
-                  >
-                    Show in calendar
-                  </button>
-                </li>
-              ))}
-            </ul>
+                  Show in calendar
+                </button>
+              </li>
+            ))}
+          </ul>
         </ComponentCard>
       )}
 

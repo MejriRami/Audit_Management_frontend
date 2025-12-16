@@ -1,5 +1,5 @@
 // redux/audit/audit-slice-types.ts
-import { Audit, AuditRescheduleHistory } from "./audit-types";
+import { Audit, AuditQuestion, AuditRescheduleHistory, PickableAudit } from "./audit-types";
 
 export interface AuditFilters {
   search: string;
@@ -29,5 +29,11 @@ export interface AuditState {
   planningError: string | null;
   rescheduleLoading: boolean,
 rescheduleError: string | null,
+
+pickableAudits: PickableAudit[];
+  pickableLoading: boolean;
+  pickableError: string | null;
+
+auditQuestions:AuditQuestion[]
 
 }

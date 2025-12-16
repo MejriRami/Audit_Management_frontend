@@ -19,7 +19,9 @@ export interface Questionnaire {
   guideline_file: string;
   type_id: string;
   framework_id: string;
-  framework: {id:string,label:string};
+  framework: {
+    code: string;id:string,label:string
+};
   auditType?: {id:string,value:string};
   auditors: Auditor[];
   questions: Question[];
