@@ -59,8 +59,11 @@ export  interface AuditRescheduleRequest{
   email:string;
 }
 export type AuditByAuditor = (
+  dispatch: Dispatch<any>,
   auditor_id: number,
-  dispatch: Dispatch<any>
+  target: string,
+  page?: number,
+  per_page?: number,
 ) => Promise<boolean>;
 
 export interface AuditQuestion {

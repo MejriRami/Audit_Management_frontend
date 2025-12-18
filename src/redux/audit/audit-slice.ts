@@ -145,7 +145,8 @@ const initialState: AuditState = {
   items: [],
   loading: false,
   error: null,
-
+  calendarItems: null,
+  cardsItems: null, 
   filters: initialFilters,
 
   historyByAuditId:[],
@@ -155,12 +156,12 @@ const initialState: AuditState = {
   planningLoading: false,
   planningError: null,
   rescheduleLoading: false,
-rescheduleError: null,
-pickableAudits: [],
-pickableLoading: false,
-pickableError: null,
+  rescheduleError: null,
+  pickableAudits: [],
+  pickableLoading: false,
+  pickableError: null,
 
-auditQuestions:[]
+  auditQuestions:[]
 
 };
 
@@ -181,8 +182,14 @@ const auditSlice = createSlice({
       state.error = null;
     },
     getAuditorsByAuditorSuccess(state, action) {
+      if (action.payload.target==='calendar')
+      {
+        state.calendarItems = action.payload.data;
+      } else if (action.payload.target==='cards')
+      {
+        state.cardsItems = action.payload.data;
+      }
       state.loading = false;
-      state.items = action.payload;
     },
     getAuditorsByAuditorFailure(state, action) {
       state.loading = false;
