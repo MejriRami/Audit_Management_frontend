@@ -61,13 +61,23 @@ export const apiGetAuditHistory = async (
 };
 
 //get audits by auditor id
-export const getAuditsByAuditor: AuditByAuditor = async (auditor_id,dispatch) => {
+export const getAuditsByAuditor: AuditByAuditor = async (
+  dispatch,
+  auditor_id: number,
+  target: string,
+  page?: number,
+  per_page?: number
+  ) => {
   dispatch(getAuditorsByAuditorRequest());
-  const url = `/audits/auditor/${auditor_id}`;
+  let url=`/audits/auditor/${auditor_id}`
+
+  if(page && per_page){
+    url+=`?page=${page}&per_page=${per_page}`;
+  }
 
   try {
     let response = await axiosInstance.get(url);
-    dispatch(getAuditorsByAuditorSuccess(response.data));
+    dispatch(getAuditorsByAuditorSuccess({data: response.data, target}));
     return true;
   } catch (error: any) {
     const { data } = error.response;

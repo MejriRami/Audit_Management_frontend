@@ -28,12 +28,14 @@ export interface AuditState {
   planningLoading: boolean;
   planningError: string | null;
   rescheduleLoading: boolean,
-rescheduleError: string | null,
+  rescheduleError: string | null,
 
-pickableAudits: PickableAudit[];
+  pickableAudits: PickableAudit[];
   pickableLoading: boolean;
   pickableError: string | null;
 
-auditQuestions:AuditQuestion[]
+  auditQuestions:AuditQuestion[],
+  calendarItems: null, // for calendar
+  cardsItems: null, 
 
 }

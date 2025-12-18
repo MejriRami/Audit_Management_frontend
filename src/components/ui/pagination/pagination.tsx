@@ -1,78 +1,98 @@
 interface PaginationProps {
-  currentPage: number;
+  page: number;
   totalPages: number;
-  pageSize: number;
   onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
 }
 
-export default function Pagination({
-  currentPage,
-  totalPages,
-  pageSize,
-  onPageChange,
-  onPageSizeChange,
-}: PaginationProps) {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+const getVisiblePages = (
+  current: number,
+  total: number,
+  delta = 2
+): (number | "...")[] => {
+  if (total <= 10) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const pages: (number | "...")[] = [];
+  const left = Math.max(2, current - delta);
+  const right = Math.min(total - 1, current + delta);
+
+  pages.push(1);
+
+  if (left > 2) pages.push("...");
+
+  for (let i = left; i <= right; i++) {
+    pages.push(i);
+  }
+
+  if (right < total - 1) pages.push("...");
+
+  pages.push(total);
+
+  return pages;
+};
+
+
+const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => {
+  const pages = getVisiblePages(page, totalPages);
 
   return (
-    <div className="flex items-center justify-between p-4">
-      {/* Page Size */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Rows per page:</span>
-        <select
-          value={pageSize}
-          onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="border rounded-md px-2 py-1 text-sm"
-        >
-          {[5, 10, 20, 50].map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="flex items-center justify-between py-4">
 
-      {/* Page Buttons */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 rounded-md text-sm border ${
-            currentPage === 1
-              ? "opacity-40 cursor-not-allowed"
-              : "hover:bg-gray-100"
-          }`}
-        >
-          Prev
-        </button>
+      {/* Previous */}
+      <button
+        disabled={page === 1}
+        onClick={() => onPageChange(page - 1)}
+        className="
+          flex items-center gap-2 px-3 py-2 border rounded-lg
+          bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300
+          disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed
+        "
+      >
+        Previous
+      </button>
 
-        {pages.map((page) => (
-          <button
-            key={page}
-            onClick={() => onPageChange(page)}
-            className={`px-3 py-1 rounded-md text-sm border ${
-              currentPage === page
-                ? "bg-blue-500 text-white"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            {page}
-          </button>
+      {/* Page Numbers */}
+      <ul className="hidden sm:flex items-center gap-1">
+        {pages.map((p, index) => (
+          <li key={index}>
+            {p === "..." ? (
+              <span className="w-10 h-10 flex items-center justify-center text-gray-400">
+                …
+              </span>
+            ) : (
+              <button
+                onClick={() => onPageChange(p)}
+                className={`
+                  w-10 h-10 rounded-lg flex items-center justify-center
+                  ${
+                    p === page
+                      ? "bg-blue-500 text-white"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-white/[0.07]"
+                  }
+                `}
+              >
+                {p}
+              </button>
+            )}
+          </li>
         ))}
+      </ul>
 
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 rounded-md text-sm border ${
-            currentPage === totalPages
-              ? "opacity-40 cursor-not-allowed"
-              : "hover:bg-gray-100"
-          }`}
-        >
-          Next
-        </button>
-      </div>
+      {/* Next */}
+      <button
+        disabled={page === totalPages}
+        onClick={() => onPageChange(page + 1)}
+        className="
+          flex items-center gap-2 px-3 py-2 border rounded-lg
+          bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300
+          disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed
+        "
+      >
+        Next
+      </button>
     </div>
   );
-}
+};
+
+export default Pagination;
