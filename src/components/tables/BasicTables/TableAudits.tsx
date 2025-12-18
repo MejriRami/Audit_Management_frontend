@@ -187,7 +187,9 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   const renderCompletedRow = (audit: Audit) => (
     <TableRow key={audit.id}>
-      <TableCell className="px-4 py-3">{audit.audit_number}</TableCell>
+      <TableCell className="text-gray-500 text-xs px-4">
+        {audit.audit_number}
+      </TableCell>
       <TableCell className="px-5 py-4">
         <div className="text-sm">
           <div className="font-medium">

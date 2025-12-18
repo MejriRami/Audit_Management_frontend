@@ -6,13 +6,13 @@ import Select from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addMonths, set } from "date-fns";
+import { format, parse, startOfWeek, getDay, addMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import Enum from "../../components/enum/Enum";
 import { useDispatch, useSelector } from "react-redux";
 import { getAuditsByAuditor } from "../../redux/audit/audit";
-import Pagination from "../../components/ui/pagination/pagination";
+import PaginationCalendarCard from "../../components/ui/pagination/PaginationCalendarCard";
 
 type CalendarEventType = "audit" | "auditee-free";
 
@@ -57,7 +57,9 @@ export default function AuditsCalendar() {
   );
   const { auditorOptions } = Enum();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const { calendarItems, cardsItems } = useSelector((state: any) => state.audit);
+  const { calendarItems, cardsItems } = useSelector(
+    (state: any) => state.audit
+  );
   const convertToEvent = (audit: any): CalendarEvent => ({
     id: audit.id,
     title: `Audit ${audit.audit_number}`,
@@ -114,26 +116,21 @@ export default function AuditsCalendar() {
   }, [auditorOptions]);
 
   useEffect(() => {
-  if (!selectedAuditor) return;
-
-  getAuditsByAuditor(
-    dispatch,
-    selectedAuditor as number,
-    "cards",
-    page,
-    per_page
-  );
-  }, [dispatch, selectedAuditor, page, per_page]);
-
-
-  useEffect(() => {
     if (!selectedAuditor) return;
 
     getAuditsByAuditor(
       dispatch,
       selectedAuditor as number,
-      "calendar"
+      "cards",
+      page,
+      per_page
     );
+  }, [dispatch, selectedAuditor, page, per_page]);
+
+  useEffect(() => {
+    if (!selectedAuditor) return;
+
+    getAuditsByAuditor(dispatch, selectedAuditor as number, "calendar");
   }, [dispatch, selectedAuditor]);
 
   return (
@@ -248,7 +245,11 @@ export default function AuditsCalendar() {
         <div className="h-[650px]">
           <BigCalendar
             localizer={localizer}
-            events={calendarItems?.items?.map((audit: any) => convertToEvent(audit)) || []}
+            events={
+              calendarItems?.items?.map((audit: any) =>
+                convertToEvent(audit)
+              ) || []
+            }
             startAccessor="start"
             endAccessor="end"
             style={{ height: "100%" }}
@@ -265,14 +266,14 @@ export default function AuditsCalendar() {
         </div>
 
         <div className="mt-4 flex flex-col gap-4 text-xs text-gray-600 dark:text-gray-300">
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-sm bg-[#579BFC]" />
-              <span>Audit - planned</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-sm bg-[#FFB347]" />
-              <span>Audit - rescheduled</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-sm bg-[#579BFC]" />
+            <span>Audit - planned</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-sm bg-[#FFB347]" />
+            <span>Audit - rescheduled</span>
+          </div>
         </div>
       </ComponentCard>
 
@@ -335,14 +336,13 @@ export default function AuditsCalendar() {
               </li>
             ))}
           </ul>
-          <Pagination
-            page={calendarItems.page}
-            totalPages={calendarItems.total_pages}
+          <PaginationCalendarCard
+            page={calendarItems?.page}
+            totalPages={calendarItems?.total_pages}
             onPageChange={handlePageChange}
           />
         </ComponentCard>
       )}
-       
 
       {/* EVENT DETAILS POPUP */}
       <Modal
