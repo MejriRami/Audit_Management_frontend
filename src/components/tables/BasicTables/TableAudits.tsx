@@ -105,7 +105,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     "Planned Start",
     "Planned End",
     "Final Score",
-    "Event Created",
+    "Strong Points ",
+    "Weak Points",
     "Action",
   ];
 
@@ -218,10 +219,11 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       <TableCell className="px-4 py-3 font-semibold text-green-600">
         {audit.finalScore ?? "-"}
       </TableCell>
-      <TableCell className="px-4 py-3">
-        <Badge size="sm" color={audit.event_created ? "success" : "light"}>
-          {audit.event_created ? "Yes" : "No"}
-        </Badge>
+      <TableCell className="text-xs px-4 py-3 font-semibold text-green-600">
+        {audit.weak_points || "-"}
+      </TableCell>
+      <TableCell className="text-xs px-4 py-3 font-semibold text-green-600">
+        {audit.strong_points || "-"}
       </TableCell>
       <TableCell className="px-4 py-3">
         <button className="rounded-lg bg-yellow-400 text-white text-xs font-small hover:bg-yellow-700 transition">
