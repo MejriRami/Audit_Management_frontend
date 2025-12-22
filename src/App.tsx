@@ -26,6 +26,7 @@ import AuditChecklist from "./components/audit/FillAudit";
 import ResetPassword from "./pages/AuthPages/ResetPassword";
 import RequireAuth from "./components/auth/RequireAuth";
 import { Toaster } from "react-hot-toast";
+import { CarAccess } from "./components/CarAccess";
 export default function App() {
   return (
     <>
@@ -41,6 +42,8 @@ export default function App() {
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/car-access" element={<CarAccess />} />
+
           {/* Dashboard Layout */}
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>

@@ -199,7 +199,8 @@ export default function PlanAudit({
       !form.questionnaireId ||
       !form.auditDate ||
       !form.startTime ||
-      !form.endTime
+      !form.endTime ||
+      !form.sector
     ) {
       setErrorMessage("Please fill all required fields.");
       return;
