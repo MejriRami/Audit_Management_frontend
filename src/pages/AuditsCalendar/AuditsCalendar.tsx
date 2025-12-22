@@ -50,7 +50,8 @@ const localizer = dateFnsLocalizer({
 
 export default function AuditsCalendar() {
   const dispatch = useDispatch();
-  const [mode, setMode] = useState<Mode>("myAudits");
+  const [mode] = useState<Mode>("myAudits");
+  // const [mode, setMode] = useState<Mode>("myAudits");
   const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null

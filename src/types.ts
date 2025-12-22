@@ -42,6 +42,8 @@ export interface Audit {
   sector?:string;
   status?: string;
   finalScore?: number;
+  strong_points?:string;
+  weak_points?:string;
   auditor?: User;
   auditees?:string[];
   sessions?: { start_time: string; end_time: string }[];
@@ -135,6 +137,7 @@ export interface QuestionnaireUpdate {
 
 export interface Auditor {
   email: string;
+  id?: number;
 }
 
 

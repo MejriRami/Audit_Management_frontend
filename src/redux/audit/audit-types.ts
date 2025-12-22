@@ -105,6 +105,11 @@ export interface AuditAnswerCreate {
 
 export interface ExecuteAuditRequest {
   answers: AuditAnswerCreate[];
+  audit_date: string;          
+  start_time: string;          
+  end_time: string;             
+  strong_points: string;       
+  weak_points: string;         
 }
 
 export interface ExecuteAuditResponse {

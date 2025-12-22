@@ -92,7 +92,7 @@ const AuditDetailsModal: React.FC<AuditDetailsModalProps> = ({
               </li>
               <li>
                 <span className="font-medium">Auditee : </span>
-                {audit.auditee?.email}
+                {audit.auditees?.join(", ")}
               </li>
             </ul>
           </div>
