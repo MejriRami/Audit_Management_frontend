@@ -3,6 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import axiosInstance from "../services/axiosInstance";
 
 interface CarFormData {
+  audit_number: string;
+  auditee_name: string;
+  audit_type: string;
+  audit_plant: string;
   reason_why: string;
   due_date: string;
   finding: string;
@@ -51,7 +55,7 @@ export const CarAccess: React.FC = () => {
     if (!email) return null;
     if (!email.includes("@")) return null;
     if (!isValidEmail(email)) {
-      return "L'email doit se terminer par @avocarbon.com";
+      return "Email must end with @avocarbon.com";
     }
     return null;
   };
@@ -94,7 +98,7 @@ export const CarAccess: React.FC = () => {
   const requestOtp = async () => {
     if (!isValidEmail(email)) {
       setMessage(
-        "⚠️ Veuillez utiliser votre adresse email professionnelle (@avocarbon.com)"
+        "⚠️ Please use your professional email address (@avocarbon.com)"
       );
       return;
     }
@@ -112,16 +116,14 @@ export const CarAccess: React.FC = () => {
         setSubmittedDate(response.data.submitted_at);
         setStep("submitted");
         setMessage(
-          `Ce formulaire a déjà été soumis le ${response.data.submitted_at}`
+          `This form has already been submitted on ${response.data.submitted_at}`
         );
       } else {
         setStep("otp");
-        setMessage("✅ Code OTP envoyé à votre email.");
+        setMessage("✅ OTP code sent to your email.");
       }
     } catch (err: any) {
-      setMessage(
-        err.response?.data?.detail || "Erreur lors de l'envoi du code."
-      );
+      setMessage(err.response?.data?.detail || "Error sending the code.");
     } finally {
       setLoading(false);
     }
@@ -142,20 +144,21 @@ export const CarAccess: React.FC = () => {
       });
 
       setCarData(res.data);
+      console.log(res.data);
       setImplementedSolution(res.data.implemented_solution || "");
 
       if (res.data.is_submitted) {
         setStep("submitted");
         setSubmittedDate(res.data.submitted_at);
         setMessage(
-          `✅ Ce formulaire a déjà été soumis le ${res.data.submitted_at}`
+          `✅ This form has already been submitted on ${res.data.submitted_at}`
         );
       } else {
         setStep("form");
         setMessage("");
       }
     } catch (err: any) {
-      setMessage(err.response?.data?.detail || "Code OTP invalide.");
+      setMessage(err.response?.data?.detail || "Invalid OTP code.");
     } finally {
       setLoading(false);
     }
@@ -163,7 +166,7 @@ export const CarAccess: React.FC = () => {
 
   const submitForm = async () => {
     if (!implementedSolution.trim()) {
-      setMessage("⚠️ Veuillez décrire la solution mise en œuvre");
+      setMessage("⚠️ Please describe the implemented solution");
       return;
     }
 
@@ -181,7 +184,10 @@ export const CarAccess: React.FC = () => {
       selectedFiles.forEach((file) => {
         formData.append("files", file);
       });
-
+      if (selectedFiles.length === 0) {
+        setMessage("⚠️ Could not submit without at least one document.");
+        return;
+      }
       const response = await axiosInstance.post("/car/submit", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -195,10 +201,10 @@ export const CarAccess: React.FC = () => {
       } else {
         setStep("submitted");
         setSubmittedDate(response.data.submitted_at);
-        setMessage("✅ Formulaire soumis avec succès !");
+        setMessage("✅ Form submitted successfully!");
       }
     } catch (err: any) {
-      setMessage(err.response?.data?.detail || "Erreur lors de la soumission.");
+      setMessage(err.response?.data?.detail || "Error submitting the form.");
     } finally {
       setLoading(false);
     }
@@ -208,10 +214,12 @@ export const CarAccess: React.FC = () => {
   const isEmailValid = isValidEmail(email);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-cyan-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative background */}
+      <div className="absolute inset-0 bg-[url('images/avocarbon-brushes.jpg')] bg-cover bg-center"></div>
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
@@ -250,7 +258,7 @@ export const CarAccess: React.FC = () => {
       <div className="max-w-2xl mx-auto relative z-10">
         {/* Logo et en-tête */}
         <div className="text-center mb-8 fade-in-up">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-800 to-blue-900 rounded-2xl mb-4 shadow-lg">
             <svg
               className="w-12 h-12 text-white"
               fill="none"
@@ -265,12 +273,24 @@ export const CarAccess: React.FC = () => {
               />
             </svg>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 bg-clip-text text-transparent mb-2">
-            AVOCARBON
-          </h1>
-          <p className="text-gray-600 text-lg font-medium">
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              <div className="text-4xl font-bold flex items-center">
+                <div className="text-4xl font-bold">
+                  <span className="text-blue-900 uppercase">AVO</span>
+                  <span className="text-gray-500">Carbon</span>
+                </div>
+              </div>
+              <div className="w-full border-t border-gray-300 my-1"></div>
+
+              <div className="absolute right-0 -bottom-6 text-orange-500 font-semibold tracking-wide">
+                STS
+              </div>
+            </div>
+          </div>
+          {/* <p className="text-gray-600 text-lg font-medium">
             Système d'Actions Correctives
-          </p>
+          </p> */}
         </div>
 
         {/* Carte principale */}
@@ -284,13 +304,13 @@ export const CarAccess: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <span
                   className={`flex items-center gap-2 text-sm font-medium ${
-                    step === "email" ? "text-emerald-600" : "text-gray-400"
+                    step === "email" ? "text-blue-600" : "text-gray-400"
                   }`}
                 >
                   <span
                     className={`flex items-center justify-center w-8 h-8 rounded-full ${
                       step === "email"
-                        ? "bg-emerald-100 text-emerald-600"
+                        ? "bg-blue-100 text-blue-600"
                         : "bg-gray-100 text-gray-400"
                     }`}
                   >
@@ -300,40 +320,40 @@ export const CarAccess: React.FC = () => {
                 </span>
                 <span
                   className={`flex items-center gap-2 text-sm font-medium ${
-                    step === "otp" ? "text-emerald-600" : "text-gray-400"
+                    step === "otp" ? "text-blue-600" : "text-gray-400"
                   }`}
                 >
                   <span
                     className={`flex items-center justify-center w-8 h-8 rounded-full ${
                       step === "otp"
-                        ? "bg-emerald-100 text-emerald-600"
+                        ? "bg-blue-100 text-blue-600"
                         : "bg-gray-100 text-gray-400"
                     }`}
                   >
                     2
                   </span>
-                  Vérification
+                  Verification
                 </span>
                 <span
                   className={`flex items-center gap-2 text-sm font-medium ${
-                    step === "form" ? "text-emerald-600" : "text-gray-400"
+                    step === "form" ? "text-blue-900" : "text-gray-400"
                   }`}
                 >
                   <span
                     className={`flex items-center justify-center w-8 h-8 rounded-full ${
                       step === "form"
-                        ? "bg-emerald-100 text-emerald-600"
+                        ? "from-blue-700 text-blue-900"
                         : "bg-gray-100 text-gray-400"
                     }`}
                   >
                     3
                   </span>
-                  Formulaire
+                  Form
                 </span>
               </div>
               <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500 ease-out"
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-blue-700 transition-all duration-500 ease-out"
                   style={{
                     width:
                       step === "email"
@@ -352,7 +372,7 @@ export const CarAccess: React.FC = () => {
             <div
               className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${
                 message.includes("✅")
-                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  ? "bg-blue-50 text-blue-800 border border-blue-200"
                   : message.includes("⚠️")
                   ? "bg-amber-50 text-amber-800 border border-amber-200"
                   : "bg-red-50 text-red-800 border border-red-200"
@@ -376,12 +396,12 @@ export const CarAccess: React.FC = () => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Adresse email professionnelle
+                  Professional Email Address
                 </label>
                 <div className="relative">
                   <input
                     type="email"
-                    placeholder="votre.nom@avocarbon.com"
+                    placeholder="your.name@avocarbon.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyPress={(e) => {
@@ -393,8 +413,8 @@ export const CarAccess: React.FC = () => {
                       emailError
                         ? "border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-100"
                         : isEmailValid
-                        ? "border-emerald-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                        : "border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                        ? "border-blue-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                     }`}
                     disabled={loading}
                     autoFocus
@@ -417,7 +437,7 @@ export const CarAccess: React.FC = () => {
                   {isEmailValid && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
                       <svg
-                        className="w-5 h-5 text-emerald-500"
+                        className="w-5 h-5 text-blue-500"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -447,8 +467,7 @@ export const CarAccess: React.FC = () => {
                   </p>
                 )}
                 <p className="mt-2 text-sm text-gray-500">
-                  Utilisez votre adresse email professionnelle pour accéder au
-                  formulaire
+                  Use your work email address to access the form.
                 </p>
               </div>
 
@@ -458,7 +477,7 @@ export const CarAccess: React.FC = () => {
                 className={`w-full py-4 rounded-xl font-semibold text-white transition-all transform ${
                   loading || !isEmailValid
                     ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                    : "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                 }`}
               >
                 {loading ? (
@@ -483,11 +502,11 @@ export const CarAccess: React.FC = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Vérification en cours...
+                    Verification in progress...
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    Continuer
+                    Continue
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -511,9 +530,9 @@ export const CarAccess: React.FC = () => {
           {step === "otp" && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-3">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-3">
                   <svg
-                    className="w-8 h-8 text-emerald-600"
+                    className="w-8 h-8 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -527,19 +546,18 @@ export const CarAccess: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  Vérification de sécurité
+                  Security Verification
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Un code à 6 chiffres a été envoyé à<br />
-                  <span className="font-semibold text-emerald-600">
-                    {email}
-                  </span>
+                  A 6-digit code has been sent to
+                  <br />
+                  <span className="font-semibold text-blue-600">{email}</span>
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 text-center">
-                  Code de vérification
+                  Verification Code
                 </label>
                 <input
                   type="text"
@@ -554,12 +572,12 @@ export const CarAccess: React.FC = () => {
                     }
                   }}
                   maxLength={6}
-                  className="w-full px-4 py-5 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none text-center text-3xl tracking-[0.5em] font-bold transition-all"
+                  className="w-full px-4 py-5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none text-center text-3xl tracking-[0.5em] font-bold transition-all"
                   disabled={loading}
                   autoFocus
                 />
                 <p className="text-center text-sm text-gray-500 mt-2">
-                  Saisissez le code à 6 chiffres
+                  Enter the 6-digit code
                 </p>
               </div>
 
@@ -570,7 +588,7 @@ export const CarAccess: React.FC = () => {
                   className={`w-full py-4 rounded-xl font-semibold text-white transition-all transform ${
                     loading || otp.length !== 6
                       ? "bg-gray-300 cursor-not-allowed"
-                      : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                      : "bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-700 hover:to-teal-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                   }`}
                 >
                   {loading ? (
@@ -595,7 +613,7 @@ export const CarAccess: React.FC = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Vérification...
+                      VVerification in progress...
                     </span>
                   ) : (
                     "Vérifier le code"
@@ -611,7 +629,7 @@ export const CarAccess: React.FC = () => {
                   disabled={loading}
                   className="w-full py-3 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
                 >
-                  ← Retour
+                  ← Return
                 </button>
               </div>
             </div>
@@ -620,104 +638,160 @@ export const CarAccess: React.FC = () => {
           {/* Étape 3 : Formulaire (partie 1 - continued in next file due to length) */}
           {step === "form" && carData && (
             <div className="space-y-6">
-              {/* Informations CAR */}
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 space-y-4 border border-emerald-100">
-                <div>
-                  <div className="flex items-start gap-2 mb-2">
-                    <svg
-                      className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <h3 className="font-bold text-gray-900 text-sm">
-                      Raison de l'action corrective
-                    </h3>
-                  </div>
-                  <p className="text-gray-700 ml-7">{carData.reason_why}</p>
-                </div>
-
+              {/* Informations CAR - Compact Version */}
+              <div className="bg-gradient-to-br from-blue-50 via-blue-50 to-cyan-50 rounded-2xl p-6 space-y-4 border border-blue-200 shadow-lg">
+                {/* Basic Info Grid */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-gray-600 text-xs uppercase tracking-wide mb-1">
+                      Audit Number
+                    </h3>
+                    <p className="text-gray-900 font-medium">
+                      {carData.audit_number}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-600 text-xs uppercase tracking-wide mb-1">
+                      Auditee Name
+                    </h3>
+                    <p className="text-gray-900 font-medium">
+                      {carData.auditee_name}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-600 text-xs uppercase tracking-wide mb-1">
+                      Plant
+                    </h3>
+                    <p className="text-gray-900 font-medium">
+                      {carData.audit_plant}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-600 text-xs uppercase tracking-wide mb-1">
+                      Questionnaire
+                    </h3>
+                    <p className="text-gray-900 font-medium">
+                      {carData.audit_type}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-blue-200/60"></div>
+
+                {/* Raison - Compact */}
+                <div className="bg-gradient-to-r from-blue-300 to-blue-300 rounded-lg p-4 border border-blue-200">
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="bg-blue-600 rounded p-1.5">
                       <svg
-                        className="w-4 h-4 text-emerald-600"
+                        className="w-4 h-4 text-white"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
                         <path
                           fillRule="evenodd"
-                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                           clipRule="evenodd"
                         />
                       </svg>
-                      <h3 className="font-bold text-gray-900 text-xs">
-                        Date limite
-                      </h3>
                     </div>
-                    <p className="text-gray-700 ml-6 text-sm">
-                      {carData.due_date}
-                    </p>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 text-sm mb-1">
+                        Reason of the Non-Conformity
+                      </h3>
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {carData.reason_why}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex items-start gap-2 mb-2">
-                    <svg
-                      className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <h3 className="font-bold text-gray-900 text-sm">
-                      Constat (Finding)
-                    </h3>
+                {/* Date and Finding - Side by Side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Date limite */}
+                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="bg-blue-600 rounded p-1.5">
+                        <svg
+                          className="w-3.5 h-3.5 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-xs">
+                        Due Date
+                      </h3>
+                    </div>
+                    <p className="text-gray-900 font-semibold ml-7">
+                      {carData.due_date}
+                    </p>
                   </div>
-                  <p className="text-gray-700 ml-7">{carData.finding}</p>
+
+                  {/* Constat (Finding) */}
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200 md:col-span-2">
+                    <div className="flex items-start gap-2 mb-2">
+                      <div className="bg-amber-600 rounded p-1.5">
+                        <svg
+                          className="w-4 h-4 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-sm mb-1">
+                          Finding
+                        </h3>
+                        <p className="text-gray-700 text-sm leading-relaxed">
+                          {carData.finding}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Solution textarea */}
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-3">
-                  Solution mise en œuvre *
+                  Implemented Solution *
                 </label>
                 <textarea
                   value={implementedSolution}
                   onChange={(e) => setImplementedSolution(e.target.value)}
-                  rows={6}
-                  placeholder="Décrivez en détail la solution que vous avez mise en place pour corriger ce problème...
-
-Exemple :
-• Actions entreprises
-• Personnes impliquées
-• Calendrier de mise en œuvre
-• Résultats attendus"
-                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 focus:outline-none resize-none transition-all"
+                  rows={5}
+                  placeholder="Decribe in detail the actions taken to address the issue...
+Example:
+- Actions taken
+- People involved
+- Implementation timeline
+- Expected outcomes
+"
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none resize-none transition-all"
                   disabled={loading}
                 />
                 <div className="flex items-center justify-between mt-2">
                   <p className="text-xs text-gray-500">
-                    Décrivez précisément les actions entreprises
+                    Describe in detail the actions taken to address the issue.
                   </p>
                   <p
                     className={`text-xs font-medium ${
                       implementedSolution.length < 50
                         ? "text-gray-400"
-                        : "text-emerald-600"
+                        : "text-blue-600"
                     }`}
                   >
-                    {implementedSolution.length} caractères
+                    {implementedSolution.length} caracters
                   </p>
                 </div>
               </div>
@@ -725,10 +799,9 @@ Exemple :
               {/* Section d'upload de fichiers */}
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-3">
-                  Documents justificatifs
+                  Justify the implemented solution with supporting documents *
                 </label>
 
-                {/* Liste des fichiers sélectionnés */}
                 {selectedFiles.length > 0 && (
                   <div className="mb-4 space-y-2">
                     {selectedFiles.map((file, index) => (
@@ -780,8 +853,7 @@ Exemple :
                   </div>
                 )}
 
-                {/* Bouton d'upload */}
-                <label className="w-full flex flex-col items-center px-4 py-6 bg-white border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all">
+                <label className="w-full flex flex-col items-center px-4 py-6 bg-white border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
                   <svg
                     className="w-10 h-10 text-gray-400"
                     fill="none"
@@ -796,7 +868,7 @@ Exemple :
                     />
                   </svg>
                   <span className="mt-2 text-sm font-medium text-gray-600">
-                    Cliquez pour ajouter des fichiers
+                    Click to upload files
                   </span>
                   <span className="mt-1 text-xs text-gray-500">
                     PDF, JPG, PNG, DOC, XLS (max 10MB)
@@ -844,11 +916,11 @@ Exemple :
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Soumission en cours...
+                    Submission in progress...
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    Soumettre la solution
+                    Submit Solution
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -871,9 +943,9 @@ Exemple :
           {/* Étape 4 : Soumis */}
           {step === "submitted" && (
             <div className="text-center space-y-6 py-8">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full mb-4 animate-pulse">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full mb-4 animate-pulse">
                 <svg
-                  className="w-14 h-14 text-emerald-600"
+                  className="w-14 h-14 text-blue-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -889,11 +961,11 @@ Exemple :
 
               <div>
                 <h3 className="text-3xl font-bold text-gray-900 mb-2">
-                  Formulaire déjà soumis
+                  Form already submitted
                 </h3>
                 <p className="text-gray-600">
-                  Votre action corrective a été enregistrée le{" "}
-                  <span className="font-bold text-emerald-600">
+                  Your corrective action has been recorded on{" "}
+                  <span className="font-bold text-blue-600">
                     {submittedDate}
                   </span>
                 </p>
@@ -913,7 +985,7 @@ Exemple :
                         clipRule="evenodd"
                       />
                     </svg>
-                    Solution soumise
+                    Solution submitted
                   </h4>
                   <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                     {implementedSolution || carData?.implemented_solution}
@@ -1010,8 +1082,8 @@ Exemple :
                     />
                   </svg>
                   <p className="text-sm text-blue-800 font-medium text-left">
-                    Si vous devez modifier votre réponse, veuillez contacter
-                    l'équipe qualité AVOCARBON.
+                    If you need to modify your response, please contact the
+                    AVOCARBON Quality team.
                   </p>
                 </div>
               </div>
@@ -1024,11 +1096,8 @@ Exemple :
           className="text-center mt-8 fade-in-up"
           style={{ animationDelay: "0.4s" }}
         >
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white">
             © 2025 AVOCARBON - Audit Track - équipe Qualité
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Plateforme sécurisée et confidentielle
           </p>
         </div>
       </div>
