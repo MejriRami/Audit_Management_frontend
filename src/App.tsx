@@ -28,6 +28,7 @@ import RequireAuth from "./components/auth/RequireAuth";
 import { Toaster } from "react-hot-toast";
 import { CarAccess } from "./components/CarAccess";
 import AuditUnavailabilityForm from "./pages/Audit/AuditUnavailabilityForm";
+import AuditorUnavailabilityForm from "./pages/Audit/AuditorUnavailabilityForm";
 export default function App() {
   return (
     <>
@@ -70,6 +71,10 @@ export default function App() {
               {/* Add Framework */}
               <Route path="/framework" element={<Framework />} />
 
+              <Route
+                path="/holiday-requests"
+                element={<AuditorUnavailabilityForm />}
+              />
               {/* Tables */}
               <Route path="/audits" element={<BasicTables />} />
 
