@@ -105,80 +105,89 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     "Planned Start",
     "Planned End",
     "Final Score",
-    "Strong Points ",
+    "Strong Points",
     "Weak Points",
     "Action",
   ];
 
   // ------------------------ Row Renderers ------------------------
   const renderOngoingRow = (audit: Audit) => (
-    <TableRow key={audit.id}>
-      <TableCell className="text-gray-500 text-xs px-4">
+    <TableRow
+      key={audit.id}
+      className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors duration-150"
+    >
+      <TableCell className="text-gray-700 dark:text-gray-300 text-sm font-semibold px-5 py-4 border-r border-gray-200 dark:border-white/10">
         {audit.audit_number}
       </TableCell>
-      <TableCell className="px-5 py-4">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
         <div className="text-sm">
-          <div className="font-medium">
+          <div className="font-semibold text-gray-800 dark:text-gray-100">
             {audit.auditor?.first_name} {audit.auditor?.last_name}
           </div>
-          <div className="text-gray-500 text-xs">{audit.auditor?.email}</div>
+          <div className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+            {audit.auditor?.email}
+          </div>
         </div>
       </TableCell>
-      <TableCell className="px-5 py-4">
-        <div className="text-sm">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
+        <div className="text-sm space-y-1">
           {audit.auditees?.map((email, i) => (
-            <div key={i} className="text-gray-500 text-xs">
+            <div key={i} className="text-gray-600 dark:text-gray-300 text-xs">
               {email}
             </div>
           ))}
         </div>
       </TableCell>
-      <TableCell className="text-sm px-4 py-3">{audit.plant || "-"}</TableCell>
-      <TableCell className="text-sm px-4 py-3">{audit.sector || "-"}</TableCell>
-      <TableCell className="text-xs px-4 py-3">
+      <TableCell className="text-sm px-5 py-4 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
+        {audit.plant || "-"}
+      </TableCell>
+      <TableCell className="text-sm px-5 py-4 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
+        {audit.sector || "-"}
+      </TableCell>
+      <TableCell className="text-xs px-5 py-4 text-gray-600 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
         {audit.planned_start_date || "-"}
       </TableCell>
-      <TableCell className="text-xs px-4 py-3">
+      <TableCell className="text-xs px-5 py-4 text-gray-600 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
         {audit.planned_end_date || "-"}
       </TableCell>
-      <TableCell className="px-4 py-3">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
         <Badge size="sm" color={badgeColorForStatus(audit.status)}>
           {displayStatus(audit.status)}
         </Badge>
       </TableCell>
-      <TableCell className="px-4 py-3">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
         <Badge size="sm" color={audit.event_created ? "success" : "light"}>
           {audit.event_created ? "Yes" : "No"}
         </Badge>
       </TableCell>
-      <TableCell className="px-4 py-3">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
         <button
           disabled={user?.email !== audit?.auditor?.email}
           onClick={() =>
             user?.email === audit?.auditor?.email && onReschedule(audit)
           }
-          className={`rounded-full text-white text-xs font-medium px-3 py-1 transition
+          className={`rounded-lg text-white text-xs font-semibold px-4 py-2 transition-all duration-200 shadow-sm
             ${
               user?.email === audit?.auditor?.email
-                ? "bg-yellow-500 hover:bg-yellow-600"
-                : "bg-gray-400 cursor-not-allowed"
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 hover:shadow-md transform hover:scale-105"
+                : "bg-gray-300 dark:bg-gray-600 cursor-not-allowed opacity-60"
             }`}
         >
           Reschedule
         </button>
       </TableCell>
-      <TableCell className="px-4 py-3">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
         <button
           onClick={() => setHistoryAudit(audit)}
-          className="px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold hover:bg-purple-200 transition shadow-sm"
+          className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 text-white text-xs font-semibold hover:from-purple-600 hover:to-violet-600 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
         >
           History
         </button>
       </TableCell>
-      <TableCell className="px-4 py-3">
+      <TableCell className="px-5 py-4">
         <button
           onClick={() => setSelectedAudit(audit)}
-          className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-200 transition shadow-sm"
+          className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
         >
           View
         </button>
@@ -187,46 +196,67 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   );
 
   const renderCompletedRow = (audit: Audit) => (
-    <TableRow key={audit.id}>
-      <TableCell className="text-gray-500 text-xs px-4">
+    <TableRow
+      key={audit.id}
+      className="hover:bg-green-50/30 dark:hover:bg-green-900/10 transition-colors duration-150"
+    >
+      <TableCell className="text-gray-700 dark:text-gray-300 text-sm font-semibold px-5 py-4 border-r border-gray-200 dark:border-white/10">
         {audit.audit_number}
       </TableCell>
-      <TableCell className="px-5 py-4">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
         <div className="text-sm">
-          <div className="font-medium">
+          <div className="font-semibold text-gray-800 dark:text-gray-100">
             {audit.auditor?.first_name} {audit.auditor?.last_name}
           </div>
-          <div className="text-gray-500 text-xs">{audit.auditor?.email}</div>
+          <div className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+            {audit.auditor?.email}
+          </div>
         </div>
       </TableCell>
-      <TableCell className="px-5 py-4">
-        <div className="text-sm">
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
+        <div className="text-sm space-y-1">
           {audit.auditees?.map((email, i) => (
-            <div key={i} className="text-gray-500 text-xs">
+            <div key={i} className="text-gray-600 dark:text-gray-300 text-xs">
               {email}
             </div>
           ))}
         </div>
       </TableCell>
-      <TableCell className="text-sm px-4 py-3">{audit.plant || "-"}</TableCell>
-      <TableCell className="text-sm px-4 py-3">{audit.sector || "-"}</TableCell>
-      <TableCell className="text-xs px-4 py-3">
+      <TableCell className="text-sm px-5 py-4 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
+        {audit.plant || "-"}
+      </TableCell>
+      <TableCell className="text-sm px-5 py-4 text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
+        {audit.sector || "-"}
+      </TableCell>
+      <TableCell className="text-xs px-5 py-4 text-gray-600 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
         {audit.planned_start_date || "-"}
       </TableCell>
-      <TableCell className="text-xs px-4 py-3">
+      <TableCell className="text-xs px-5 py-4 text-gray-600 dark:text-gray-300 border-r border-gray-200 dark:border-white/10">
         {audit.planned_end_date || "-"}
       </TableCell>
-      <TableCell className="px-4 py-3 font-semibold text-green-600">
-        {audit.finalScore ?? "-"}
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
+        <div className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-300 dark:border-green-700">
+          <span className="font-bold text-green-700 dark:text-green-300 text-sm">
+            {audit.finalScore ?? "-"}
+          </span>
+        </div>
       </TableCell>
-      <TableCell className="text-xs px-4 py-3 font-semibold text-green-600">
-        {audit.weak_points || "-"}
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
+        <div className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 border border-emerald-300 dark:border-emerald-700">
+          <span className="font-semibold text-emerald-700 dark:text-emerald-300 text-xs">
+            {audit.strong_points || "-"}
+          </span>
+        </div>
       </TableCell>
-      <TableCell className="text-xs px-4 py-3 font-semibold text-green-600">
-        {audit.strong_points || "-"}
+      <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
+        <div className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 border border-red-300 dark:border-red-700">
+          <span className="font-semibold text-red-700 dark:text-red-300 text-xs">
+            {audit.weak_points || "-"}
+          </span>
+        </div>
       </TableCell>
-      <TableCell className="px-4 py-3">
-        <button className="rounded-lg bg-yellow-400 text-white text-xs font-small hover:bg-yellow-700 transition">
+      <TableCell className="px-5 py-4">
+        <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-xs font-semibold hover:from-indigo-600 hover:to-blue-600 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105">
           Generate Report
         </button>
       </TableCell>
@@ -236,16 +266,29 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   return (
     <div className="space-y-6">
       {/* -------------------- ONGOING AUDITS -------------------- */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]">
+      <div className="overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-white/20 bg-white dark:bg-white/[0.03] shadow-lg shadow-gray-200/50 dark:shadow-none">
+        {/* <div className="bg-gradient-to-r bg-blue-800 px-6 py-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-3">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm">
+              <span className="text-sm">{ongoingAudits.length}</span>
+            </span>
+            Ongoing Audits
+          </h2>
+        </div> */}
+
         <div className="max-w-full overflow-x-auto">
           <Table>
-            <TableHeader className="border-b bg-gray-50 dark:bg-zinc-900 dark:border-white/10">
+            <TableHeader className="border-b-2 border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800 dark:border-white/10">
               <TableRow>
-                {ONGOING_HEADERS.map((h) => (
+                {ONGOING_HEADERS.map((h, idx) => (
                   <TableCell
                     key={h}
                     isHeader
-                    className="text-sm px-5 py-3 font-medium text-gray-600 dark:text-gray-400"
+                    className={`text-sm px-5 py-4 font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide ${
+                      idx < ONGOING_HEADERS.length - 1
+                        ? "border-r border-gray-300 dark:border-white/20"
+                        : ""
+                    }`}
                   >
                     {h}
                   </TableCell>
@@ -253,36 +296,74 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-              {paginatedOngoing.map(renderOngoingRow)}
+            <TableBody className="divide-y-2 divide-gray-100 dark:divide-white/5">
+              {paginatedOngoing.length > 0 ? (
+                paginatedOngoing.map(renderOngoingRow)
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={ONGOING_HEADERS.length}
+                    className="text-center py-12"
+                  >
+                    <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                      <svg
+                        className="w-16 h-16 mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
+                      </svg>
+                      <p className="text-lg font-semibold">No ongoing audits</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
 
-        <Pagination
-          currentPage={ongoingPage}
-          totalPages={totalPagesOngoing}
-          pageSize={ongoingPageSize}
-          onPageChange={setOngoingPage}
-          onPageSizeChange={(size) => {
-            setOngoingPageSize(size);
-            setOngoingPage(1);
-          }}
-        />
+        {totalPagesOngoing > 0 && (
+          <div className="border-t-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-900/50">
+            <Pagination
+              currentPage={ongoingPage}
+              totalPages={totalPagesOngoing}
+              pageSize={ongoingPageSize}
+              onPageChange={setOngoingPage}
+              onPageSizeChange={(size) => {
+                setOngoingPageSize(size);
+                setOngoingPage(1);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* -------------------- COMPLETED AUDITS -------------------- */}
-      <div className="border border-gray-200 bg-white rounded-xl dark:bg-white/[0.03] dark:border-white/10">
+      <div className="border-2 border-gray-200 dark:border-white/20 bg-white rounded-2xl dark:bg-white/[0.03] shadow-lg shadow-gray-200/50 dark:shadow-none overflow-hidden">
         <button
           onClick={() => setShowCompleted(!showCompleted)}
-          className="w-full flex items-center justify-between px-6 py-4 font-semibold text-gray-700 dark:text-gray-200"
+          className="w-full flex items-center justify-between px-6 py-5 font-bold text-gray-700 dark:text-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 transition-all duration-200"
         >
-          <span>Completed Audits ({completedAudits.length})</span>
+          <span className="flex items-center gap-3 text-lg">
+            <span className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-md">
+              <span className="text-sm font-bold">
+                {completedAudits.length}
+              </span>
+            </span>
+            Completed Audits
+          </span>
           <motion.div
             animate={{ rotate: showCompleted ? 180 : 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-sm"
           >
-            <ChevronDownIcon className="h-5 w-5" />
+            <ChevronDownIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
           </motion.div>
         </button>
 
@@ -292,18 +373,22 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              className="overflow-hidden border-t dark:border-white/10"
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden border-t-2 border-gray-200 dark:border-white/10"
             >
               <div className="max-w-full overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-gray-50 dark:bg-zinc-900 border-b dark:border-white/10">
+                  <TableHeader className="bg-gradient-to-b from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800 border-b-2 border-gray-200 dark:border-white/10">
                     <TableRow>
-                      {COMPLETED_HEADERS.map((h) => (
+                      {COMPLETED_HEADERS.map((h, idx) => (
                         <TableCell
                           key={h}
                           isHeader
-                          className="text-sm px-5 py-3 font-medium text-gray-600 dark:text-gray-400"
+                          className={`text-sm px-5 py-4 font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide ${
+                            idx < COMPLETED_HEADERS.length - 1
+                              ? "border-r border-gray-300 dark:border-white/20"
+                              : ""
+                          }`}
                         >
                           {h}
                         </TableCell>
@@ -311,21 +396,53 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                    {paginatedCompleted.map(renderCompletedRow)}
+                  <TableBody className="divide-y-2 divide-gray-100 dark:divide-white/5">
+                    {paginatedCompleted.length > 0 ? (
+                      paginatedCompleted.map(renderCompletedRow)
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={COMPLETED_HEADERS.length}
+                          className="text-center py-12"
+                        >
+                          <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
+                            <svg
+                              className="w-16 h-16 mb-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <p className="text-lg font-semibold">
+                              No completed audits
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
 
-                <Pagination
-                  currentPage={completedPage}
-                  totalPages={totalPagesCompleted}
-                  pageSize={completedPageSize}
-                  onPageChange={setCompletedPage}
-                  onPageSizeChange={(size) => {
-                    setCompletedPageSize(size);
-                    setCompletedPage(1);
-                  }}
-                />
+                {totalPagesCompleted > 0 && (
+                  <div className="border-t-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-zinc-900/50">
+                    <Pagination
+                      currentPage={completedPage}
+                      totalPages={totalPagesCompleted}
+                      pageSize={completedPageSize}
+                      onPageChange={setCompletedPage}
+                      onPageSizeChange={(size) => {
+                        setCompletedPageSize(size);
+                        setCompletedPage(1);
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
