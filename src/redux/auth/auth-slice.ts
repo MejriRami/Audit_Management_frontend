@@ -22,6 +22,7 @@ const authSlice = createSlice({
       state.token = null;
     },
     loginSuccess(state, action) {
+      console.log('Login Success Payload:', action.payload);
       state.isAuthenticated = true;
       state.toast='Email et mot de passe sont valides';
       state.token = action.payload.access_token;
