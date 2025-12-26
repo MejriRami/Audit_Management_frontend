@@ -160,3 +160,41 @@ export interface Question {
   changed_by: string | null;
   created_at: string;
 }
+
+
+export interface NotificationItem {  
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  created_at: string;
+  metadata?: {
+    car_id?: number;
+    audit_id?: number;
+    audit_number?: string;
+    submitted_by?: string;
+    submitted_at?: string;
+    plant?: string;
+    sector?: string;
+  };
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationItem[];
+  unread_count: number;
+}
+
+export type NotificationEventType = 
+  | 'connected' 
+  | 'notification' 
+  | 'error' 
+  | 'keepalive';
+
+export interface SSEEvent {
+  event: NotificationEventType;
+  data: any;
+  id?: number;
+  timestamp: string;
+}
