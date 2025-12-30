@@ -348,7 +348,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         });
 
         // Automatically send email after successful report generation
-        await sendEmailAutomatically(audit);
+        // await sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }

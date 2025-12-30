@@ -7,6 +7,7 @@ export interface QuestionnaireState {
     success: boolean;
     error: boolean;
     toast: string;
+    loading: boolean;
 }
 
 export interface Questionnaire {
