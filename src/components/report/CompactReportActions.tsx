@@ -70,6 +70,41 @@ export default function CompactReportActions({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+        {/* ✅ NEW: Regenerate Button - Only show when report exists */}
+        {reportExists && (
+          <Tooltip
+            text={isGenerating ? "Regenerating..." : "Regenerate Report"}
+            show={hoveredButton === "regenerate"}
+          >
+            <motion.button
+              whileHover={{ scale: isGenerating ? 1 : 1.1 }}
+              whileTap={{ scale: isGenerating ? 1 : 0.9 }}
+              onHoverStart={() =>
+                !isGenerating && setHoveredButton("regenerate")
+              }
+              onHoverEnd={() => setHoveredButton(null)}
+              onClick={onGenerate}
+              disabled={isGenerating}
+              className={`relative p-2.5 rounded-lg transition-all ${
+                isGenerating
+                  ? "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
+                  : "bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+              }`}
+            >
+              {isGenerating ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <ArrowPathIcon className="w-5 h-5 text-white" />
+                </motion.div>
+              ) : (
+                <ArrowPathIcon className="w-5 h-5 text-white" />
+              )}
+            </motion.button>
+          </Tooltip>
+        )}
+
         {/* Preview Button */}
         <Tooltip text="Preview PDF" show={hoveredButton === "preview"}>
           <motion.button
