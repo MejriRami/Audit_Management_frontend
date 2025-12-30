@@ -238,8 +238,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   }, [showOngoing, ongoingAudits.length]);
 
   // ------------------------ Report Actions ------------------------
-
-  // ------------------------ Report Actions ------------------------
   const handlePreviewPDF = async (audit: Audit) => {
     if (!canHaveReport(audit)) {
       toast.error("No report available until the audit is executed.", {
@@ -347,8 +345,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           },
         });
 
-        // Automatically send email after successful report generation
-        // await sendEmailAutomatically(audit);
+        // ✅ NEW: Automatically send email after successful report generation
+        await sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }
