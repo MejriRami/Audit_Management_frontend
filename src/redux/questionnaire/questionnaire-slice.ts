@@ -7,7 +7,8 @@ const initialState : QuestionnaireState    = {
     questionnaire: null,
     success : false,
     error: false,
-    toast: ''
+    toast: '',
+    loading: false,
 }
 
 const questionnaireSlice = createSlice({
@@ -43,18 +44,22 @@ const questionnaireSlice = createSlice({
     addQuestionnaireRequest(state) {
       state.success = false;
       state.error = false;
+      state.loading = true;
+      state.toast = "";
     },
     addQuestionnaireSuccess(state, action) {
       console.log(action.payload.questionnaire);
+      state.loading = false; 
       state.questionnairesList.push(action.payload.questionnaire);
       state.success = true;
       state.error = false;
       state.toast = "Questionnaire added successfully";
     },
-    addQuestionnaireFailure(state) {
+    addQuestionnaireFailure(state,action) {
+      state.loading = false; 
       state.success = false;
       state.error = true;
-      state.toast = "Failed to add Questionnaire";
+      state.toast = action.payload?.message || "Failed to add Questionnaire";
     },
     deleteQuestionnaireRequest(state) {
       state.success = false;

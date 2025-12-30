@@ -8,7 +8,10 @@ import { TimeIcon } from "../../icons";
 import { Questionnaire } from "../../redux/questionnaire/questionnaire-slice-types";
 import QuestionnaireInitialForm from "../initialForms/QuestionnaireInitialForm";
 import { useEffect } from "react";
-import { getQuestionnaireById, updateQuestionnaire } from "../../redux/questionnaire/questionnaire";
+import {
+  getQuestionnaireById,
+  updateQuestionnaire,
+} from "../../redux/questionnaire/questionnaire";
 import { useDispatch, useSelector } from "react-redux";
 import MultiSelectAuditors from "../form/MultiSelectAuditors";
 import Button from "../ui/button/Button";
@@ -19,7 +22,7 @@ interface EditQuestionnaireModalProps {
   selectedQuestionnaire: Questionnaire | null;
   frameworkOptions: { label: string; value: string }[];
   auditTypeOptions: { label: string; value: string }[];
-  auditorOptions: { label: string; value: string;}[];
+  auditorOptions: { label: string; value: string }[];
 }
 
 export default function EditQuestionnaireModal({
@@ -28,18 +31,28 @@ export default function EditQuestionnaireModal({
   selectedQuestionnaire,
   frameworkOptions,
   auditTypeOptions,
-  auditorOptions
+  auditorOptions,
 }: EditQuestionnaireModalProps) {
   const dispatch = useDispatch();
-  const { formQuestionnaire, handleInputValue, handleSelectChange, setFormQuestionnaire, handleMultiSelectInput } = QuestionnaireInitialForm();
+  const {
+    formQuestionnaire,
+    handleInputValue,
+    handleSelectChange,
+    setFormQuestionnaire,
+    handleMultiSelectInput,
+  } = QuestionnaireInitialForm();
   const { questionnaire } = useSelector((state: any) => state.questionnaire);
+  // Status options - only 2 statuses
+  const statusOptions = [
+    { label: "Ready to Use", value: "Ready to Use" },
+    { label: "Under Revision", value: "Under Revision" },
+  ];
 
-  if (!selectedQuestionnaire) 
-    return null;
+  if (!selectedQuestionnaire) return null;
 
   useEffect(() => {
-    if(isOpen && selectedQuestionnaire?.id) {
-      getQuestionnaireById(selectedQuestionnaire.id, dispatch)
+    if (isOpen && selectedQuestionnaire?.id) {
+      getQuestionnaireById(selectedQuestionnaire.id, dispatch);
     }
   }, [selectedQuestionnaire?.id, dispatch, setFormQuestionnaire]);
 
@@ -47,22 +60,26 @@ export default function EditQuestionnaireModal({
     if (questionnaire) {
       setFormQuestionnaire(questionnaire);
     }
-  },[questionnaire, setFormQuestionnaire]);
+  }, [questionnaire, setFormQuestionnaire]);
 
- const handleUpdateQuestionnaire = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateQuestionnaire = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Implement the update logic here
     const adjustedFormQuestionnaire = {
       ...formQuestionnaire,
-      target_duration: formQuestionnaire.target_duration.endsWith(':00') ? 
-        formQuestionnaire.target_duration 
+      target_duration: formQuestionnaire.target_duration.endsWith(":00")
+        ? formQuestionnaire.target_duration
         : formQuestionnaire.target_duration + ":00",
-      auditor_emails: formQuestionnaire.auditors.map(a => a.email)
+      auditor_emails: formQuestionnaire.auditors.map((a) => a.email),
     };
     console.log(adjustedFormQuestionnaire);
-    updateQuestionnaire(formQuestionnaire?.id, adjustedFormQuestionnaire, dispatch);
+    updateQuestionnaire(
+      formQuestionnaire?.id,
+      adjustedFormQuestionnaire,
+      dispatch
+    );
     onClose();
-  }
+  };
 
   return (
     <Modal
@@ -70,7 +87,7 @@ export default function EditQuestionnaireModal({
       onClose={onClose}
       className="max-w-[700px] p-6 lg:p-10"
     >
-      <form 
+      <form
         className="flex flex-col px-2 overflow-y-auto custom-scrollbar"
         onSubmit={handleUpdateQuestionnaire}
       >
@@ -107,12 +124,26 @@ export default function EditQuestionnaireModal({
             </div>
 
             {/* STATUS */}
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <Label>Status</Label>
               <Input
                 value={formQuestionnaire?.status}
                 onChange={handleInputValue}
                 name="status"
+              />
+            </div> */}
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                Status
+              </Label>
+              <Select
+                options={statusOptions}
+                defaultValue={formQuestionnaire?.status}
+                onChange={(value: string) =>
+                  handleSelectChange("status", value)
+                }
+                className="h-11 border-gray-300 dark:border-gray-600 rounded-lg focus:border-[#0073ea] focus:ring-1 focus:ring-[#0073ea]"
               />
             </div>
 
@@ -167,9 +198,16 @@ export default function EditQuestionnaireModal({
             <div className="space-y-4 col-span-3">
               <MultiSelectAuditors
                 label="Auditors"
-                options={auditorOptions.map(a => ({ value: String(a.value), text: a.label }))}
-                defaultSelected={formQuestionnaire?.auditors?.map(a => String(a.id)) ?? []} // controlled
-                onChange={(selectedIds) => handleMultiSelectInput("auditors", selectedIds)}
+                options={auditorOptions.map((a) => ({
+                  value: String(a.value),
+                  text: a.label,
+                }))}
+                defaultSelected={
+                  formQuestionnaire?.auditors?.map((a) => String(a.id)) ?? []
+                } // controlled
+                onChange={(selectedIds) =>
+                  handleMultiSelectInput("auditors", selectedIds)
+                }
               />
             </div>
           </div>
@@ -184,9 +222,7 @@ export default function EditQuestionnaireModal({
             Close
           </button>
 
-          <Button
-            className="px-4 py-2 rounded text-white bg-gradient-to-r from-orange-400 to-orange-500"
-          >
+          <Button className="px-4 py-2 rounded text-white bg-gradient-to-r from-orange-400 to-orange-500">
             Update Questionnaire
           </Button>
         </div>

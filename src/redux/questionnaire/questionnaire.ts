@@ -60,20 +60,23 @@ export const addQuestionnaire: AddQuestionnaire = async (data, dispatch) => {
   const url = `/questionnaire/add`;
 
   try {
-    let response = await axiosInstance.post(url, data);
-    console.log(response.data);
+    const response = await axiosInstance.post(url, data);
     dispatch(addQuestionnaireSuccess(response.data));
     return true;
   } catch (error: any) {
-    const { status, data } = error.response;
-    dispatch(addQuestionnaireFailure(data));
-    if (status === 401) {
-      logUserOut(dispatch);
-    }
-  }
+    const status = error?.response?.status;
+    const resp = error?.response?.data;
 
-  return false;
+    const message =
+      resp?.detail || resp?.message || "Failed to add Questionnaire";
+
+    dispatch(addQuestionnaireFailure({ message }));
+
+    if (status === 401) logUserOut(dispatch);
+    return false;
+  }
 };
+
 
 export const deleteQuestionnaire: DeleteQuestionnaire = async (questionnaire_id, dispatch) => {
   dispatch(deleteQuestionnaireRequest());

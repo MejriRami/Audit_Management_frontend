@@ -8,7 +8,7 @@ const QuestionnaireInitialForm = () => {
     id: 0,
     name: "",
     version: 1,
-    status: "under revision",
+    status: "Under Revision",
     target_duration: "",
     score_calculation: "",
     guideline_file: "",
@@ -34,7 +34,7 @@ const QuestionnaireInitialForm = () => {
   function handleSelectChange(name: string, value: any) {
     setFormQuestionnaire((prev) => ({
       ...prev,
-      [name]: parseInt(value),
+      [name]: name === "status" ? value : Number(value),
     }));
   }
 
