@@ -17,41 +17,78 @@ export type CorrectiveActionStatus =
   | "Accepted"
   | "Rejected"
   | "Completed";
-// -------------------- Questions & Findings --------------------
+
+// -------------------- Questionnaire --------------------
+export interface Questionnaire {
+  id: number;
+  name: string;
+  type: string;
+}
+
+// -------------------- Document --------------------
+export interface Document {
+  id: number;
+  filename?: string;
+  file_url: string;
+  mimetype?: string;
+  size?: number;
+  uploaded_at?: string;
+}
+
+// -------------------- Question Response --------------------
 export interface QuestionResponse {
   id: number;
   description: string;
-  criticality?: string;
+  chapter?: string;
+  criticality: string; // "Critical" | "High" | "Medium" | "Low" | "N/A"
+  value?: number;
   response?: string;
 }
 
+// -------------------- Finding --------------------
 export interface Finding {
   question_id: number;
-  finding_type: string;
+  finding_type: string; // "Non-Conformity" | "Opportunity for Improvement" | "Conformity" | "Not Evaluated"
+  finding_text?: string;
   corrective_action?: string;
-  corrective_action_status?: CorrectiveActionStatus
+  corrective_action_status?: string; // "pending" | "in_progress" | "submitted" | "accepted" | "rejected" | "completed"
+  corrective_action_type?: string; // "Escalated" | "Overdue" | "Pending Review" | "In Progress" | "Awaiting Approval" | "Approved" | "Rejected" | "Completed" | "Standard"
 }
+
 
 // -------------------- Audit --------------------
 export interface Audit {
-  audit_number: string;
-  event_created: boolean;
   id: number;
-  questionnaire?: {  name: string};
+  audit_number: string;
+  status: string;
+  planned_start_date: string;
+  planned_end_date: string;
+  actual_start_date?: string;
+  actual_end_date?: string;
   plant?: string;
-  sector?:string;
-  status?: string;
+  sector?: string;
+  total_score?: number; // Changed from finalScore
+  weak_points?: string;
+  strong_points?: string;
+  event_created: boolean;
   finalScore?: number;
-  strong_points?:string;
-  weak_points?:string;
+  // Relationships
   auditor?: User;
-  auditees?:string[];
-  sessions?: { start_time: string; end_time: string }[];
-  questions_and_responses?: QuestionResponse[];
-  findings?: Finding[];
-  planned_start_date?:string;
-  planned_end_date?:string;
+  questionnaire?: Questionnaire;
+  auditees: string[]; // Array of email strings
+  
+  // Audit content
+  questions_and_responses: QuestionResponse[];
+  findings: Finding[];
 }
+
+// -------------------- Questionnaire --------------------
+export interface Questionnaire {
+  id: number;
+  name: string;
+}
+
+
 
 // -------------------- Corrective Actions Table --------------------
 export interface CorrectiveAction {
