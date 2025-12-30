@@ -239,6 +239,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   // ------------------------ Report Actions ------------------------
 
+  // ------------------------ Report Actions ------------------------
   const handlePreviewPDF = async (audit: Audit) => {
     if (!canHaveReport(audit)) {
       toast.error("No report available until the audit is executed.", {
@@ -308,7 +309,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     }
 
     const auditId = audit.id;
-
     setReportStatus((prev) => ({
       ...prev,
       [auditId]: { generating: true, available: false },
@@ -346,12 +346,14 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             padding: "16px",
           },
         });
+
+        // Automatically send email after successful report generation
+        await sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }
     } catch (error: any) {
       console.error("Error generating report:", error);
-
       setReportStatus((prev) => ({
         ...prev,
         [auditId]: {
@@ -373,6 +375,83 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           },
         }
       );
+    }
+  };
+
+  // ✅ NEW FUNCTION: Automatically send email after report generation
+  const sendEmailAutomatically = async (audit: Audit) => {
+    const auditId = audit.id;
+
+    // Get all auditees as recipients
+    const recipients = audit.auditees || [];
+
+    if (recipients.length === 0) {
+      toast.error("No recipients found for this audit", {
+        style: {
+          borderRadius: "16px",
+          background: "#dc2626",
+          color: "#fff",
+          padding: "16px",
+        },
+      });
+      return;
+    }
+
+    setSendingEmails((prev) => ({ ...prev, [auditId]: true }));
+
+    const emailToast = toast.loading(
+      `📧 Sending report to ${recipients.length + 1} recipient(s)...`,
+      {
+        style: {
+          borderRadius: "16px",
+          background: "#1e293b",
+          color: "#fff",
+          padding: "16px",
+        },
+      }
+    );
+
+    try {
+      const response = await axios.post(`/api/reports/${auditId}/send-email`, {
+        recipients,
+        include_auditor: true, // Always include auditor in automatic emails
+      });
+
+      if (response.data.success) {
+        setEmailsSent((prev) => ({ ...prev, [auditId]: true }));
+        toast.success(
+          `✅ Report sent successfully to ${
+            response.data.sent_to?.length || 0
+          } recipient(s)!`,
+          {
+            id: emailToast,
+            style: {
+              borderRadius: "16px",
+              background: "#059669",
+              color: "#fff",
+              padding: "16px",
+            },
+          }
+        );
+      } else {
+        throw new Error("Failed to send email");
+      }
+    } catch (error: any) {
+      console.error("Error sending email:", error);
+      toast.error(
+        error.response?.data?.detail || "❌ Failed to send report via email",
+        {
+          id: emailToast,
+          style: {
+            borderRadius: "16px",
+            background: "#dc2626",
+            color: "#fff",
+            padding: "16px",
+          },
+        }
+      );
+    } finally {
+      setSendingEmails((prev) => ({ ...prev, [auditId]: false }));
     }
   };
 
@@ -425,6 +504,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       });
       return;
     }
+
     setCurrentEmailAudit(audit);
     setEmailModalOpen(true);
   };
@@ -436,7 +516,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     if (!currentEmailAudit) return;
 
     const auditId = currentEmailAudit.id;
-
     setSendingEmails((prev) => ({ ...prev, [auditId]: true }));
 
     const loadingToast = toast.loading(
@@ -461,7 +540,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
       if (response.data.success) {
         setEmailsSent((prev) => ({ ...prev, [auditId]: true }));
-
         toast.success(
           `✅ Report sent successfully to ${
             response.data.sent_to?.length || 0
@@ -484,7 +562,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       }
     } catch (error: any) {
       console.error("Error sending email:", error);
-
       toast.error(
         error.response?.data?.detail || "❌ Failed to send report via email",
         {
@@ -501,7 +578,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       setSendingEmails((prev) => ({ ...prev, [auditId]: false }));
     }
   };
-
   // ------------------------ Headers ------------------------
   const ONGOING_HEADERS: string[] = [
     "#Audit Identifier",
