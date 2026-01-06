@@ -10,7 +10,6 @@ import Badge from "../../ui/badge/Badge";
 import AuditDetailsModal from "../../modals/AuditDetailsModal";
 import RescheduleAuditModal from "../../modals/RescheduleModal";
 import AuditHistoryModal from "../../modals/AuditHistoryModal";
-import { Audit } from "../../../types";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
@@ -31,6 +30,7 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
+import { Audit } from "../../../redux/audit/audit-types";
 interface TableAuditsProps {
   audits: Audit[];
 }

@@ -6,7 +6,7 @@ export interface Audit {
   audit_number: string;
   event_created: boolean;
   id: number;
-  questionnaire?: { name: string };
+  questionnaire?: { id:number,name: string ,type?:string};
   plant?: string;
   sector?: string;
   status?: string;
@@ -23,6 +23,11 @@ export interface Audit {
   findings?: Finding[];
   planned_start_date?: string;
   planned_end_date?: string;
+  actual_start_date?: string;
+  actual_end_date?: string;
+  total_score?: number; 
+  weak_points?: string;
+  strong_points?: string;
 }
 
 export interface AuditPlanCreate {

@@ -6,7 +6,7 @@ import {
   UserGroupIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Audit } from "../../types";
+import { Audit } from "../../redux/audit/audit-types";
 
 interface SendReportEmailModalProps {
   isOpen: boolean;
