@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { format } from "date-fns";
-import { Audit } from "../../types";
 import { Modal } from "../ui/modal";
 import { useSelector } from "react-redux";
 import { fetchAuditHistory } from "../../redux/audit/audit-slice";
 import { useAppDispatch } from "../../redux/hooks";
 import { RootState } from "../../redux/store";
+import { Audit } from "../../redux/audit/audit-types";
 
 interface AuditHistoryModalProps {
   audit: Audit;

@@ -46,9 +46,11 @@ export const selectFilteredAudits = createSelector(
       const matchesQuestionnaire =
         !f.questionnaire || a.questionnaire?.name === f.questionnaire;
 
-      const auditorEmail =
-        (a.auditor as any)?.email || (a.auditor as any)?.username;
-      const matchesAuditor = !f.auditor || auditorEmail === f.auditor;
+      const auditorEmail = a.auditor?.email;
+
+const matchesAuditor =
+  !f.auditor || auditorEmail === f.auditor;
+
 
       const matchesAuditee =
         !f.auditee || a.auditees?.some((e) => e === f.auditee);
@@ -91,8 +93,10 @@ export const selectUniqueAuditors = createSelector(
   (audits) => {
     const set = new Set<string>();
     audits.forEach((a) => {
-      const email = (a.auditor as any)?.email || (a.auditor as any)?.username;
-      if (email) set.add(email);
+      const email = a.auditor?.email;
+      if (email) {
+        set.add(email);
+      }
     });
     return Array.from(set);
   }

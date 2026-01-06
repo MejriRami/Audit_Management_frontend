@@ -20,7 +20,7 @@ export type CorrectiveActionStatus =
 
 // -------------------- Questionnaire --------------------
 export interface Questionnaire {
-  id: number;
+  id?: number;
   name: string;
   type: string;
 }
@@ -82,11 +82,7 @@ export interface Audit {
   findings: Finding[];
 }
 
-// -------------------- Questionnaire --------------------
-export interface Questionnaire {
-  id: number;
-  name: string;
-}
+
 
 
 
@@ -140,37 +136,6 @@ export interface Framework {
   code: string;
 }
 
-export interface QuestionnaireList {
-  id: number;
-  name: string;
-}
-export interface Questionnaire {
-  id: number;
-  name: string;
-  version: number;
-  status: string;
-  target_duration: string; // "HH:MM:SS"
-  score_calculation?: string;
-  guideline_file?: string;
-  type: string; // audit type value
-  framework_id?: string; // dropdown value
-  framework?: {id:string,label:string}; // display code
-  auditors?: Auditor[];
-  questions: Question[];
-}
-
-export interface QuestionnaireUpdate {
-  id: number;
-  name?: string;
-  framework_id?: number; // number
-  type?: string;
-  status?: string;
-  target_duration?: string; // "HH:MM:SS"
-  guideline_file?: string;
-  auditors_emails?: Auditor[];
-  score_calculation?: string;
-  version?: number;
-}
 
 export interface Auditor {
   email: string;

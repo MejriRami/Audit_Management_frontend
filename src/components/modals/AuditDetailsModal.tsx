@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Audit } from "../../types";
 import {
   XMarkIcon,
   ChevronDownIcon,
   ChevronUpIcon,
 } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
+import { Audit } from "../../redux/audit/audit-types";
 
 // Props interface
 interface AuditDetailsModalProps {
