@@ -25,7 +25,7 @@ import {
 import { apiUploadFile } from "../../redux/audit/audit";
 
 // ==================== TYPES ====================
-type AuditValue = "" | -1 | 0 | 3 | 5 | 8 | 10;
+type AuditValue = "" | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 8 | 10;
 
 interface AuditItem {
   row: number;
@@ -56,10 +56,20 @@ interface AuditSummary {
   endTime: string;
   strongPoints: string;
   weakPoints: string;
+  questionnaireName: string;
 }
 
-// ==================== CONSTANTS ====================
-const VALUE_OPTIONS: ValueOption[] = [
+// ==================== SCORING SYSTEMS ====================
+const IATF_VALUE_OPTIONS: ValueOption[] = [
+  { value: -1, label: "Optional", color: "text-yellow-700" },
+  { value: 1, label: "1 - Poor", color: "text-red-700" },
+  { value: 2, label: "2 - Weak", color: "text-orange-700" },
+  { value: 3, label: "3 - Acceptable", color: "text-amber-600" },
+  { value: 4, label: "4 - Good", color: "text-emerald-600" },
+  { value: 5, label: "5 - Excellent", color: "text-emerald-700" },
+];
+
+const STANDARD_VALUE_OPTIONS: ValueOption[] = [
   { value: -1, label: "Optional", color: "text-yellow-700" },
   { value: 0, label: "0 - Inexistant", color: "text-red-700" },
   { value: 3, label: "3 - Not sufficient", color: "text-orange-700" },
@@ -69,11 +79,21 @@ const VALUE_OPTIONS: ValueOption[] = [
 ];
 
 // ==================== UTILITIES ====================
-const needsDetails = (v: AuditValue): boolean => v !== "" && v !== -1 && v <= 5;
+const getValueOptions = (questionnaireName: string): ValueOption[] => {
+  const name = questionnaireName.toLowerCase();
+  return name.includes("iatf") || name.includes("plant manager")
+    ? IATF_VALUE_OPTIONS
+    : STANDARD_VALUE_OPTIONS;
+};
 
-const getValueColor = (v: AuditValue): string => {
+const needsDetails = (v: AuditValue, isIATF: boolean): boolean => {
+  if (v === "" || v === -1) return false;
+  return isIATF ? v <= 3 : v <= 5;
+};
+
+const getValueColor = (v: AuditValue, valueOptions: ValueOption[]): string => {
   if (v === "") return "text-slate-700";
-  return VALUE_OPTIONS.find((o) => o.value === v)?.color || "text-slate-700";
+  return valueOptions.find((o) => o.value === v)?.color || "text-slate-700";
 };
 
 const getCriticalClass = (critical: number): string => {
@@ -82,11 +102,14 @@ const getCriticalClass = (critical: number): string => {
   return "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200";
 };
 
-const validateItem = (item: AuditItem): AuditItem["errors"] => {
+const validateItem = (
+  item: AuditItem,
+  isIATF: boolean
+): AuditItem["errors"] => {
   const errors: AuditItem["errors"] = {};
   if (item.value === "") errors.value = "Required";
 
-  if (needsDetails(item.value)) {
+  if (needsDetails(item.value, isIATF)) {
     if (!item.findings.trim()) errors.findings = "Required";
     if (item.requestCAR && !item.carReason.trim()) {
       errors.carReason = "Required for CAR request";
@@ -97,7 +120,6 @@ const validateItem = (item: AuditItem): AuditItem["errors"] => {
 
 // ==================== SUB-COMPONENTS ====================
 
-// Consolidated Header with Selection, Progress, and Summary
 const AuditHeader = ({
   onExport,
   canExport,
@@ -114,6 +136,8 @@ const AuditHeader = ({
   hasItems,
   summary,
   onSummaryChange,
+  isIATF,
+  questionnaireName,
 }: {
   onExport: () => void;
   canExport: boolean;
@@ -130,6 +154,8 @@ const AuditHeader = ({
   hasItems: boolean;
   summary: AuditSummary;
   onSummaryChange: (field: keyof AuditSummary, value: string) => void;
+  isIATF: boolean;
+  questionnaireName: string;
 }) => (
   <div>
     {/* Header Title */}
@@ -140,11 +166,8 @@ const AuditHeader = ({
         </div>
         <div>
           <h1 className="text-lg font-semibold text-slate-800">
-            Audit Execution — Standard
+            Audit Execution — {isIATF ? "IATF" : "Standard"}
           </h1>
-          <p className="text-xs text-slate-500">
-            Complete checklist with findings and evidence
-          </p>
         </div>
       </div>
 
@@ -158,7 +181,6 @@ const AuditHeader = ({
         Export CSV
       </button>
     </div>
-
     {/* Selection Panel */}
     <div className="p-6 bg-slate-50/50 border-b border-slate-200">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -210,24 +232,47 @@ const AuditHeader = ({
         </div>
       </div>
     </div>
-
-    {/* Audit Summary - Integrated in Header */}
+    {/* Audit Summary */}
     {hasItems && (
       <div className="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <FileText className="text-indigo-600" size={18} />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <FileText className="text-indigo-600" size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-slate-800">
+                Audit Summary
+              </h2>
+              <p className="text-xs text-slate-600">
+                Required before submission
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base font-semibold text-slate-800">
-              Audit Summary
-            </h2>
-            <p className="text-xs text-slate-600">Required before submission</p>
-          </div>
+
+          {/* Questionnaire Name Badge */}
+          {questionnaireName && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg">
+              <ClipboardList size={16} className="text-indigo-600" />
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-slate-700">
+                  {questionnaireName}
+                </span>
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded ${
+                    isIATF
+                      ? "bg-purple-100 text-purple-700"
+                      : "bg-blue-100 text-blue-700"
+                  }`}
+                >
+                  {isIATF ? "IATF (1-5)" : "Standard (0-10)"}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Audit Date */}
           <div>
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
               <Calendar size={14} className="text-slate-500" />
@@ -241,7 +286,6 @@ const AuditHeader = ({
             />
           </div>
 
-          {/* Start Time */}
           <div>
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
               <Clock size={14} className="text-slate-500" />
@@ -255,7 +299,6 @@ const AuditHeader = ({
             />
           </div>
 
-          {/* End Time */}
           <div>
             <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
               <Clock size={14} className="text-slate-500" />
@@ -269,10 +312,8 @@ const AuditHeader = ({
             />
           </div>
 
-          {/* Placeholder for alignment */}
           <div className="hidden lg:block"></div>
 
-          {/* Strong Points */}
           <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Strong Points
@@ -286,7 +327,6 @@ const AuditHeader = ({
             />
           </div>
 
-          {/* Weak Points */}
           <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Weak Points
@@ -337,7 +377,6 @@ const AuditHeader = ({
   </div>
 );
 
-// Evidence Upload Component
 const EvidenceUpload = ({
   evidence,
   previews,
@@ -393,10 +432,11 @@ const EvidenceUpload = ({
   </div>
 );
 
-// Audit Row Component
 const AuditRow = ({
   item,
   previews,
+  valueOptions,
+  isIATF,
   onUpdateField,
   onToggleCAR,
   onAddEvidence,
@@ -404,6 +444,8 @@ const AuditRow = ({
 }: {
   item: AuditItem;
   previews: Map<string, string>;
+  valueOptions: ValueOption[];
+  isIATF: boolean;
   onUpdateField: <K extends keyof AuditItem>(
     questionId: number,
     field: K,
@@ -414,6 +456,9 @@ const AuditRow = ({
   onRemoveEvidence: (questionId: number, idx: number) => void;
 }) => {
   const hasErrors = Object.keys(item.errors).length > 0;
+  const detailsRequired = needsDetails(item.value, isIATF);
+  const canRequestCAR =
+    item.value !== "" && item.value !== -1 && detailsRequired;
 
   return (
     <tr
@@ -421,7 +466,6 @@ const AuditRow = ({
         hasErrors ? "bg-red-50/40" : ""
       } ${item.requestCAR ? "bg-orange-50/40" : ""}`}
     >
-      {/* Row Number */}
       <td className="px-4 py-4 align-top">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-slate-200 transition-colors">
           <span className="text-sm font-semibold text-slate-700">
@@ -430,14 +474,12 @@ const AuditRow = ({
         </div>
       </td>
 
-      {/* Question */}
       <td className="px-4 py-4 align-top">
         <p className="text-sm text-slate-800 leading-relaxed">
           {item.question}
         </p>
       </td>
 
-      {/* Critical Value */}
       <td className="px-4 py-4 align-top text-center">
         <span
           className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold ${getCriticalClass(
@@ -448,7 +490,6 @@ const AuditRow = ({
         </span>
       </td>
 
-      {/* Value Selection */}
       <td className="px-4 py-4 align-top">
         <select
           value={item.value}
@@ -464,10 +505,10 @@ const AuditRow = ({
             item.errors?.value
               ? "border-red-400 bg-red-50"
               : "border-slate-300 bg-white hover:border-slate-400"
-          } ${getValueColor(item.value)} font-medium`}
+          } ${getValueColor(item.value, valueOptions)} font-medium`}
         >
           <option value="">Select value...</option>
-          {VALUE_OPTIONS.map((opt) => (
+          {valueOptions.map((opt) => (
             <option key={String(opt.value)} value={opt.value}>
               {opt.label}
             </option>
@@ -480,7 +521,6 @@ const AuditRow = ({
         )}
       </td>
 
-      {/* Findings */}
       <td className="px-4 py-4 align-top">
         <textarea
           value={item.findings}
@@ -489,9 +529,7 @@ const AuditRow = ({
           }
           rows={3}
           placeholder={
-            needsDetails(item.value)
-              ? "Required details..."
-              : "Optional notes..."
+            detailsRequired ? "Required details..." : "Optional notes..."
           }
           aria-invalid={!!item.errors?.findings}
           className={`w-full p-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
@@ -507,7 +545,6 @@ const AuditRow = ({
         )}
       </td>
 
-      {/* Evidence */}
       <td className="px-4 py-4 align-top">
         <EvidenceUpload
           evidence={item.evidence}
@@ -518,9 +555,8 @@ const AuditRow = ({
         />
       </td>
 
-      {/* CAR Reason */}
       <td className="px-4 py-4 align-top">
-        {item.value !== "" && item.value !== -1 && item.value <= 5 ? (
+        {canRequestCAR ? (
           <div className="space-y-3">
             <label className="flex items-center gap-2 cursor-pointer group/checkbox">
               <input
@@ -542,7 +578,7 @@ const AuditRow = ({
                     onUpdateField(item.questionId, "carReason", e.target.value)
                   }
                   rows={3}
-                  placeholder="Reason for CAR (required)..."
+                  placeholder="indicate the issue  (required)..."
                   aria-invalid={!!item.errors?.carReason}
                   className={`w-full p-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all ${
                     item.errors?.carReason
@@ -581,6 +617,7 @@ export default function AuditChecklistRefactored() {
   const [selectedPlannedAuditId, setSelectedPlannedAuditId] = useState<
     number | ""
   >("");
+  const [questionnaireName, setQuestionnaireName] = useState<string>("");
   const [items, setItems] = useState<AuditItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -591,6 +628,7 @@ export default function AuditChecklistRefactored() {
     endTime: "",
     strongPoints: "",
     weakPoints: "",
+    questionnaireName: "",
   });
 
   // Redux
@@ -605,12 +643,20 @@ export default function AuditChecklistRefactored() {
     [selectedAuditor]
   );
 
+  // Determine scoring system
+  const valueOptions = useMemo(
+    () => getValueOptions(questionnaireName),
+    [questionnaireName]
+  );
+  const isIATF = valueOptions === IATF_VALUE_OPTIONS;
+
   // Fetch pickable audits when auditor changes
   useEffect(() => {
     if (!auditorId) {
       setSelectedPlannedAuditId("");
       setItems([]);
       setSubmitted(false);
+      setQuestionnaireName("");
       return;
     }
 
@@ -618,6 +664,7 @@ export default function AuditChecklistRefactored() {
     setSelectedPlannedAuditId("");
     setItems([]);
     setSubmitted(false);
+    setQuestionnaireName("");
   }, [auditorId, dispatch]);
 
   // Handle audit selection
@@ -627,7 +674,16 @@ export default function AuditChecklistRefactored() {
 
     if (auditId === "") {
       setItems([]);
+      setQuestionnaireName("");
       return;
+    }
+
+    // Extract questionnaire name from selected audit
+    const selectedAudit = pickableAudits.find((a) => a.id === auditId);
+    if (selectedAudit) {
+      // Adjust these property names based on your actual data structure
+      const name = selectedAudit.questionnaire_name || "";
+      setQuestionnaireName(name);
     }
 
     const result = await dispatch(getAuditQuestions(auditId));
@@ -655,6 +711,7 @@ export default function AuditChecklistRefactored() {
       );
     } else {
       setItems([]);
+      setQuestionnaireName("");
       toast.error("Failed to load audit questions");
     }
   };
@@ -669,7 +726,6 @@ export default function AuditChecklistRefactored() {
         item.evidence.forEach((file) => {
           const key = `${item.questionId}-${file.name}-${file.size}`;
           stillUsed.add(key);
-
           const existing = prev.get(key);
           next.set(key, existing ?? URL.createObjectURL(file));
         });
@@ -713,7 +769,7 @@ export default function AuditChecklistRefactored() {
           if (
             newValue === "" ||
             newValue === -1 ||
-            (typeof newValue === "number" && newValue > 5)
+            !needsDetails(newValue, isIATF)
           ) {
             updated.requestCAR = false;
             updated.carReason = "";
@@ -777,7 +833,7 @@ export default function AuditChecklistRefactored() {
 
     const validated = items.map((item) => ({
       ...item,
-      errors: validateItem(item),
+      errors: validateItem(item, isIATF),
     }));
     setItems(validated);
 
@@ -805,12 +861,12 @@ export default function AuditChecklistRefactored() {
               };
             })
           );
-
           return {
             question_id: item.questionId,
             value: item.value === "" ? -1 : (item.value as number),
             finding_text: item.findings?.trim() ? item.findings.trim() : null,
             documents,
+            critical_value: item.critical,
             request_car: item.requestCAR,
             car_reason:
               item.requestCAR && item.carReason?.trim()
@@ -819,7 +875,6 @@ export default function AuditChecklistRefactored() {
           };
         })
       );
-
       const resultAction = await dispatch(
         executeAuditThunk({
           auditId: selectedPlannedAuditId,
@@ -833,7 +888,7 @@ export default function AuditChecklistRefactored() {
           },
         })
       );
-
+      console.log(resultAction);
       if (!executeAuditThunk.fulfilled.match(resultAction)) {
         toast.error(String(resultAction.payload || "Failed to execute audit"));
         setSubmitted(false);
@@ -854,12 +909,14 @@ export default function AuditChecklistRefactored() {
       setSubmitted(true);
       setSelectedPlannedAuditId("");
       setItems([]);
+      setQuestionnaireName("");
       setSummary({
         auditDate: today,
         startTime: "",
         endTime: "",
         strongPoints: "",
         weakPoints: "",
+        questionnaireName: "",
       });
     } catch (err: any) {
       console.error(err);
@@ -922,7 +979,7 @@ export default function AuditChecklistRefactored() {
       item.requestCAR &&
       item.value !== "" &&
       item.value !== -1 &&
-      item.value <= 5
+      needsDetails(item.value, isIATF)
   ).length;
 
   const canSubmit =
@@ -932,7 +989,7 @@ export default function AuditChecklistRefactored() {
     items.every(
       (item) =>
         item.value !== "" &&
-        (!needsDetails(item.value) || item.findings.trim()) &&
+        (!needsDetails(item.value, isIATF) || item.findings.trim()) &&
         (!item.requestCAR || item.carReason.trim())
     ) &&
     summary.auditDate.trim() !== "" &&
@@ -953,7 +1010,6 @@ export default function AuditChecklistRefactored() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 p-4 md:p-8">
       <div className="max-w-[1600px] mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Consolidated Header */}
           <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
             <AuditHeader
               onExport={downloadCSV}
@@ -971,10 +1027,11 @@ export default function AuditChecklistRefactored() {
               hasItems={items.length > 0}
               summary={summary}
               onSummaryChange={handleSummaryChange}
+              isIATF={isIATF}
+              questionnaireName={questionnaireName}
             />
           </div>
 
-          {/* Checklist Table */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -1029,6 +1086,8 @@ export default function AuditChecklistRefactored() {
                         key={item.questionId}
                         item={item}
                         previews={previews}
+                        valueOptions={valueOptions}
+                        isIATF={isIATF}
                         onUpdateField={updateField}
                         onToggleCAR={toggleCARRequest}
                         onAddEvidence={addEvidence}
@@ -1040,14 +1099,14 @@ export default function AuditChecklistRefactored() {
               </table>
             </div>
 
-            {/* Table Footer */}
             {items.length > 0 && (
               <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-slate-100 border-t border-slate-200">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="space-y-1">
                     <p className="text-sm text-slate-600">
-                      Values ≤5 require findings. Check "Request CAR" to request
-                      corrective actions.
+                      {isIATF
+                        ? "Values ≤3 require findings. Check 'Request CAR' for corrective actions."
+                        : "Values ≤5 require findings. Check 'Request CAR' for corrective actions."}
                     </p>
                     {carCount > 0 && (
                       <div className="flex items-center gap-2">

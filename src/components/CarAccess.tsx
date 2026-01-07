@@ -15,6 +15,7 @@ interface CarFormData {
   status: string;
   submitted_at: string | null;
   documents: DocumentInfo[];
+  root_cause: string;
 }
 
 interface DocumentInfo {
@@ -36,6 +37,7 @@ export const CarAccess: React.FC = () => {
   const [otp, setOtp] = useState("");
   const [carData, setCarData] = useState<CarFormData | null>(null);
   const [implementedSolution, setImplementedSolution] = useState("");
+  const [rootCause, setRootCause] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [submittedDate, setSubmittedDate] = useState<string | null>(null);
@@ -146,7 +148,7 @@ export const CarAccess: React.FC = () => {
       setCarData(res.data);
       console.log(res.data);
       setImplementedSolution(res.data.implemented_solution || "");
-
+      setRootCause(res.data.root_cause || "");
       if (res.data.is_submitted) {
         setStep("submitted");
         setSubmittedDate(res.data.submitted_at);
@@ -169,6 +171,10 @@ export const CarAccess: React.FC = () => {
       setMessage("⚠️ Please describe the implemented solution");
       return;
     }
+    if (!rootCause.trim()) {
+      setMessage("⚠️ Please describe the root cause");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -179,7 +185,7 @@ export const CarAccess: React.FC = () => {
       formData.append("token", tokenParam);
       formData.append("email", email);
       formData.append("implemented_solution", implementedSolution);
-
+      formData.append("root_cause", rootCause);
       // Ajouter les fichiers
       selectedFiles.forEach((file) => {
         formData.append("files", file);
@@ -760,7 +766,35 @@ export const CarAccess: React.FC = () => {
                   </div>
                 </div>
               </div>
-
+              {/* Root Cause textarea */}
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-3">
+                  Root Cause *
+                </label>
+                <textarea
+                  value={rootCause}
+                  onChange={(e) => setRootCause(e.target.value)}
+                  rows={3}
+                  placeholder="Decribe in detail root cause of the issue...
+"
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none resize-none transition-all"
+                  disabled={loading}
+                />
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-gray-500">
+                    Describe in detail the issue.
+                  </p>
+                  <p
+                    className={`text-xs font-medium ${
+                      implementedSolution.length < 50
+                        ? "text-gray-400"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    {rootCause.length} caracters
+                  </p>
+                </div>
+              </div>
               {/* Solution textarea */}
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-3">
