@@ -91,6 +91,7 @@ export interface PickableAudit {
   planned_end_time: string;     
   status: string;
   auditees: AuditeeMini[];
+  questionnaire_name:string;
 }
 export interface DocumentCreate {
   filename: string;
@@ -106,6 +107,7 @@ export interface AuditAnswerCreate {
   documents: DocumentCreate[];
   car_reason?: string | null;
   request_car: boolean;
+  critical_value:number;
 }
 
 export interface ExecuteAuditRequest {
