@@ -17,7 +17,12 @@ export type AddQuestionnaire = (
 export type DeleteQuestionnaire = (
   id: number,
   dispatch: Dispatch<any>
-) => Promise<boolean>;
+) => Promise<{
+  success: boolean;
+  deleted?: boolean;
+  error?: string;
+  status?: number;
+}>;
 
 export type UpdateQuestionnaire = (
   questionnaire_id: number,

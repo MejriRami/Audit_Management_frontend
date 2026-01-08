@@ -8,6 +8,8 @@ export interface QuestionnaireState {
     error: boolean;
     toast: string;
     loading: boolean;
+    deleteError:string | null;
+    deleteLoading:boolean ;
 }
 
 export interface Questionnaire {
