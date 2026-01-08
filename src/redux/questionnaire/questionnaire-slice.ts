@@ -9,7 +9,8 @@ const initialState : QuestionnaireState    = {
     error: false,
     toast: '',
     loading: false,
-}
+    deleteLoading: false,  
+    deleteError: null}
 
 const questionnaireSlice = createSlice({
   name: 'questionnaire',
@@ -61,21 +62,24 @@ const questionnaireSlice = createSlice({
       state.error = true;
       state.toast = action.payload?.message || "Failed to add Questionnaire";
     },
-    deleteQuestionnaireRequest(state) {
-      state.success = false;
-      state.error = false;
-    },
-    deleteQuestionnaireSuccess(state, action) {
-      state.questionnairesList = state.questionnairesList.filter(questionnaire => questionnaire.id !== action.payload.id);
-      state.success = true;
-      state.error = false;
-      state.toast = "Questionnaire deleted successfully";
-    },
-    deleteQuestionnaireFailure(state) {
-      state.success = false;
-      state.error = true;
-      state.toast = "Failed to delete Questionnaire";
-    },
+deleteQuestionnaireRequest(state) {
+  state.deleteLoading = true; 
+  state.deleteError = null;   
+  state.success = false;
+},
+deleteQuestionnaireSuccess(state, action) {
+  state.questionnairesList = state.questionnairesList.filter(
+    questionnaire => questionnaire.id !== action.payload.id
+  );
+  state.deleteLoading = false;
+  state.success = true;
+  state.deleteError = null;
+},
+deleteQuestionnaireFailure(state, action) {
+  state.deleteLoading = false;
+  state.success = false;
+  state.deleteError = action.payload || "Failed to delete Questionnaire";
+},
     updateQuestionnaireRequest(state) {
       state.success = false;
       state.error = false;
@@ -98,7 +102,13 @@ const questionnaireSlice = createSlice({
       state.success = false;
       state.error = false;
       state.toast = '';
+        state.loading = false;
+
     },
+    clearDeleteState(state) {
+  state.deleteLoading = false;
+  state.deleteError = null;
+},
     getQuestionnairesByNameRequest(state) {
       state.success = false;
       state.error = false;
@@ -134,7 +144,8 @@ export const {
     resetQuestioannairesState,
     getQuestionnairesByNameSuccess,
     getQuestionnairesByNameFailure,
-    getQuestionnairesByNameRequest
+    getQuestionnairesByNameRequest,
+    clearDeleteState
 } = questionnaireSlice.actions;
 
 export default questionnaireSlice.reducer;

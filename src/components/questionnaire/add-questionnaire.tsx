@@ -138,7 +138,9 @@ export default function AddQuestionnaire() {
     },
     [dispatch, formQuestionnaire, loading, validateForm]
   );
-
+  useEffect(() => {
+    dispatch(resetQuestioannairesState());
+  }, [dispatch]);
   useEffect(() => {
     if (toast === "Questionnaire added successfully") {
       const t = setTimeout(() => {

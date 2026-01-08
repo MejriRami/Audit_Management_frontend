@@ -84,19 +84,28 @@ export const deleteQuestionnaire: DeleteQuestionnaire = async (questionnaire_id,
 
   try {
     let response = await axiosInstance.delete(url);
-    dispatch(deleteQuestionnaireSuccess(response.data));
-    return true;
+    dispatch(deleteQuestionnaireSuccess({ id: questionnaire_id, data: response.data }));
+    return {
+      success: true,
+      deleted: true
+    };
   } catch (error: any) {
-    const { status, data } = error.response;
-    dispatch(deleteQuestionnaireFailure(data));
+    const { status, data } = error.response || {};
+    const errorMessage = data?.detail || data?.message || "Failed to delete questionnaire";
+    
+    dispatch(deleteQuestionnaireFailure(errorMessage));
+    
     if (status === 401) {
       logUserOut(dispatch);
     }
+    
+    return {
+      success: false,
+      error: errorMessage,
+      status
+    };
   }
-
-  return false;
 };
-
 export const updateQuestionnaire: UpdateQuestionnaire = async (questionnaire_id, data, dispatch) => {
   dispatch(updateQuestionnaireRequest());
   const url = `/questionnaire/${questionnaire_id}`;

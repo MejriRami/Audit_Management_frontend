@@ -12,8 +12,12 @@ import ConfirmDialog from "../../components/form/ConfirmDialogProps";
 import EditQuestionnaireModal from "../../components/questionnaire/edit-questionnaire";
 import { getFrameworks } from "../../redux/framework/framework";
 import Enum from "../../components/enum/Enum";
-import { resetQuestioannairesState } from "../../redux/questionnaire/questionnaire-slice";
+import {
+  clearDeleteState,
+  resetQuestioannairesState,
+} from "../../redux/questionnaire/questionnaire-slice";
 import QuestionsModal from "../../components/Questions.tsx/QuestionsModal";
+import toast from "react-hot-toast";
 
 export default function FormElements() {
   const navigate = useNavigate();
@@ -31,19 +35,39 @@ export default function FormElements() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set()
   );
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleClick = () => {
+    setDeleteError(null);
+
     navigate("/add-questionnaire");
   };
 
   const openDeleteConfirm = (q: Questionnaire) => {
     setSelectedQuestionnaire(q);
+    dispatch(clearDeleteState());
     setIsConfirmOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    deleteQuestionnaire(selectedQuestionnaire?.id, dispatch);
+  const handleConfirmDelete = async () => {
+    const result = await deleteQuestionnaire(
+      selectedQuestionnaire?.id,
+      dispatch
+    );
+
+    if (result.success) {
+      setIsConfirmOpen(false);
+      setDeleteError(null);
+      toast.success("Questionnaire deleted successfully");
+    } else {
+      // Afficher l'erreur dans la modale
+      setDeleteError(result.error || "Failed to delete questionnaire");
+      // Ne pas fermer la modale pour que l'utilisateur voit l'erreur
+    }
+  };
+  const handleCancelDelete = () => {
     setIsConfirmOpen(false);
+    dispatch(clearDeleteState()); // Clear error when closing
   };
 
   const handleEditQuestionnaire = (q: Questionnaire) => {
@@ -91,7 +115,7 @@ export default function FormElements() {
     {}
   );
 
-  // Sort groups by priority (only 2 statuses)
+  // Sort groups by priority
   const statusOrder = ["Ready to Use", "Under Revision"];
   const sortedStatuses = Object.keys(groupedQuestionnaires).sort((a, b) => {
     const indexA = statusOrder.indexOf(a);
@@ -99,7 +123,7 @@ export default function FormElements() {
     return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
   });
 
-  // Status color mapping (only 2 statuses)
+  // Status color mapping
   const getStatusColor = (status: string) => {
     const colors: Record<string, { bg: string; text: string; border: string }> =
       {
@@ -335,7 +359,7 @@ export default function FormElements() {
                       >
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse">
-                            {/* Table Header (only show for first group or always) */}
+                            {/* Table Header */}
                             <thead className="bg-[#f6f7fb] dark:bg-gray-800">
                               <tr>
                                 <th className="sticky left-0 z-30 text-left px-6 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 bg-[#f6f7fb] dark:bg-gray-800 min-w-[300px]">
@@ -422,12 +446,16 @@ export default function FormElements() {
 
       <ConfirmDialog
         isOpen={isConfirmOpen}
-        title="Delete Questionnaire"
-        message="Are you sure you want to delete this Questionnaire? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setIsConfirmOpen(false)}
+        title={deleteError ? "Delete Failed" : "Confirm Deletion"}
+        message={
+          deleteError ||
+          `Are you sure you want to delete "${selectedQuestionnaire?.name}"? This action cannot be undone.`
+        }
+        onConfirm={deleteError ? handleCancelDelete : handleConfirmDelete}
+        onCancel={deleteError ? undefined : handleCancelDelete}
+        isError={!!deleteError}
+        confirmText={deleteError ? "Close" : "Delete"}
+        cancelText={deleteError ? "" : "Cancel"}
       />
     </div>
   );
