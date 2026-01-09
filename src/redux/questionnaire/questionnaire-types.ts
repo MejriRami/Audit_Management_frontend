@@ -27,7 +27,10 @@ export type DeleteQuestionnaire = (
 export type UpdateQuestionnaire = (
   questionnaire_id: number,
   data: any,
-  dispatch: Dispatch<any>
+  file: File | null,
+  removeGuideline: boolean,
+  dispatch: Dispatch<any>,
+  currentUserId: number // Pass user ID as parameter instead of using useSelector
 ) => Promise<boolean>;
 
 export type GetQuestionnairesByName=(

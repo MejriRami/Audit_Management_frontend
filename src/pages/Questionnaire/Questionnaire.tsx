@@ -7,7 +7,10 @@ import {
   deleteQuestionnaire,
   getQuestionnaires,
 } from "../../redux/questionnaire/questionnaire";
-import { Questionnaire } from "../../redux/questionnaire/questionnaire-slice-types";
+import {
+  Questionnaire,
+  GuidelineDocument,
+} from "../../redux/questionnaire/questionnaire-slice-types";
 import ConfirmDialog from "../../components/form/ConfirmDialogProps";
 import EditQuestionnaireModal from "../../components/questionnaire/edit-questionnaire";
 import { getFrameworks } from "../../redux/framework/framework";
@@ -18,6 +21,8 @@ import {
 } from "../../redux/questionnaire/questionnaire-slice";
 import QuestionsModal from "../../components/Questions.tsx/QuestionsModal";
 import toast from "react-hot-toast";
+import GuidelineViewerModal from "./GuidelineViewerModal";
+import axiosInstance from "../../services/axiosInstance";
 
 export default function FormElements() {
   const navigate = useNavigate();
@@ -37,9 +42,21 @@ export default function FormElements() {
   );
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Guideline viewer state
+  const [isGuidelineViewerOpen, setIsGuidelineViewerOpen] = useState(false);
+  const [selectedGuideline, setSelectedGuideline] =
+    useState<GuidelineDocument | null>(null);
+
+  // Guideline delete state
+  const [isDeleteGuidelineOpen, setIsDeleteGuidelineOpen] = useState(false);
+  const [guidelineToDelete, setGuidelineToDelete] = useState<{
+    questionnaireId: number;
+    guideline: GuidelineDocument;
+  } | null>(null);
+  const [deletingGuideline, setDeletingGuideline] = useState(false);
+
   const handleClick = () => {
     setDeleteError(null);
-
     navigate("/add-questionnaire");
   };
 
@@ -60,19 +77,22 @@ export default function FormElements() {
       setDeleteError(null);
       toast.success("Questionnaire deleted successfully");
     } else {
-      // Afficher l'erreur dans la modale
       setDeleteError(result.error || "Failed to delete questionnaire");
-      // Ne pas fermer la modale pour que l'utilisateur voit l'erreur
     }
   };
+
   const handleCancelDelete = () => {
     setIsConfirmOpen(false);
-    dispatch(clearDeleteState()); // Clear error when closing
+    dispatch(clearDeleteState());
   };
 
   const handleEditQuestionnaire = (q: Questionnaire) => {
     setIsOpen(true);
     setSelectedQuestionnaire(q);
+  };
+
+  const closeEditModal = () => {
+    setIsOpen(false);
   };
 
   const closeModalQuestions = () => {
@@ -82,6 +102,50 @@ export default function FormElements() {
   const openModalQuestions = (q: Questionnaire) => {
     setSelectedQuestionnaire(q);
     setIsModalOpenQuestions(true);
+  };
+
+  // Open guideline viewer
+  const openGuidelineViewer = (guideline: GuidelineDocument) => {
+    setSelectedGuideline(guideline);
+    setIsGuidelineViewerOpen(true);
+  };
+
+  const closeGuidelineViewer = () => {
+    setIsGuidelineViewerOpen(false);
+    setSelectedGuideline(null);
+  };
+
+  // Open delete guideline confirmation
+  const openDeleteGuideline = (
+    questionnaireId: number,
+    guideline: GuidelineDocument,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation(); // Prevent opening the viewer
+    setGuidelineToDelete({ questionnaireId, guideline });
+    setIsDeleteGuidelineOpen(true);
+  };
+
+  // Delete guideline
+  const handleDeleteGuideline = async () => {
+    if (!guidelineToDelete) return;
+
+    setDeletingGuideline(true);
+    try {
+      await axiosInstance.delete(
+        `/questionnaire/documents/${guidelineToDelete.questionnaireId}/guideline`
+      );
+      toast.success("Guideline deleted successfully");
+      setIsDeleteGuidelineOpen(false);
+      setGuidelineToDelete(null);
+      // Refresh questionnaires list
+      getQuestionnaires(dispatch);
+    } catch (error: any) {
+      console.error("Delete guideline error:", error);
+      toast.error(error.response?.data?.detail || "Failed to delete guideline");
+    } finally {
+      setDeletingGuideline(false);
+    }
   };
 
   const toggleGroup = (status: string) => {
@@ -145,6 +209,12 @@ export default function FormElements() {
         border: "border-gray-300 dark:border-gray-700",
       }
     );
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
   };
 
   const renderQuestionnaireRow = (q: Questionnaire, index: number) => (
@@ -219,11 +289,55 @@ export default function FormElements() {
         </div>
       </td>
 
-      {/* Guide File */}
+      {/* Guideline - Updated with click to view and delete */}
       <td className="px-6 py-5">
-        <div className="text-sm text-gray-700 dark:text-gray-300">
-          {q.guideline_file || "N/A"}
-        </div>
+        {q.guideline ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => openGuidelineViewer(q.guideline!)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group/file flex-1"
+            >
+              <svg
+                className="w-4 h-4 text-green-600 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+              </svg>
+              <div className="flex flex-col items-start min-w-0">
+                <span className="text-xs font-medium text-gray-900 dark:text-gray-100 group-hover/file:text-green-600 dark:group-hover/file:text-green-400 truncate max-w-[200px]">
+                  {q.guideline.filename}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatFileSize(q.guideline.size)} • Click to view
+                </span>
+              </div>
+            </button>
+            <button
+              onClick={(e) => openDeleteGuideline(q.id, q.guideline!, e)}
+              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+              title="Delete guideline"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <span className="text-sm text-gray-400 dark:text-gray-500">
+            No file
+          </span>
+        )}
       </td>
 
       {/* Actions - Sticky */}
@@ -292,7 +406,7 @@ export default function FormElements() {
         <div className="h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
           {/* Table Wrapper */}
           <div
-            className="flex-1 overflow-auto bg-whit dark:bg-gray-950 p-4"
+            className="flex-1 overflow-auto bg-white dark:bg-gray-950 p-4"
             style={{ minHeight: 0 }}
           >
             {questionnairesList.length > 0 ? (
@@ -315,7 +429,6 @@ export default function FormElements() {
                         className={`w-full px-6 py-4 flex items-center justify-between bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-l-4 ${statusColors.border}`}
                       >
                         <div className="flex items-center gap-3">
-                          {/* Collapse Icon */}
                           <svg
                             className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                               isCollapsed ? "-rotate-90" : ""
@@ -331,8 +444,6 @@ export default function FormElements() {
                               d="M19 9l-7 7-7-7"
                             />
                           </svg>
-
-                          {/* Status Badge */}
                           <div
                             className={`px-3 py-1.5 rounded-full ${statusColors.bg} border ${statusColors.border}`}
                           >
@@ -342,8 +453,6 @@ export default function FormElements() {
                               {status}
                             </span>
                           </div>
-
-                          {/* Count */}
                           <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                             {items.length}{" "}
                             {items.length === 1 ? "item" : "items"}
@@ -359,7 +468,6 @@ export default function FormElements() {
                       >
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse">
-                            {/* Table Header */}
                             <thead className="bg-[#f6f7fb] dark:bg-gray-800">
                               <tr>
                                 <th className="sticky left-0 z-30 text-left px-6 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 bg-[#f6f7fb] dark:bg-gray-800 min-w-[300px]">
@@ -380,15 +488,14 @@ export default function FormElements() {
                                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 min-w-[180px]">
                                   Target Duration
                                 </th>
-                                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 min-w-[200px]">
-                                  Guide File
+                                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 min-w-[300px]">
+                                  Guideline
                                 </th>
                                 <th className="sticky right-0 z-30 text-center px-6 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 bg-[#f6f7fb] dark:bg-gray-800 min-w-[160px]">
                                   Actions
                                 </th>
                               </tr>
                             </thead>
-
                             <tbody>
                               {items.map((q: Questionnaire, index: number) =>
                                 renderQuestionnaireRow(q, index)
@@ -437,13 +544,20 @@ export default function FormElements() {
 
       <EditQuestionnaireModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={closeEditModal}
         selectedQuestionnaire={selectedQuestionnaire}
         frameworkOptions={frameworkOptions}
         auditTypeOptions={auditTypeOptions}
         auditorOptions={auditorOptions}
       />
 
+      <GuidelineViewerModal
+        isOpen={isGuidelineViewerOpen}
+        onClose={closeGuidelineViewer}
+        guideline={selectedGuideline}
+      />
+
+      {/* Questionnaire Delete Confirmation */}
       <ConfirmDialog
         isOpen={isConfirmOpen}
         title={deleteError ? "Delete Failed" : "Confirm Deletion"}
@@ -456,6 +570,21 @@ export default function FormElements() {
         isError={!!deleteError}
         confirmText={deleteError ? "Close" : "Delete"}
         cancelText={deleteError ? "" : "Cancel"}
+      />
+
+      {/* Guideline Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={isDeleteGuidelineOpen}
+        title="Delete Guideline"
+        message={`Are you sure you want to delete "${guidelineToDelete?.guideline.filename}"? This action cannot be undone.`}
+        onConfirm={handleDeleteGuideline}
+        onCancel={() => {
+          setIsDeleteGuidelineOpen(false);
+          setGuidelineToDelete(null);
+        }}
+        confirmText={deletingGuideline ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+        isError={false}
       />
     </div>
   );
