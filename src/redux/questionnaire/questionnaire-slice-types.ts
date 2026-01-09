@@ -11,7 +11,13 @@ export interface QuestionnaireState {
     deleteError:string | null;
     deleteLoading:boolean ;
 }
-
+export interface GuidelineDocument {
+  id: number;
+  filename: string;
+  file_url: string;
+  size: number;
+  uploaded_at: string;
+}
 export interface Questionnaire {
   id: number;
   name: string;
@@ -19,7 +25,9 @@ export interface Questionnaire {
   status: string;
   target_duration: string;
   score_calculation: string;
-  guideline_file: string;
+  guideline_file?: string;
+    guideline?: GuidelineDocument; // New guideline object from API
+
   type_id: string;
   framework_id: string;
   framework: {
