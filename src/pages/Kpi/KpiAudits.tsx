@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 
 import PageMeta from "../../components/common/PageMeta";
@@ -33,12 +33,15 @@ async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
   const text = await res.text();
 
-  if (!res.ok) throw new Error(`Request failed ${res.status}: ${text.slice(0, 200)}...`);
+  if (!res.ok)
+    throw new Error(`Request failed ${res.status}: ${text.slice(0, 200)}...`);
 
   try {
     return JSON.parse(text) as T;
   } catch {
-    throw new Error(`Expected JSON from ${API_BASE}${path} but got:\n${text.slice(0, 200)}...`);
+    throw new Error(
+      `Expected JSON from ${API_BASE}${path} but got:\n${text.slice(0, 200)}...`
+    );
   }
 }
 
@@ -100,7 +103,7 @@ function StackedBarD3({
       .range([height - margin.bottom, margin.top]);
 
     const palette = (d3.schemeTableau10 as string[]).concat(
-      (d3.schemeSet3 as unknown as string[])
+      d3.schemeSet3 as unknown as string[]
     );
     const color = d3.scaleOrdinal<string>().domain(keys).range(palette);
 
@@ -245,7 +248,7 @@ function ComboBarLineD3({
     // Line (score)
     const line = d3
       .line<{ group: string; count: number; score: number }>()
-      .x((d) => (x(d.group)! + x.bandwidth() / 2))
+      .x((d) => x(d.group)! + x.bandwidth() / 2)
       .y((d) => yRight(d.score));
 
     svg
@@ -299,8 +302,12 @@ export default function KpiAuditsD3() {
 
   const [auditHours, setAuditHours] = useState<KpiStackedResponse | null>(null);
   const [lateCar, setLateCar] = useState<KpiStackedResponse | null>(null);
-  const [countScore, setCountScore] = useState<KpiCountScoreResponse | null>(null);
-  const [typePerPlant, setTypePerPlant] = useState<KpiStackedResponse | null>(null);
+  const [countScore, setCountScore] = useState<KpiCountScoreResponse | null>(
+    null
+  );
+  const [typePerPlant, setTypePerPlant] = useState<KpiStackedResponse | null>(
+    null
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -342,9 +349,13 @@ export default function KpiAuditsD3() {
       setError(null);
       try {
         const [hours, car, cs, tpp] = await Promise.all([
-          fetchJson<KpiStackedResponse>(`/kpi/audit-hours?interval=month&date_basis=planned&${qs}`),
+          fetchJson<KpiStackedResponse>(
+            `/kpi/audit-hours?interval=month&date_basis=planned&${qs}`
+          ),
           fetchJson<KpiStackedResponse>(`/kpi/late-car?interval=week&${qs}`),
-          fetchJson<KpiCountScoreResponse>(`/kpi/audit-count-score?interval=month&date_basis=planned&${qs}`),
+          fetchJson<KpiCountScoreResponse>(
+            `/kpi/audit-count-score?interval=month&date_basis=planned&${qs}`
+          ),
           fetchJson<KpiStackedResponse>(`/kpi/audits-by-type-plant?${qs}`),
         ]);
 
@@ -368,15 +379,29 @@ export default function KpiAuditsD3() {
       <ComponentCard title="Filters">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">Plant</p>
-            <Select options={plantOptions} defaultValue={plant} onChange={setPlant} />
+            <p className="text-xs font-medium text-gray-500 uppercase mb-2">
+              Plant
+            </p>
+            <Select
+              options={plantOptions}
+              defaultValue={plant}
+              onChange={setPlant}
+            />
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">Audit Type</p>
-            <Select options={typeOptions} defaultValue={auditTypeId} onChange={setAuditTypeId} />
+            <p className="text-xs font-medium text-gray-500 uppercase mb-2">
+              Audit Type
+            </p>
+            <Select
+              options={typeOptions}
+              defaultValue={auditTypeId}
+              onChange={setAuditTypeId}
+            />
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">From</p>
+            <p className="text-xs font-medium text-gray-500 uppercase mb-2">
+              From
+            </p>
             <input
               type="date"
               value={from}
@@ -385,7 +410,9 @@ export default function KpiAuditsD3() {
             />
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2">To</p>
+            <p className="text-xs font-medium text-gray-500 uppercase mb-2">
+              To
+            </p>
             <input
               type="date"
               value={to}
@@ -414,7 +441,10 @@ export default function KpiAuditsD3() {
 
       <ComponentCard title="Number of audits and score">
         {countScore?.data?.length ? (
-          <ComboBarLineD3 data={countScore.data} gradeLines={countScore.gradeLines} />
+          <ComboBarLineD3
+            data={countScore.data}
+            gradeLines={countScore.gradeLines}
+          />
         ) : (
           <div className="text-sm text-gray-500">No data.</div>
         )}
@@ -422,7 +452,11 @@ export default function KpiAuditsD3() {
 
       <ComponentCard title="Audits per type per plant">
         {typePerPlant?.data?.length ? (
-          <StackedBarD3 data={typePerPlant.data} keys={typePerPlant.keys} unit="count" />
+          <StackedBarD3
+            data={typePerPlant.data}
+            keys={typePerPlant.keys}
+            unit="count"
+          />
         ) : (
           <div className="text-sm text-gray-500">No data.</div>
         )}
