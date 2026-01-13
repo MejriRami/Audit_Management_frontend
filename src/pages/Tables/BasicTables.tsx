@@ -1,4 +1,12 @@
+// ✅ FULL FILE: BasicTables.tsx (copy/paste)
+// What’s fixed:
+// - Reads URL params: tab, search, audit_id, car_id
+// - If tab=corrective_actions → opens Corrective Actions tab
+// - If car_id/audit_id exist → filters corrective actions correctly (so Accept/Reject shows)
+// - Normal navigation to /audits stays the same (defaults to Audits tab, no forced filters)
+
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import PageMeta from "../../components/common/PageMeta";
@@ -32,6 +40,7 @@ type EntityFilters = {
 
 export default function BasicTables() {
   const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<"audits" | "corrective_actions">(
     "audits"
@@ -46,6 +55,27 @@ export default function BasicTables() {
     type: "",
     parent: "",
   });
+
+  // ✅ URL param behavior (only triggers if params exist)
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    const search = searchParams.get("search");
+    const auditId = searchParams.get("audit_id");
+    const carId = searchParams.get("car_id");
+
+    if (tab === "corrective_actions") {
+      setActiveTab("corrective_actions");
+
+      // Prefer car_id / audit_id when coming from notifications
+      if (carId) {
+        setEntityFilters((prev) => ({ ...prev, search: `car:${carId}` }));
+      } else if (auditId) {
+        setEntityFilters((prev) => ({ ...prev, search: `audit:${auditId}` }));
+      } else if (search) {
+        setEntityFilters((prev) => ({ ...prev, search }));
+      }
+    }
+  }, [searchParams]);
 
   // ----- Redux audit state via selectors -----
   const auditsLoading = useAppSelector(selectAuditsLoading);
@@ -67,7 +97,6 @@ export default function BasicTables() {
   };
 
   // ---- Handlers for filters ----
-
   const handleSearchChange = (value: string) => {
     if (activeTab === "audits") {
       dispatch(setAuditFiltersAction({ search: value }));
@@ -78,9 +107,7 @@ export default function BasicTables() {
 
   const handleFilterChange = (key: keyof AuditFilters, value: string) => {
     if (activeTab === "audits") {
-      dispatch(
-        setAuditFiltersAction({ [key]: value } as Partial<AuditFilters>)
-      );
+      dispatch(setAuditFiltersAction({ [key]: value } as Partial<AuditFilters>));
     } else {
       setEntityFilters((prev) => ({ ...prev, [key]: value }));
     }
@@ -95,16 +122,49 @@ export default function BasicTables() {
     }
   };
 
-  // ----- Corrective actions filtered client-side ----- //
+  // ✅ Corrective actions filtering (supports notification params)
   const filteredCorrectiveActions = useMemo(() => {
     const term =
       activeTab === "audits"
-        ? auditFilters.search.toLowerCase()
-        : entityFilters.search.toLowerCase();
+        ? auditFilters.search.toLowerCase().trim()
+        : entityFilters.search.toLowerCase().trim();
 
-    return mockCorrectiveActions.filter((c) =>
-      c.auditFramework.toLowerCase().includes(term)
-    );
+    // no search -> show all corrective actions
+    if (!term) return mockCorrectiveActions;
+
+    // From notifications: show specific corrective action by id
+    if (term.startsWith("car:")) {
+      const carId = Number(term.replace("car:", ""));
+      if (Number.isNaN(carId)) return [];
+      return mockCorrectiveActions.filter((c) => c.id === carId);
+    }
+
+    // From notifications: show all corrective actions of an audit
+    if (term.startsWith("audit:")) {
+      const auditId = Number(term.replace("audit:", ""));
+      if (Number.isNaN(auditId)) return [];
+      return mockCorrectiveActions.filter((c) => c.auditId === auditId);
+    }
+
+    // Normal search: match across multiple fields (safe)
+    return mockCorrectiveActions.filter((c) => {
+      const haystack = [
+        c.auditFramework,
+        String(c.auditId),
+        String(c.auditAnswerId),
+        c.finding_type,
+        c.corrective_action ?? "",
+        c.auditee,
+        c.pilotUser,
+        c.reason_why ?? "",
+        c.due_date ?? "",
+        c.status,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(term);
+    });
   }, [activeTab, auditFilters.search, entityFilters.search]);
 
   const currentSearch =
@@ -246,7 +306,6 @@ export default function BasicTables() {
                       }
                     >
                       <option value="">All</option>
-
                       {uniqueQuestionnaires.map((q) => (
                         <option key={q} value={q}>
                           {q}
@@ -266,7 +325,6 @@ export default function BasicTables() {
                       }
                     >
                       <option value="">All</option>
-
                       {uniqueAuditors.map((email) => (
                         <option key={email} value={email}>
                           {email}
@@ -286,7 +344,6 @@ export default function BasicTables() {
                       }
                     >
                       <option value="">All</option>
-
                       {uniqueAuditees.map((email) => (
                         <option key={email} value={email}>
                           {email}
@@ -320,11 +377,10 @@ export default function BasicTables() {
                   </div>
                 </>
               ) : (
-                <>{/* future entity filters */}</>
+                <></>
               )}
             </div>
           )}
-          {/* Inside <ComponentCard> just before the table content */}
 
           {auditsError && activeTab === "audits" && (
             <div className="mb-4 rounded border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
@@ -360,7 +416,7 @@ export default function BasicTables() {
     </>
   );
 }
-// somewhere reusable, or inline in BasicTables file
+
 function InlineLoader() {
   return (
     <div className="flex justify-center items-center py-8 text-gray-500">
