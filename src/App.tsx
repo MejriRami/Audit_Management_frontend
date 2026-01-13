@@ -54,6 +54,7 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>
               {/* <Route index path="/" element={<Home />} /> */}
+              <Route index path="/" element={<KpiAudits />} />
               <Route index path="/home" element={<KpiAudits />} />
 
               {/* Others Page */}

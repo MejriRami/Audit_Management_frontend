@@ -25,7 +25,7 @@ import {
 import { apiUploadFile } from "../../redux/audit/audit";
 
 // ==================== TYPES ====================
-type AuditValue = "" | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 8 | 10;
+type AuditValue = "" | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
 
 interface AuditItem {
   row: number;
@@ -78,17 +78,51 @@ const STANDARD_VALUE_OPTIONS: ValueOption[] = [
   { value: 10, label: "10 - Good practice", color: "text-emerald-700" },
 ];
 
+// ✅ VDA 6.3 VALUE OPTIONS
+const VDA_VALUE_OPTIONS: ValueOption[] = [
+  { value: -1, label: "Optional", color: "text-yellow-700" },
+  { value: 0, label: "0 - Not fulfilled", color: "text-red-700" },
+  { value: 4, label: "4 - Partially fulfilled", color: "text-orange-700" },
+  { value: 6, label: "6 - Mostly fulfilled", color: "text-amber-600" },
+  { value: 8, label: "8 - Fulfilled", color: "text-emerald-600" },
+  { value: 10, label: "10 - Exceeded", color: "text-emerald-700" },
+];
+
 // ==================== UTILITIES ====================
 const getValueOptions = (questionnaireName: string): ValueOption[] => {
   const name = questionnaireName.toLowerCase();
-  return name.includes("iatf") || name.includes("plant manager")
-    ? IATF_VALUE_OPTIONS
-    : STANDARD_VALUE_OPTIONS;
+
+  // ✅ Check for VDA first
+  if (name.includes("vda")) {
+    return VDA_VALUE_OPTIONS;
+  }
+
+  // Check for IATF/Plant Manager
+  if (name.includes("iatf") || name.includes("plant manager")) {
+    return IATF_VALUE_OPTIONS;
+  }
+
+  // Default to Standard
+  return STANDARD_VALUE_OPTIONS;
 };
 
-const needsDetails = (v: AuditValue, isIATF: boolean): boolean => {
+const needsDetails = (v: AuditValue, questionnaireName: string): boolean => {
   if (v === "" || v === -1) return false;
-  return isIATF ? v <= 3 : v <= 5;
+
+  const name = questionnaireName.toLowerCase();
+
+  // ✅ VDA: values < 6 need details (0, 4)
+  if (name.includes("vda")) {
+    return v < 6;
+  }
+
+  // IATF: values <= 3 need details
+  if (name.includes("iatf") || name.includes("plant manager")) {
+    return v <= 3;
+  }
+
+  // Standard: values <= 5 need details
+  return v <= 5;
 };
 
 const getValueColor = (v: AuditValue, valueOptions: ValueOption[]): string => {
@@ -104,18 +138,44 @@ const getCriticalClass = (critical: number): string => {
 
 const validateItem = (
   item: AuditItem,
-  isIATF: boolean
+  questionnaireName: string
 ): AuditItem["errors"] => {
   const errors: AuditItem["errors"] = {};
   if (item.value === "") errors.value = "Required";
 
-  if (needsDetails(item.value, isIATF)) {
+  if (needsDetails(item.value, questionnaireName)) {
     if (!item.findings.trim()) errors.findings = "Required";
     if (item.requestCAR && !item.carReason.trim()) {
       errors.carReason = "Required for CAR request";
     }
   }
   return errors;
+};
+
+const getQuestionnaireType = (questionnaireName: string): string => {
+  const name = questionnaireName.toLowerCase();
+  if (name.includes("vda")) return "VDA 6.3";
+  if (name.includes("iatf") || name.includes("plant manager")) return "IATF";
+  return "Standard";
+};
+
+const getScaleDescription = (questionnaireName: string): string => {
+  const name = questionnaireName.toLowerCase();
+  if (name.includes("vda")) return "VDA (0-10)";
+  if (name.includes("iatf") || name.includes("plant manager"))
+    return "IATF (1-5)";
+  return "Standard (0-10)";
+};
+
+const getFooterMessage = (questionnaireName: string): string => {
+  const name = questionnaireName.toLowerCase();
+  if (name.includes("vda")) {
+    return "Values <6 require findings. Check 'Request CAR' for corrective actions.";
+  }
+  if (name.includes("iatf") || name.includes("plant manager")) {
+    return "Values ≤3 require findings. Check 'Request CAR' for corrective actions.";
+  }
+  return "Values ≤5 require findings. Check 'Request CAR' for corrective actions.";
 };
 
 // ==================== SUB-COMPONENTS ====================
@@ -136,7 +196,6 @@ const AuditHeader = ({
   hasItems,
   summary,
   onSummaryChange,
-  isIATF,
   questionnaireName,
 }: {
   onExport: () => void;
@@ -154,228 +213,239 @@ const AuditHeader = ({
   hasItems: boolean;
   summary: AuditSummary;
   onSummaryChange: (field: keyof AuditSummary, value: string) => void;
-  isIATF: boolean;
   questionnaireName: string;
-}) => (
-  <div>
-    {/* Header Title */}
-    <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-indigo-600 rounded-lg">
-          <ClipboardList className="text-white" size={20} />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-slate-800">
-            Audit Execution — {isIATF ? "IATF" : "Standard"}
-          </h1>
-        </div>
-      </div>
+}) => {
+  const questionnaireType = getQuestionnaireType(questionnaireName);
+  const scaleDescription = getScaleDescription(questionnaireName);
 
-      <button
-        type="button"
-        onClick={onExport}
-        disabled={!canExport}
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Download size={16} className="text-slate-600" />
-        Export CSV
-      </button>
-    </div>
-    {/* Selection Panel */}
-    <div className="p-6 bg-slate-50/50 border-b border-slate-200">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Auditor
-          </label>
-          <div className="relative">
-            <Select
-              placeholder="Select an auditor..."
-              options={auditorOptions}
-              defaultValue={auditorId || ""}
-              onChange={onAuditorChange}
-              className="w-full p-3 pr-10 bg-white border border-slate-300 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              disabled={submitting}
-            />
-            <ChevronDown
-              size={18}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-            />
+  return (
+    <div>
+      {/* Header Title */}
+      <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-600 rounded-lg">
+            <ClipboardList className="text-white" size={20} />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-slate-800">
+              Audit Execution — {questionnaireType}
+            </h1>
           </div>
         </div>
 
-        <div className="lg:col-span-2">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Planned Audit
-          </label>
-          <div className="relative">
-            <Select
-              key={`${selectedPlannedAuditId}-${auditOptions.length}`}
-              options={auditOptions}
-              placeholder={
-                pickableLoading
-                  ? "Loading audits..."
-                  : !auditorId
-                  ? "Select auditor first..."
-                  : "Select planned audit..."
-              }
-              defaultValue={selectedPlannedAuditId}
-              onChange={(value) => onAuditChange(value ? Number(value) : "")}
-              className="w-full p-3 pr-10 bg-white border border-slate-300 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              disabled={!auditorId || pickableLoading || submitting}
-            />
-            <ChevronDown
-              size={18}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-            />
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={onExport}
+          disabled={!canExport}
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download size={16} className="text-slate-600" />
+          Export CSV
+        </button>
       </div>
-    </div>
-    {/* Audit Summary */}
-    {hasItems && (
-      <div className="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <FileText className="text-indigo-600" size={18} />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-slate-800">
-                Audit Summary
-              </h2>
-              <p className="text-xs text-slate-600">
-                Required before submission
-              </p>
+
+      {/* Selection Panel */}
+      <div className="p-6 bg-slate-50/50 border-b border-slate-200">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Auditor
+            </label>
+            <div className="relative">
+              <Select
+                placeholder="Select an auditor..."
+                options={auditorOptions}
+                defaultValue={auditorId || ""}
+                onChange={onAuditorChange}
+                className="w-full p-3 pr-10 bg-white border border-slate-300 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                disabled={submitting}
+              />
+              <ChevronDown
+                size={18}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
             </div>
           </div>
 
-          {/* Questionnaire Name Badge */}
-          {questionnaireName && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg">
-              <ClipboardList size={16} className="text-indigo-600" />
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">
-                  {questionnaireName}
-                </span>
-                <span
-                  className={`px-2 py-1 text-xs font-semibold rounded ${
-                    isIATF
-                      ? "bg-purple-100 text-purple-700"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {isIATF ? "IATF (1-5)" : "Standard (0-10)"}
-                </span>
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Planned Audit
+            </label>
+            <div className="relative">
+              <Select
+                key={`${selectedPlannedAuditId}-${auditOptions.length}`}
+                options={auditOptions}
+                placeholder={
+                  pickableLoading
+                    ? "Loading audits..."
+                    : !auditorId
+                    ? "Select auditor first..."
+                    : "Select planned audit..."
+                }
+                defaultValue={selectedPlannedAuditId}
+                onChange={(value) => onAuditChange(value ? Number(value) : "")}
+                className="w-full p-3 pr-10 bg-white border border-slate-300 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                disabled={!auditorId || pickableLoading || submitting}
+              />
+              <ChevronDown
+                size={18}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Audit Summary */}
+      {hasItems && (
+        <div className="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <FileText className="text-indigo-600" size={18} />
               </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-800">
+                  Audit Summary
+                </h2>
+                <p className="text-xs text-slate-600">
+                  Required before submission
+                </p>
+              </div>
+            </div>
+
+            {/* Questionnaire Name Badge */}
+            {questionnaireName && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg">
+                <ClipboardList size={16} className="text-indigo-600" />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-700">
+                    {questionnaireName}
+                  </span>
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded ${
+                      questionnaireType === "VDA 6.3"
+                        ? "bg-green-100 text-green-700"
+                        : questionnaireType === "IATF"
+                        ? "bg-purple-100 text-purple-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {scaleDescription}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
+                <Calendar size={14} className="text-slate-500" />
+                Audit Date
+              </label>
+              <input
+                type="date"
+                value={summary.auditDate}
+                onChange={(e) => onSummaryChange("auditDate", e.target.value)}
+                className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
+                <Clock size={14} className="text-slate-500" />
+                Start Time
+              </label>
+              <input
+                type="time"
+                value={summary.startTime}
+                onChange={(e) => onSummaryChange("startTime", e.target.value)}
+                className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
+                <Clock size={14} className="text-slate-500" />
+                End Time
+              </label>
+              <input
+                type="time"
+                value={summary.endTime}
+                onChange={(e) => onSummaryChange("endTime", e.target.value)}
+                className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div className="hidden lg:block"></div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Strong Points
+              </label>
+              <textarea
+                rows={2}
+                value={summary.strongPoints}
+                onChange={(e) =>
+                  onSummaryChange("strongPoints", e.target.value)
+                }
+                placeholder="Describe strengths observed..."
+                className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                Weak Points
+              </label>
+              <textarea
+                rows={2}
+                value={summary.weakPoints}
+                onChange={(e) => onSummaryChange("weakPoints", e.target.value)}
+                placeholder="Describe weaknesses or non-conformities..."
+                className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Bar */}
+      {hasItems && (
+        <div className="p-5 bg-white border-b border-slate-200">
+          <div className="flex items-center gap-4 mb-3">
+            <span className="text-sm font-semibold text-slate-700">
+              Progress:
+            </span>
+            <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div
+                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-sm font-bold text-slate-700 min-w-[3rem] text-right">
+              {progress}%
+            </span>
+          </div>
+
+          {carCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+              <AlertTriangle
+                size={16}
+                className="text-orange-600 flex-shrink-0"
+              />
+              <span className="text-sm text-orange-700 font-medium">
+                {carCount} CAR{carCount > 1 ? "s" : ""} will be requested upon
+                submission
+              </span>
             </div>
           )}
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
-              <Calendar size={14} className="text-slate-500" />
-              Audit Date
-            </label>
-            <input
-              type="date"
-              value={summary.auditDate}
-              onChange={(e) => onSummaryChange("auditDate", e.target.value)}
-              className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
-              <Clock size={14} className="text-slate-500" />
-              Start Time
-            </label>
-            <input
-              type="time"
-              value={summary.startTime}
-              onChange={(e) => onSummaryChange("startTime", e.target.value)}
-              className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 mb-1.5">
-              <Clock size={14} className="text-slate-500" />
-              End Time
-            </label>
-            <input
-              type="time"
-              value={summary.endTime}
-              onChange={(e) => onSummaryChange("endTime", e.target.value)}
-              className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            />
-          </div>
-
-          <div className="hidden lg:block"></div>
-
-          <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Strong Points
-            </label>
-            <textarea
-              rows={2}
-              value={summary.strongPoints}
-              onChange={(e) => onSummaryChange("strongPoints", e.target.value)}
-              placeholder="Describe strengths observed..."
-              className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Weak Points
-            </label>
-            <textarea
-              rows={2}
-              value={summary.weakPoints}
-              onChange={(e) => onSummaryChange("weakPoints", e.target.value)}
-              placeholder="Describe weaknesses or non-conformities..."
-              className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
-            />
-          </div>
-        </div>
-      </div>
-    )}
-    {/* Progress Bar */}
-    {hasItems && (
-      <div className="p-5 bg-white border-b border-slate-200">
-        <div className="flex items-center gap-4 mb-3">
-          <span className="text-sm font-semibold text-slate-700">
-            Progress:
-          </span>
-          <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <span className="text-sm font-bold text-slate-700 min-w-[3rem] text-right">
-            {progress}%
-          </span>
-        </div>
-
-        {carCount > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
-            <AlertTriangle
-              size={16}
-              className="text-orange-600 flex-shrink-0"
-            />
-            <span className="text-sm text-orange-700 font-medium">
-              {carCount} CAR{carCount > 1 ? "s" : ""} will be requested upon
-              submission
-            </span>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
+};
 
 const EvidenceUpload = ({
   evidence,
@@ -436,7 +506,7 @@ const AuditRow = ({
   item,
   previews,
   valueOptions,
-  isIATF,
+  questionnaireName,
   onUpdateField,
   onToggleCAR,
   onAddEvidence,
@@ -445,7 +515,7 @@ const AuditRow = ({
   item: AuditItem;
   previews: Map<string, string>;
   valueOptions: ValueOption[];
-  isIATF: boolean;
+  questionnaireName: string;
   onUpdateField: <K extends keyof AuditItem>(
     questionId: number,
     field: K,
@@ -456,7 +526,7 @@ const AuditRow = ({
   onRemoveEvidence: (questionId: number, idx: number) => void;
 }) => {
   const hasErrors = Object.keys(item.errors).length > 0;
-  const detailsRequired = needsDetails(item.value, isIATF);
+  const detailsRequired = needsDetails(item.value, questionnaireName);
   const canRequestCAR =
     item.value !== "" && item.value !== -1 && detailsRequired;
 
@@ -648,7 +718,6 @@ export default function AuditChecklistRefactored() {
     () => getValueOptions(questionnaireName),
     [questionnaireName]
   );
-  const isIATF = valueOptions === IATF_VALUE_OPTIONS;
 
   // Fetch pickable audits when auditor changes
   useEffect(() => {
@@ -681,7 +750,6 @@ export default function AuditChecklistRefactored() {
     // Extract questionnaire name from selected audit
     const selectedAudit = pickableAudits.find((a) => a.id === auditId);
     if (selectedAudit) {
-      // Adjust these property names based on your actual data structure
       const name = selectedAudit.questionnaire_name || "";
       setQuestionnaireName(name);
     }
@@ -769,7 +837,7 @@ export default function AuditChecklistRefactored() {
           if (
             newValue === "" ||
             newValue === -1 ||
-            !needsDetails(newValue, isIATF)
+            !needsDetails(newValue, questionnaireName)
           ) {
             updated.requestCAR = false;
             updated.carReason = "";
@@ -833,7 +901,7 @@ export default function AuditChecklistRefactored() {
 
     const validated = items.map((item) => ({
       ...item,
-      errors: validateItem(item, isIATF),
+      errors: validateItem(item, questionnaireName),
     }));
     setItems(validated);
 
@@ -979,7 +1047,7 @@ export default function AuditChecklistRefactored() {
       item.requestCAR &&
       item.value !== "" &&
       item.value !== -1 &&
-      needsDetails(item.value, isIATF)
+      needsDetails(item.value, questionnaireName)
   ).length;
 
   const canSubmit =
@@ -989,7 +1057,8 @@ export default function AuditChecklistRefactored() {
     items.every(
       (item) =>
         item.value !== "" &&
-        (!needsDetails(item.value, isIATF) || item.findings.trim()) &&
+        (!needsDetails(item.value, questionnaireName) ||
+          item.findings.trim()) &&
         (!item.requestCAR || item.carReason.trim())
     ) &&
     summary.auditDate.trim() !== "" &&
@@ -1027,7 +1096,6 @@ export default function AuditChecklistRefactored() {
               hasItems={items.length > 0}
               summary={summary}
               onSummaryChange={handleSummaryChange}
-              isIATF={isIATF}
               questionnaireName={questionnaireName}
             />
           </div>
@@ -1087,7 +1155,7 @@ export default function AuditChecklistRefactored() {
                         item={item}
                         previews={previews}
                         valueOptions={valueOptions}
-                        isIATF={isIATF}
+                        questionnaireName={questionnaireName}
                         onUpdateField={updateField}
                         onToggleCAR={toggleCARRequest}
                         onAddEvidence={addEvidence}
@@ -1104,9 +1172,7 @@ export default function AuditChecklistRefactored() {
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="space-y-1">
                     <p className="text-sm text-slate-600">
-                      {isIATF
-                        ? "Values ≤3 require findings. Check 'Request CAR' for corrective actions."
-                        : "Values ≤5 require findings. Check 'Request CAR' for corrective actions."}
+                      {getFooterMessage(questionnaireName)}
                     </p>
                     {carCount > 0 && (
                       <div className="flex items-center gap-2">
