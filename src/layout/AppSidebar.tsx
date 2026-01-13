@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
     path: "/kpi-audits",
   },
   {
-    name: "Holiday Requests",
+    name: "Leave Requests",
     icon: <CalendarCheck className="w-5 h-5" />,
     path: "/holiday-requests",
   },
