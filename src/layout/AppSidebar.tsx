@@ -63,11 +63,11 @@ const navItems: NavItem[] = [
     icon: <BarChart2 className="w-5 h-5" />,
     path: "/kpi-audits",
   },
-  {
-    name: "Leave Requests",
-    icon: <CalendarCheck className="w-5 h-5" />,
-    path: "/holiday-requests",
-  },
+  // {
+  //   name: "Leave Requests",
+  //   icon: <CalendarCheck className="w-5 h-5" />,
+  //   path: "/holiday-requests",
+  // },
 ];
 
 const othersItems: NavItem[] = [

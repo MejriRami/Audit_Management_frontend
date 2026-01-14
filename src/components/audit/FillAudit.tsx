@@ -60,7 +60,7 @@ interface AuditSummary {
 }
 
 // ==================== SCORING SYSTEMS ====================
-const IATF_VALUE_OPTIONS: ValueOption[] = [
+const IATF_PLANT_MANAGER_VALUE_OPTIONS: ValueOption[] = [
   { value: -1, label: "Optional", color: "text-yellow-700" },
   { value: 1, label: "1 - Poor", color: "text-red-700" },
   { value: 2, label: "2 - Weak", color: "text-orange-700" },
@@ -98,8 +98,9 @@ const getValueOptions = (questionnaireName: string): ValueOption[] => {
   }
 
   // Check for IATF/Plant Manager
-  if (name.includes("iatf") || name.includes("plant manager")) {
-    return IATF_VALUE_OPTIONS;
+  // if (name.includes("iatf") || name.includes("plant manager iatf")) {
+  if (name.includes("plant manager iatf")) {
+    return IATF_PLANT_MANAGER_VALUE_OPTIONS;
   }
 
   // Default to Standard
@@ -111,7 +112,7 @@ const needsDetails = (v: AuditValue, questionnaireName: string): boolean => {
 
   const name = questionnaireName.toLowerCase();
 
-  // ✅ VDA: values < 6 need details (0, 4)
+  //  VDA: values < 6 need details (0, 4)
   if (name.includes("vda")) {
     return v < 6;
   }
