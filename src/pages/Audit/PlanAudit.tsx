@@ -1,3 +1,5 @@
+// ✅ FULL FILE: PlanAudit.tsx (with supervisor_email support + clean typings)
+
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -20,9 +22,6 @@ import toast from "react-hot-toast";
  * ✅ date-fns-tz compatibility:
  * - old versions: have formatInTimeZone, utcToZonedTime, zonedTimeToUtc
  * - newer versions: have formatInTimeZone, toZonedTime, fromZonedTime
- *
- * Your project has a version where zonedTimeToUtc is missing,
- * so we import "fromZonedTime" if available.
  */
 import * as tz from "date-fns-tz";
 
@@ -34,6 +33,7 @@ interface PlanModalProps {
 
 interface AuditPlanForm {
   auditeeEmails: string; // comma-separated
+  supervisorEmail: string; // ✅ NEW (required)
   plant: string | null;
   sector: string;
   questionnaireId: string | number | null;
@@ -75,6 +75,7 @@ export default function PlanAudit({
 
   const [form, setForm] = useState<AuditPlanForm>({
     auditeeEmails: "",
+    supervisorEmail: "",
     plant: null,
     sector: "",
     questionnaireId: null,
@@ -103,18 +104,54 @@ export default function PlanAudit({
   ];
 
   const glasses = [
-    { value: "RemoteEye.CN-Anhui@avocarbon.com", label: "RemoteEye.CN-Anhui@avocarbon.com" },
-    { value: "RemoteEye.CN-Tianjin@avocarbon.com", label: "RemoteEye.CN-Tianjin@avocarbon.com" },
-    { value: "RemoteEye.DE-Frankfort@avocarbon.com", label: "RemoteEye.DE-Frankfort@avocarbon.com" },
-    { value: "RemoteEye.FR-Cyclam@avocarbon.com", label: "RemoteEye.FR-Cyclam@avocarbon.com" },
-    { value: "RemoteEye.FR-Poitiers@avocarbon.com", label: "RemoteEye.FR-Poitiers@avocarbon.com" },
-    { value: "RemoteEye.IN-Chennai@avocarbon.com", label: "RemoteEye.IN-Chennai@avocarbon.com" },
-    { value: "RemoteEye.MX-Galeana@avocarbon.com", label: "RemoteEye.MX-Galeana@avocarbon.com" },
-    { value: "RemoteEye.MX-Monterrey@avocarbon.com", label: "RemoteEye.MX-Monterrey@avocarbon.com" },
-    { value: "RemoteEye.MX-Rayones@avocarbon.com", label: "RemoteEye.MX-Rayones@avocarbon.com" },
-    { value: "RemoteEye.TN-Nadhour@avocarbon.com", label: "RemoteEye.TN-Nadhour@avocarbon.com" },
-    { value: "RemoteEye.TN-SameTunisie@avocarbon.com", label: "RemoteEye.TN-SameTunisie@avocarbon.com" },
-    { value: "RemoteEye.TN-SCEET@avocarbon.com", label: "RemoteEye.TN-SCEET@avocarbon.com" },
+    {
+      value: "RemoteEye.CN-Anhui@avocarbon.com",
+      label: "RemoteEye.CN-Anhui@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.CN-Tianjin@avocarbon.com",
+      label: "RemoteEye.CN-Tianjin@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.DE-Frankfort@avocarbon.com",
+      label: "RemoteEye.DE-Frankfort@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.FR-Cyclam@avocarbon.com",
+      label: "RemoteEye.FR-Cyclam@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.FR-Poitiers@avocarbon.com",
+      label: "RemoteEye.FR-Poitiers@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.IN-Chennai@avocarbon.com",
+      label: "RemoteEye.IN-Chennai@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.MX-Galeana@avocarbon.com",
+      label: "RemoteEye.MX-Galeana@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.MX-Monterrey@avocarbon.com",
+      label: "RemoteEye.MX-Monterrey@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.MX-Rayones@avocarbon.com",
+      label: "RemoteEye.MX-Rayones@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-Nadhour@avocarbon.com",
+      label: "RemoteEye.TN-Nadhour@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-SameTunisie@avocarbon.com",
+      label: "RemoteEye.TN-SameTunisie@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-SCEET@avocarbon.com",
+      label: "RemoteEye.TN-SCEET@avocarbon.com",
+    },
     { value: "RemoteEye.TN-STS@avocarbon.com", label: "RemoteEye.TN-STS@avocarbon.com" },
     { value: "RemoteEye.KR-Daegu@avocarbon.com", label: "RemoteEye.KR-Daegu@avocarbon.com" },
   ];
@@ -180,24 +217,25 @@ export default function PlanAudit({
       .map((e) => e.trim())
       .filter((e) => e !== "");
 
-    const isValid = list.every((email) =>
-      /^[^\s@]+@avocarbon\.com$/.test(email)
-    );
-
+    const isValid = list.every((email) => /^[^\s@]+@avocarbon\.com$/i.test(email));
     return { isValid, list };
+  };
+
+  const validateSingleAvocarbonEmail = (email: string) => {
+    const e = (email ?? "").trim();
+    if (!e) return false;
+    return /^[^\s@]+@avocarbon\.com$/i.test(e);
   };
 
   /** timezone preview renderer */
   const renderPreview = (label: string, tzName: string, time: Date | null) => {
     if (!time) return null;
 
-    // formatInTimeZone exists in both old/new date-fns-tz
     const fmt = (tz as any).formatInTimeZone as
       | ((d: Date, tz: string, f: string) => string)
       | undefined;
 
     if (!fmt) {
-      // ultra-fallback (shouldn't happen): show local time
       return (
         <div className="flex justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">{label}</span>
@@ -218,12 +256,6 @@ export default function PlanAudit({
     );
   };
 
-  /**
-   * ✅ Convert Plant "wall-clock" selection to an absolute Date (UTC instant)
-   * Works with BOTH old and new date-fns-tz versions:
-   * - new: fromZonedTime(localDate, tz)
-   * - old: zonedTimeToUtc(localDate, tz)
-   */
   const toUtcInstantFromPlantLocal = (plantLocalDate: Date, tzName: string) => {
     const fromZonedTime = (tz as any).fromZonedTime as
       | ((d: Date, tz: string) => Date)
@@ -236,16 +268,10 @@ export default function PlanAudit({
     if (fromZonedTime) return fromZonedTime(plantLocalDate, tzName);
     if (zonedTimeToUtc) return zonedTimeToUtc(plantLocalDate, tzName);
 
-    // last resort fallback: treat given Date as already UTC (not ideal)
     return plantLocalDate;
   };
 
-  /**
-   * Build a Date representing "auditDate + time" in Plant local wall-clock,
-   * then convert it to a UTC instant.
-   */
   const combineDateAndTimeInPlantTz = (date: Date, time: Date, tzName: string) => {
-    // Build a LOCAL Date object using numeric parts to avoid string parsing issues
     const y = date.getFullYear();
     const m = date.getMonth();
     const d = date.getDate();
@@ -253,10 +279,7 @@ export default function PlanAudit({
     const mm = time.getMinutes();
     const ss = time.getSeconds();
 
-    // This Date is *not* correct timezone yet; it's just holding wall-clock parts.
     const plantLocalWallClock = new Date(y, m, d, hh, mm, ss);
-
-    // Convert that wall-clock to a UTC instant using date-fns-tz helpers
     return toUtcInstantFromPlantLocal(plantLocalWallClock, tzName);
   };
 
@@ -266,6 +289,7 @@ export default function PlanAudit({
 
     if (
       !form.auditeeEmails ||
+      !form.supervisorEmail ||
       !form.plant ||
       !form.questionnaireId ||
       !form.auditDate ||
@@ -279,7 +303,12 @@ export default function PlanAudit({
 
     const { isValid, list } = validateEmails(form.auditeeEmails);
     if (!isValid) {
-      setErrorMessage("All emails must end with @avocarbon.com");
+      setErrorMessage("All auditee emails must end with @avocarbon.com");
+      return;
+    }
+
+    if (!validateSingleAvocarbonEmail(form.supervisorEmail)) {
+      setErrorMessage("Supervisor email must be a valid @avocarbon.com email");
       return;
     }
 
@@ -289,34 +318,25 @@ export default function PlanAudit({
     }
 
     try {
-      const startUtc = combineDateAndTimeInPlantTz(
-        form.auditDate,
-        form.startTime,
-        plantTz
-      );
-      const endUtc = combineDateAndTimeInPlantTz(
-        form.auditDate,
-        form.endTime,
-        plantTz
-      );
+      const startUtc = combineDateAndTimeInPlantTz(form.auditDate, form.startTime, plantTz);
+      const endUtc = combineDateAndTimeInPlantTz(form.auditDate, form.endTime, plantTz);
 
-      // formatInTimeZone exists across versions
       const fmt = (tz as any).formatInTimeZone as
         | ((d: Date, tz: string, f: string) => string)
         | undefined;
 
-      if (!fmt) {
-        throw new Error("date-fns-tz formatInTimeZone not available");
-      }
+      if (!fmt) throw new Error("date-fns-tz formatInTimeZone not available");
 
-      const payload: AuditPlanCreate = {
+      // ✅ Send snake_case keys expected by backend
+      const payload: AuditPlanCreate & { supervisor_email: string } = {
         auditee_emails: list,
         auditor_id: user.id,
         plant: form.plant,
         sector: form.sector,
         questionnaire_id: Number(form.questionnaireId),
 
-        // ✅ send Plant-local strings (stable regardless of auditor timezone)
+        supervisor_email: form.supervisorEmail.trim(),
+
         audit_date: fmt(startUtc, plantTz, "yyyy-MM-dd"),
         start_time: fmt(startUtc, plantTz, "HH:mm:ss"),
         end_time: fmt(endUtc, plantTz, "HH:mm:ss"),
@@ -324,14 +344,15 @@ export default function PlanAudit({
         ...(form.hardwareEmail && { hardware_email: form.hardwareEmail }),
       };
 
-      await dispatch(planAuditThunk(payload)).unwrap();
+      await dispatch(planAuditThunk(payload as any)).unwrap();
 
       toast.success("Audit planned successfully!", { duration: 10000 });
 
-      if (onAuditCreated) onAuditCreated();
+      onAuditCreated?.();
 
       setForm({
         auditeeEmails: "",
+        supervisorEmail: "",
         plant: null,
         sector: "",
         questionnaireId: null,
@@ -373,40 +394,55 @@ export default function PlanAudit({
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT: Form */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Auditees + Supervisor */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <Label htmlFor="auditees">Auditee Email(s)</Label>
                 <Input
                   type="text"
                   id="auditees"
-                  placeholder="Enter emails separated by commas"
+                  placeholder="user1@avocarbon.com, user2@avocarbon.com"
                   value={form.auditeeEmails}
                   onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      auditeeEmails: e.target.value,
-                    }))
+                    setForm((prev) => ({ ...prev, auditeeEmails: e.target.value }))
                   }
                 />
               </div>
 
               <div className="space-y-4">
+                <Label htmlFor="supervisor_email">
+                  Supervisor Email <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  type="email"
+                  id="supervisor_email"
+                  placeholder="supervisor@avocarbon.com"
+                  value={form.supervisorEmail}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, supervisorEmail: e.target.value }))
+                  }
+                />
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Used for CAR escalation CC (supervisor).
+                </div>
+              </div>
+            </div>
+
+            {/* Plant + Sector */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
                 <Label htmlFor="plant">Plant (Anchor)</Label>
                 <Select
                   options={plantOptions}
                   placeholder="Select a plant"
-                  onChange={(value) =>
-                    setForm((prev) => ({ ...prev, plant: value }))
-                  }
+                  onChange={(value) => setForm((prev) => ({ ...prev, plant: value }))}
                   className="dark:bg-dark-900"
                 />
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   Plant timezone: <span className="font-mono">{plantTz}</span>
                 </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <Label htmlFor="sector">Sector</Label>
                 <Input
@@ -418,7 +454,10 @@ export default function PlanAudit({
                   className="dark:bg-dark-900"
                 />
               </div>
+            </div>
 
+            {/* Questionnaire + Hardware */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <Label htmlFor="questionnaire">Questionnaire</Label>
                 <Select
@@ -435,6 +474,18 @@ export default function PlanAudit({
                   className="dark:bg-dark-900"
                 />
               </div>
+
+              <div className="space-y-4">
+                <Label htmlFor="hardware">Hardware</Label>
+                <Select
+                  options={glasses}
+                  placeholder="Select a hardware email"
+                  onChange={(value) =>
+                    setForm((prev) => ({ ...prev, hardwareEmail: value }))
+                  }
+                  className="dark:bg-dark-900"
+                />
+              </div>
             </div>
 
             {/* Date & Time */}
@@ -443,17 +494,13 @@ export default function PlanAudit({
                 id="auditDate"
                 label="Audit Date (Plant)"
                 value={form.auditDate}
-                onChange={(date) =>
-                  setForm((prev) => ({ ...prev, auditDate: date }))
-                }
+                onChange={(date) => setForm((prev) => ({ ...prev, auditDate: date }))}
               />
 
               <TimePicker
                 label="Start Time (Plant)"
                 value={form.startTime}
-                onChange={(time) =>
-                  setForm((prev) => ({ ...prev, startTime: time }))
-                }
+                onChange={(time) => setForm((prev) => ({ ...prev, startTime: time }))}
                 selectedDate={form.auditDate}
                 blockedSlots={blockedSlots}
                 compareTime={form.endTime}
@@ -463,26 +510,11 @@ export default function PlanAudit({
               <TimePicker
                 label="End Time (Plant)"
                 value={form.endTime}
-                onChange={(time) =>
-                  setForm((prev) => ({ ...prev, endTime: time }))
-                }
+                onChange={(time) => setForm((prev) => ({ ...prev, endTime: time }))}
                 selectedDate={form.auditDate}
                 blockedSlots={blockedSlots}
                 compareTime={form.startTime}
                 mode="end"
-              />
-            </div>
-
-            {/* Hardware */}
-            <div className="space-y-4">
-              <Label htmlFor="hardware">Hardware</Label>
-              <Select
-                options={glasses}
-                placeholder="Select a hardware email"
-                onChange={(value) =>
-                  setForm((prev) => ({ ...prev, hardwareEmail: value }))
-                }
-                className="dark:bg-dark-900"
               />
             </div>
 
@@ -507,9 +539,7 @@ export default function PlanAudit({
                 onClick={handleSubmit}
                 disabled={planningLoading}
                 className={`px-4 py-2 text-white rounded-lg ${
-                  planningLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-indigo-600"
+                  planningLoading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600"
                 }`}
               >
                 {planningLoading ? "Processing..." : "Add Audit Plan"}
@@ -520,9 +550,7 @@ export default function PlanAudit({
           {/* RIGHT: Time synchronization / timezone previews */}
           <div className="space-y-4">
             <div className="rounded-lg border p-4 dark:border-gray-700">
-              <div className="font-semibold mb-2 dark:text-gray-100">
-                Live clocks
-              </div>
+              <div className="font-semibold mb-2 dark:text-gray-100">Live clocks</div>
               <div className="space-y-2 text-sm">
                 {renderPreview("🏭 Plant", plantTz, new Date())}
                 {renderPreview("🧑‍💼 You", auditorTz, new Date())}
@@ -531,9 +559,7 @@ export default function PlanAudit({
             </div>
 
             <div className="rounded-lg border p-4 dark:border-gray-700">
-              <div className="font-semibold mb-2 dark:text-gray-100">
-                Selected start time
-              </div>
+              <div className="font-semibold mb-2 dark:text-gray-100">Selected start time</div>
               <div className="space-y-2">
                 {renderPreview("🏭 Plant", plantTz, form.startTime)}
                 {renderPreview("🧑‍💼 You", auditorTz, form.startTime)}
@@ -543,9 +569,7 @@ export default function PlanAudit({
 
             {form.endTime && (
               <div className="rounded-lg border p-4 dark:border-gray-700">
-                <div className="font-semibold mb-2 dark:text-gray-100">
-                  Selected end time
-                </div>
+                <div className="font-semibold mb-2 dark:text-gray-100">Selected end time</div>
                 <div className="space-y-2">
                   {renderPreview("🏭 Plant", plantTz, form.endTime)}
                   {renderPreview("🧑‍💼 You", auditorTz, form.endTime)}
