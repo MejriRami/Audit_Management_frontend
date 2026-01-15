@@ -23,6 +23,7 @@ import {
   removePickableAudit,
 } from "../../redux/audit/audit-slice";
 import { apiUploadFile } from "../../redux/audit/audit";
+import IATFNonConformityManager from "./IatfNonConformityManager";
 
 // ==================== TYPES ====================
 type AuditValue = "" | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
@@ -78,7 +79,6 @@ const STANDARD_VALUE_OPTIONS: ValueOption[] = [
   { value: 10, label: "10 - Good practice", color: "text-emerald-700" },
 ];
 
-// ✅ VDA 6.3 VALUE OPTIONS
 const VDA_VALUE_OPTIONS: ValueOption[] = [
   { value: -1, label: "Optional", color: "text-yellow-700" },
   { value: 0, label: "0 - Not fulfilled", color: "text-red-700" },
@@ -92,18 +92,14 @@ const VDA_VALUE_OPTIONS: ValueOption[] = [
 const getValueOptions = (questionnaireName: string): ValueOption[] => {
   const name = questionnaireName.toLowerCase();
 
-  // ✅ Check for VDA first
   if (name.includes("vda")) {
     return VDA_VALUE_OPTIONS;
   }
 
-  // Check for IATF/Plant Manager
-  // if (name.includes("iatf") || name.includes("plant manager iatf")) {
   if (name.includes("plant manager iatf")) {
     return IATF_PLANT_MANAGER_VALUE_OPTIONS;
   }
 
-  // Default to Standard
   return STANDARD_VALUE_OPTIONS;
 };
 
@@ -112,17 +108,14 @@ const needsDetails = (v: AuditValue, questionnaireName: string): boolean => {
 
   const name = questionnaireName.toLowerCase();
 
-  //  VDA: values < 6 need details (0, 4)
   if (name.includes("vda")) {
     return v < 6;
   }
 
-  // IATF: values <= 3 need details
   if (name.includes("iatf") || name.includes("plant manager")) {
     return v <= 3;
   }
 
-  // Standard: values <= 5 need details
   return v <= 5;
 };
 
@@ -177,6 +170,12 @@ const getFooterMessage = (questionnaireName: string): string => {
     return "Values ≤3 require findings. Check 'Request CAR' for corrective actions.";
   }
   return "Values ≤5 require findings. Check 'Request CAR' for corrective actions.";
+};
+
+// Check if questionnaire is IATF NC mode (not Plant Manager IATF)
+const isIATFNCMode = (questionnaireName: string): boolean => {
+  const name = questionnaireName.toLowerCase();
+  return name.includes("iatf") && !name.includes("plant manager");
 };
 
 // ==================== SUB-COMPONENTS ====================
@@ -297,8 +296,8 @@ const AuditHeader = ({
         </div>
       </div>
 
-      {/* Audit Summary */}
-      {hasItems && (
+      {/* Audit Summary - Only show for non-IATF-NC mode */}
+      {hasItems && !isIATFNCMode(questionnaireName) && (
         <div className="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -315,7 +314,6 @@ const AuditHeader = ({
               </div>
             </div>
 
-            {/* Questionnaire Name Badge */}
             {questionnaireName && (
               <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg">
                 <ClipboardList size={16} className="text-indigo-600" />
@@ -412,8 +410,8 @@ const AuditHeader = ({
         </div>
       )}
 
-      {/* Progress Bar */}
-      {hasItems && (
+      {/* Progress Bar - Only show for non-IATF-NC mode */}
+      {hasItems && !isIATFNCMode(questionnaireName) && (
         <div className="p-5 bg-white border-b border-slate-200">
           <div className="flex items-center gap-4 mb-3">
             <span className="text-sm font-semibold text-slate-700">
@@ -689,6 +687,7 @@ export default function AuditChecklistRefactored() {
     number | ""
   >("");
   const [questionnaireName, setQuestionnaireName] = useState<string>("");
+  const [auditee_name, setAuditeeName] = useState<string>("");
   const [items, setItems] = useState<AuditItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -717,6 +716,12 @@ export default function AuditChecklistRefactored() {
   // Determine scoring system
   const valueOptions = useMemo(
     () => getValueOptions(questionnaireName),
+    [questionnaireName]
+  );
+
+  // Check if in IATF NC mode
+  const showIATFNCInterface = useMemo(
+    () => isIATFNCMode(questionnaireName),
     [questionnaireName]
   );
 
@@ -753,6 +758,14 @@ export default function AuditChecklistRefactored() {
     if (selectedAudit) {
       const name = selectedAudit.questionnaire_name || "";
       setQuestionnaireName(name);
+      const auditee_name = selectedAudit.auditees[0].email || "";
+      setAuditeeName(auditee_name);
+
+      // If IATF NC mode, don't load questions
+      if (isIATFNCMode(name)) {
+        setItems([]);
+        return;
+      }
     }
 
     const result = await dispatch(getAuditQuestions(auditId));
@@ -782,6 +795,118 @@ export default function AuditChecklistRefactored() {
       setItems([]);
       setQuestionnaireName("");
       toast.error("Failed to load audit questions");
+    }
+  };
+
+  // Handle IATF NC submission
+  const handleIATFNCSubmission = async (
+    nonConformities: any[],
+    auditDetails: {
+      actualStartTime: string;
+      actualEndTime: string;
+      strongPoints: string;
+      weakPoints: string;
+    }
+  ) => {
+    if (!selectedPlannedAuditId) {
+      toast.error("No audit selected");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // Define the classification type
+      type NCClassification =
+        | "Minor"
+        | "Major"
+        | "Improvement"
+        | "Strong Point";
+
+      // Create a properly typed mapping
+      const classificationMap: Record<NCClassification, number> = {
+        Minor: 1,
+        Major: 2,
+        Improvement: 3,
+        "Strong Point": 4,
+      };
+
+      // Upload evidence files for each NC
+      const answers = await Promise.all(
+        nonConformities.map(async (nc, index) => {
+          const uploadedEvidence = await Promise.all(
+            nc.evidence.map(async (file: File) => {
+              const uploadResult = await apiUploadFile(file);
+              return {
+                filename: uploadResult.filename,
+                mimetype: uploadResult.mimetype,
+                size: uploadResult.size,
+                file_url: uploadResult.file_url,
+              };
+            })
+          );
+
+          // Map classification to numeric value with type safety
+          const classificationValue =
+            classificationMap[nc.classification as NCClassification] || 1;
+
+          return {
+            question_id: -(index + 1), // Negative ID to distinguish IATF NCs
+            value: classificationValue,
+            finding_text: nc.findings,
+            documents: uploadedEvidence,
+            car_reason: nc.observedNonConformity,
+            request_car: nc.requestCAR,
+            critical_value: 0, // Not applicable for IATF
+            // ✅ IATF NC specific fields
+            process: nc.process,
+            standard_paragraph: nc.normParagraph,
+            classification: nc.classification,
+          };
+        })
+      );
+
+      // Submit using existing API
+      const resultAction = await dispatch(
+        executeAuditThunk({
+          auditId: selectedPlannedAuditId,
+          data: {
+            answers,
+            audit_date: summary.auditDate,
+            start_time: auditDetails.actualStartTime,
+            end_time: auditDetails.actualEndTime,
+            strong_points: auditDetails.strongPoints || "",
+            weak_points: auditDetails.weakPoints || "",
+          },
+        })
+      );
+
+      if (!executeAuditThunk.fulfilled.match(resultAction)) {
+        toast.error(
+          String(resultAction.payload || "Failed to submit non-conformities")
+        );
+        return;
+      }
+
+      const res = resultAction.payload as any;
+      const carsCreated = nonConformities.filter((nc) => nc.requestCAR).length;
+
+      toast.success(
+        carsCreated > 0
+          ? `${nonConformities.length} NC(s) submitted. ${carsCreated} CAR(s) created.`
+          : `${nonConformities.length} NC(s) submitted successfully.`
+      );
+
+      dispatch(removePickableAudit(selectedPlannedAuditId));
+      setSubmitted(true);
+      setSelectedPlannedAuditId("");
+      setQuestionnaireName("");
+    } catch (err: any) {
+      console.error("IATF NC submission error:", err);
+      toast.error(err?.message || "Failed to submit non-conformities");
+      throw err;
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -890,7 +1015,7 @@ export default function AuditChecklistRefactored() {
     setSummary((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Submit handler
+  // Submit handler for standard audits
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitted || submitting) return;
@@ -957,7 +1082,7 @@ export default function AuditChecklistRefactored() {
           },
         })
       );
-      console.log(resultAction);
+
       if (!executeAuditThunk.fulfilled.match(resultAction)) {
         toast.error(String(resultAction.payload || "Failed to execute audit"));
         setSubmitted(false);
@@ -1076,6 +1201,45 @@ export default function AuditChecklistRefactored() {
   }));
 
   // ==================== RENDER ====================
+
+  // If IATF NC mode is active and audit is selected, show NC manager
+  if (showIATFNCInterface && selectedPlannedAuditId) {
+    const selectedAudit = pickableAudits.find(
+      (a) => a.id === selectedPlannedAuditId
+    );
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 p-4 md:p-8">
+        <div className="max-w-[1600px] mx-auto mb-6">
+          {/* Back button to return to audit selection */}
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedPlannedAuditId("");
+              setQuestionnaireName("");
+              setSubmitted(false);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            <ChevronDown size={16} className="rotate-90" />
+            Back to Audit Selection
+          </button>
+        </div>
+
+        <IATFNonConformityManager
+          plannedAuditId={selectedPlannedAuditId}
+          questionnaireName={questionnaireName}
+          auditNumber={selectedAudit?.audit_number}
+          auditeeName={auditee_name}
+          auditDate={selectedAudit?.planned_date}
+          plannedStartTime={selectedAudit?.planned_start_time}
+          plannedEndTime={selectedAudit?.planned_end_time}
+          onSubmit={handleIATFNCSubmission}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 p-4 md:p-8">
       <div className="max-w-[1600px] mx-auto">
