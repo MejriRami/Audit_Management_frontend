@@ -57,7 +57,6 @@ interface IATFNonConformityManagerProps {
 
 // ==================== MAIN COMPONENT ====================
 export default function IATFNonConformityManager({
-  plannedAuditId,
   questionnaireName,
   auditNumber = "N/A",
   auditeeName = "N/A",

@@ -888,7 +888,6 @@ export default function AuditChecklistRefactored() {
         return;
       }
 
-      const res = resultAction.payload as any;
       const carsCreated = nonConformities.filter((nc) => nc.requestCAR).length;
 
       toast.success(
