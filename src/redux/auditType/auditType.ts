@@ -10,7 +10,7 @@ import { AddAuditTypes, DeleteAuditTypes, GetAuditTypes } from "./auditType-type
 
 export const getAuditTypes: GetAuditTypes = async (dispatch) => {
   dispatch(getAuditTypeRequest());
-  const url = `/audit-types`;
+  const url = `/audit-types/all`;
 
   try {
     let response = await axiosInstance.get(url);
@@ -29,7 +29,7 @@ export const getAuditTypes: GetAuditTypes = async (dispatch) => {
 
 export const addAuditTypes: AddAuditTypes = async (data, dispatch) => {
   dispatch(addAuditTypeRequest());
-  const url = `/audit-types`;
+  const url = `/audit-types/add`;
 
   try {
     let response = await axiosInstance.post(url, data);
