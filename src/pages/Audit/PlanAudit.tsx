@@ -103,20 +103,62 @@ export default function PlanAudit({
   ];
 
   const glasses = [
-    { value: "RemoteEye.CN-Anhui@avocarbon.com", label: "RemoteEye.CN-Anhui@avocarbon.com" },
-    { value: "RemoteEye.CN-Tianjin@avocarbon.com", label: "RemoteEye.CN-Tianjin@avocarbon.com" },
-    { value: "RemoteEye.DE-Frankfort@avocarbon.com", label: "RemoteEye.DE-Frankfort@avocarbon.com" },
-    { value: "RemoteEye.FR-Cyclam@avocarbon.com", label: "RemoteEye.FR-Cyclam@avocarbon.com" },
-    { value: "RemoteEye.FR-Poitiers@avocarbon.com", label: "RemoteEye.FR-Poitiers@avocarbon.com" },
-    { value: "RemoteEye.IN-Chennai@avocarbon.com", label: "RemoteEye.IN-Chennai@avocarbon.com" },
-    { value: "RemoteEye.MX-Galeana@avocarbon.com", label: "RemoteEye.MX-Galeana@avocarbon.com" },
-    { value: "RemoteEye.MX-Monterrey@avocarbon.com", label: "RemoteEye.MX-Monterrey@avocarbon.com" },
-    { value: "RemoteEye.MX-Rayones@avocarbon.com", label: "RemoteEye.MX-Rayones@avocarbon.com" },
-    { value: "RemoteEye.TN-Nadhour@avocarbon.com", label: "RemoteEye.TN-Nadhour@avocarbon.com" },
-    { value: "RemoteEye.TN-SameTunisie@avocarbon.com", label: "RemoteEye.TN-SameTunisie@avocarbon.com" },
-    { value: "RemoteEye.TN-SCEET@avocarbon.com", label: "RemoteEye.TN-SCEET@avocarbon.com" },
-    { value: "RemoteEye.TN-STS@avocarbon.com", label: "RemoteEye.TN-STS@avocarbon.com" },
-    { value: "RemoteEye.KR-Daegu@avocarbon.com", label: "RemoteEye.KR-Daegu@avocarbon.com" },
+    {
+      value: "RemoteEye.CN-Anhui@avocarbon.com",
+      label: "RemoteEye.CN-Anhui@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.CN-Tianjin@avocarbon.com",
+      label: "RemoteEye.CN-Tianjin@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.DE-Frankfort@avocarbon.com",
+      label: "RemoteEye.DE-Frankfort@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.FR-Cyclam@avocarbon.com",
+      label: "RemoteEye.FR-Cyclam@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.FR-Poitiers@avocarbon.com",
+      label: "RemoteEye.FR-Poitiers@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.IN-Chennai@avocarbon.com",
+      label: "RemoteEye.IN-Chennai@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.MX-Galeana@avocarbon.com",
+      label: "RemoteEye.MX-Galeana@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.MX-Monterrey@avocarbon.com",
+      label: "RemoteEye.MX-Monterrey@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.MX-Rayones@avocarbon.com",
+      label: "RemoteEye.MX-Rayones@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-Nadhour@avocarbon.com",
+      label: "RemoteEye.TN-Nadhour@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-SameTunisie@avocarbon.com",
+      label: "RemoteEye.TN-SameTunisie@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-SCEET@avocarbon.com",
+      label: "RemoteEye.TN-SCEET@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.TN-STS@avocarbon.com",
+      label: "RemoteEye.TN-STS@avocarbon.com",
+    },
+    {
+      value: "RemoteEye.KR-Daegu@avocarbon.com",
+      label: "RemoteEye.KR-Daegu@avocarbon.com",
+    },
   ];
 
   const blockedSlots = [
@@ -244,7 +286,11 @@ export default function PlanAudit({
    * Build a Date representing "auditDate + time" in Plant local wall-clock,
    * then convert it to a UTC instant.
    */
-  const combineDateAndTimeInPlantTz = (date: Date, time: Date, tzName: string) => {
+  const combineDateAndTimeInPlantTz = (
+    date: Date,
+    time: Date,
+    tzName: string
+  ) => {
     // Build a LOCAL Date object using numeric parts to avoid string parsing issues
     const y = date.getFullYear();
     const m = date.getMonth();
@@ -270,8 +316,7 @@ export default function PlanAudit({
       !form.questionnaireId ||
       !form.auditDate ||
       !form.startTime ||
-      !form.endTime ||
-      !form.sector
+      !form.endTime
     ) {
       setErrorMessage("Please fill all required fields.");
       return;
@@ -366,7 +411,8 @@ export default function PlanAudit({
             Add New Audit Plan
           </h5>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Date &amp; time are selected in <b>Plant local time</b>. Live previews show other timezones.
+            Date &amp; time are selected in <b>Plant local time</b>. Live
+            previews show other timezones.
           </p>
         </div>
 
