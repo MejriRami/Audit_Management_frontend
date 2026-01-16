@@ -4,8 +4,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { Link, useNavigate } from "react-router";
 import { logUserOut, me } from "../../redux/auth/auth";
 import { useDispatch, useSelector } from "react-redux";
-import logo from "../../../public/images/logo/avocarbon.png";
-
+import logo from "../../assets/logo/avocarbon.png";
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
@@ -21,8 +20,8 @@ export default function UserDropdown() {
   }
 
   const logout = () => {
-      logUserOut(dispatch);
-      navigate('/signIn');
+    logUserOut(dispatch);
+    navigate("/signIn");
   };
 
   useEffect(() => {
@@ -39,7 +38,9 @@ export default function UserDropdown() {
           <img src={logo} alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{user?.first_name} {user?.last_name}</span>
+        <span className="block mr-1 font-medium text-theme-sm">
+          {user?.first_name} {user?.last_name}
+        </span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -103,7 +104,7 @@ export default function UserDropdown() {
         </ul>
         <Link
           onClick={logout}
-          to={'#'}
+          to={"#"}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg

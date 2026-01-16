@@ -222,7 +222,7 @@ export const CarAccess: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-cyan-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative background */}
-      <div className="absolute inset-0 bg-[url('images/avocarbon-brushes.jpg')] bg-cover bg-center"></div>
+      <div className="absolute inset-0 bg-[url('assets/images/avocarbon-brushes.jpg')] bg-cover bg-center"></div>
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
