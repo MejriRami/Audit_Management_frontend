@@ -268,7 +268,13 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         return;
       }
 
-      setPreviewPdfUrl(`/reports/${audit.id}/preview-pdf`);
+      const response = await axiosInstance.get(
+        `/reports/${audit.id}/preview-pdf`,
+        { responseType: "blob" }
+      );
+
+      const url = URL.createObjectURL(response.data);
+      setPreviewPdfUrl(url);
       setCurrentPreviewAudit(audit);
       setPdfPreviewOpen(true);
     } catch (error: any) {
