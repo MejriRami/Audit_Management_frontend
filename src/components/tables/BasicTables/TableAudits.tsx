@@ -15,7 +15,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import Pagination from "../../ui/pagination/pagination";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import CompactReportActions from "../../report/CompactReportActions";
 import PDFPreviewModal from "../../report/PDFPreviewModal";
 import SendReportEmailModal from "../../report/SendReportEmailModal";
@@ -31,6 +30,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Audit } from "../../../redux/audit/audit-types";
+import axiosInstance from "../../../services/axiosInstance";
 interface TableAuditsProps {
   audits: Audit[];
 }
@@ -182,8 +182,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         }
 
         try {
-          const response = await axios.get(
-            `/api/reports/${audit.id}/report-status`
+          const response = await axiosInstance.get(
+            `/reports/${audit.id}/report-status`
           );
           statusUpdates[audit.id] = {
             generating: false,
@@ -252,8 +252,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     }
 
     try {
-      const statusResponse = await axios.get(
-        `/api/reports/${audit.id}/report-status`
+      const statusResponse = await axiosInstance.get(
+        `/reports/${audit.id}/report-status`
       );
 
       if (!statusResponse.data.report_exists) {
@@ -268,7 +268,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         return;
       }
 
-      setPreviewPdfUrl(`/api/reports/${audit.id}/preview-pdf`);
+      setPreviewPdfUrl(`/reports/${audit.id}/preview-pdf`);
       setCurrentPreviewAudit(audit);
       setPdfPreviewOpen(true);
     } catch (error: any) {
@@ -325,8 +325,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     );
 
     try {
-      const response = await axios.post(
-        `/api/reports/${auditId}/generate-report`
+      const response = await axiosInstance.post(
+        `/reports/${auditId}/generate-report`
       );
 
       if (response.data.success) {
@@ -410,10 +410,13 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     );
 
     try {
-      const response = await axios.post(`/api/reports/${auditId}/send-email`, {
-        recipients,
-        include_auditor: true, // Always include auditor in automatic emails
-      });
+      const response = await axiosInstance.post(
+        `/reports/${auditId}/send-email`,
+        {
+          recipients,
+          include_auditor: true, // Always include auditor in automatic emails
+        }
+      );
 
       if (response.data.success) {
         setEmailsSent((prev) => ({ ...prev, [auditId]: true }));
@@ -455,8 +458,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   const downloadReport = async (auditId: number, auditNumber: string) => {
     try {
-      const response = await axios.get(
-        `/api/reports/${auditId}/download-report`,
+      const response = await axiosInstance.get(
+        `/reports/${auditId}/download-report`,
         { responseType: "blob" }
       );
 
@@ -531,10 +534,13 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     );
 
     try {
-      const response = await axios.post(`/api/reports/${auditId}/send-email`, {
-        recipients,
-        include_auditor: includeAuditor,
-      });
+      const response = await axiosInstance.post(
+        `/reports/${auditId}/send-email`,
+        {
+          recipients,
+          include_auditor: includeAuditor,
+        }
+      );
 
       if (response.data.success) {
         setEmailsSent((prev) => ({ ...prev, [auditId]: true }));
