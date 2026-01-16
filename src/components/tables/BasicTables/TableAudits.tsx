@@ -252,22 +252,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     }
 
     try {
-      const statusResponse = await axiosInstance.get(
-        `/reports/${audit.id}/report-status`
-      );
-
-      if (!statusResponse.data.report_exists) {
-        toast.error("Report not generated yet. Please generate it first.", {
-          style: {
-            borderRadius: "16px",
-            background: "#dc2626",
-            color: "#fff",
-            padding: "16px",
-          },
-        });
-        return;
-      }
-
       const response = await axiosInstance.get(
         `/reports/${audit.id}/preview-pdf`,
         { responseType: "blob" }
