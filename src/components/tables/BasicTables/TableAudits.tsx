@@ -56,19 +56,19 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState("");
   const [currentPreviewAudit, setCurrentPreviewAudit] = useState<Audit | null>(
-    null
+    null,
   );
 
   // Email modal / state
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [currentEmailAudit, setCurrentEmailAudit] = useState<Audit | null>(
-    null
+    null,
   );
   const [sendingEmails, setSendingEmails] = useState<{
     [auditId: number]: boolean;
   }>({});
   const [emailsSent, setEmailsSent] = useState<{ [auditId: number]: boolean }>(
-    {}
+    {},
   );
 
   const user = useSelector((state: any) => state.auth.user);
@@ -142,10 +142,10 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   // Separate ongoing and completed audits
   const ongoingAudits = audits.filter(
-    (a) => normalizedStatus(a.status) !== "completed"
+    (a) => normalizedStatus(a.status) !== "completed",
   );
   const completedAudits = audits.filter(
-    (a) => normalizedStatus(a.status) === "completed"
+    (a) => normalizedStatus(a.status) === "completed",
   );
 
   // Pagination state
@@ -157,15 +157,15 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   const totalPagesOngoing = Math.ceil(ongoingAudits.length / ongoingPageSize);
   const paginatedOngoing = ongoingAudits.slice(
     (ongoingPage - 1) * ongoingPageSize,
-    ongoingPage * ongoingPageSize
+    ongoingPage * ongoingPageSize,
   );
 
   const totalPagesCompleted = Math.ceil(
-    completedAudits.length / completedPageSize
+    completedAudits.length / completedPageSize,
   );
   const paginatedCompleted = completedAudits.slice(
     (completedPage - 1) * completedPageSize,
-    completedPage * completedPageSize
+    completedPage * completedPageSize,
   );
 
   // ------------------------ Report + Email Status ------------------------
@@ -183,7 +183,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
         try {
           const response = await axiosInstance.get(
-            `/reports/${audit.id}/report-status`
+            `/reports/${audit.id}/report-status`,
           );
           statusUpdates[audit.id] = {
             generating: false,
@@ -192,7 +192,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         } catch {
           statusUpdates[audit.id] = { generating: false, available: false };
         }
-      })
+      }),
     );
 
     setReportStatus((prev) => ({ ...prev, ...statusUpdates }));
@@ -254,7 +254,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     try {
       const response = await axiosInstance.get(
         `/reports/${audit.id}/preview-pdf`,
-        { responseType: "blob" }
+        { responseType: "blob" },
       );
 
       const url = URL.createObjectURL(response.data);
@@ -278,7 +278,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     if (currentPreviewAudit) {
       await downloadReport(
         currentPreviewAudit.id,
-        currentPreviewAudit.audit_number
+        currentPreviewAudit.audit_number,
       );
     }
   };
@@ -311,12 +311,12 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           color: "#fff",
           padding: "16px",
         },
-      }
+      },
     );
 
     try {
       const response = await axiosInstance.post(
-        `/reports/${auditId}/generate-report`
+        `/reports/${auditId}/generate-report`,
       );
 
       if (response.data.success) {
@@ -334,12 +334,9 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             padding: "16px",
           },
         });
-
-        // ✅ NEW: Automatically send email after successful report generation
-        if (response.data.success && response.data.report_exists) {
-          // Now safe to send email
-          await sendEmailAutomatically(audit);
-        }
+        // console.log(response.data);
+        // ✅ Automatically send email after successful report generation
+        await sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }
@@ -364,7 +361,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             color: "#fff",
             padding: "16px",
           },
-        }
+        },
       );
     }
   };
@@ -399,7 +396,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           color: "#fff",
           padding: "16px",
         },
-      }
+      },
     );
 
     try {
@@ -408,7 +405,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         {
           recipients,
           include_auditor: true, // Always include auditor in automatic emails
-        }
+        },
       );
 
       if (response.data.success) {
@@ -425,7 +422,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               color: "#fff",
               padding: "16px",
             },
-          }
+          },
         );
       } else {
         throw new Error("Failed to send email");
@@ -442,7 +439,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             color: "#fff",
             padding: "16px",
           },
-        }
+        },
       );
     } finally {
       setSendingEmails((prev) => ({ ...prev, [auditId]: false }));
@@ -453,7 +450,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     try {
       const response = await axiosInstance.get(
         `/reports/${auditId}/download-report`,
-        { responseType: "blob" }
+        { responseType: "blob" },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -505,7 +502,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   const handleSendEmail = async (
     recipients: string[],
-    includeAuditor: boolean
+    includeAuditor: boolean,
   ) => {
     if (!currentEmailAudit) return;
 
@@ -523,7 +520,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           color: "#fff",
           padding: "16px",
         },
-      }
+      },
     );
 
     try {
@@ -532,7 +529,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         {
           recipients,
           include_auditor: includeAuditor,
-        }
+        },
       );
 
       if (response.data.success) {
@@ -549,7 +546,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               color: "#fff",
               padding: "16px",
             },
-          }
+          },
         );
 
         setEmailModalOpen(false);
@@ -569,7 +566,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             color: "#fff",
             padding: "16px",
           },
-        }
+        },
       );
     } finally {
       setSendingEmails((prev) => ({ ...prev, [auditId]: false }));
