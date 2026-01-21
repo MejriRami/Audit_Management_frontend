@@ -1,5 +1,3 @@
-// ✅ FULL FILE: BasicTables.tsx (copy/paste)
-
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -43,7 +41,7 @@ export default function BasicTables() {
   const [searchParams] = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<"audits" | "corrective_actions">(
-    "audits"
+    "audits",
   );
 
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
@@ -58,13 +56,13 @@ export default function BasicTables() {
   });
 
   // ---- Corrective Actions (from API) ----
-  const [correctiveActions, setCorrectiveActions] = useState<CorrectiveAction[]>(
-    []
-  );
+  const [correctiveActions, setCorrectiveActions] = useState<
+    CorrectiveAction[]
+  >([]);
   const [carsLoading, setCarsLoading] = useState(false);
   const [carsError, setCarsError] = useState<string | null>(null);
 
-  // ----- Redux audit state via selectors (✅ safe defaults) -----
+  // ----- Redux audit state via selectors ( safe defaults) -----
   const auditsLoading = useAppSelector(selectAuditsLoading);
   const auditsError = useAppSelector(selectAuditsError);
 
@@ -111,7 +109,7 @@ export default function BasicTables() {
     }
   }, [searchParams]);
 
-  // ✅ Fetch corrective actions when tab is opened
+  //  Fetch corrective actions when tab is opened
   useEffect(() => {
     if (activeTab !== "corrective_actions") return;
 
@@ -121,9 +119,12 @@ export default function BasicTables() {
 
       try {
         const token = localStorage.getItem("token"); // adjust key if different
-        const res = await axios.get(`${API_BASE}/car/admin/corrective-actions`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
+        const res = await axios.get(
+          `${API_BASE}/car/admin/corrective-actions`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          },
+        );
 
         // backend returns: { items: [...] }
         setCorrectiveActions(res.data?.items ?? []);
@@ -158,10 +159,12 @@ export default function BasicTables() {
 
   const handleFilterChange = (key: keyof AuditFilters, value: string) => {
     if (activeTab === "audits") {
-      dispatch(setAuditFiltersAction({ [key]: value } as Partial<AuditFilters>));
+      dispatch(
+        setAuditFiltersAction({ [key]: value } as Partial<AuditFilters>),
+      );
     } else {
       // kept for future
-      setEntityFilters((prev) => ({ ...prev, [key]: value } as any));
+      setEntityFilters((prev) => ({ ...prev, [key]: value }) as any);
     }
   };
 
@@ -173,7 +176,7 @@ export default function BasicTables() {
     }
   };
 
-  // ✅ Corrective actions filtering (supports notification params)
+  //  Corrective actions filtering (supports notification params)
   const filteredCorrectiveActions = useMemo(() => {
     const term = entityFilters.search.toLowerCase().trim();
 
@@ -211,7 +214,7 @@ export default function BasicTables() {
   }, [entityFilters.search, correctiveActions]);
 
   const currentSearch =
-    activeTab === "audits" ? auditFilters.search ?? "" : entityFilters.search;
+    activeTab === "audits" ? (auditFilters.search ?? "") : entityFilters.search;
 
   return (
     <>
@@ -356,7 +359,9 @@ export default function BasicTables() {
                 <select
                   className="p-2 border rounded w-full"
                   value={auditFilters.auditor ?? ""}
-                  onChange={(e) => handleFilterChange("auditor", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("auditor", e.target.value)
+                  }
                 >
                   <option value="">All</option>
                   {uniqueAuditors.map((email) => (
@@ -373,7 +378,9 @@ export default function BasicTables() {
                 <select
                   className="p-2 border rounded w-full"
                   value={auditFilters.auditee ?? ""}
-                  onChange={(e) => handleFilterChange("auditee", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("auditee", e.target.value)
+                  }
                 >
                   <option value="">All</option>
                   {uniqueAuditees.map((email) => (
