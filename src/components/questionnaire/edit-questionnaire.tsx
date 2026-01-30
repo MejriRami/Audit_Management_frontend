@@ -94,7 +94,7 @@ export default function EditQuestionnaireModal({
   };
 
   const handleUpdateQuestionnaire = async (
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
 
@@ -107,32 +107,34 @@ export default function EditQuestionnaireModal({
 
     // Prepare data
     const adjustedFormQuestionnaire = {
-      ...formQuestionnaire,
+      name: formQuestionnaire.name,
+      status: formQuestionnaire.status,
       target_duration: formQuestionnaire.target_duration.endsWith(":00")
         ? formQuestionnaire.target_duration
         : formQuestionnaire.target_duration + ":00",
+      type_id: formQuestionnaire.type_id
+        ? Number(formQuestionnaire.type_id)
+        : undefined,
+      framework_id: formQuestionnaire.framework_id
+        ? Number(formQuestionnaire.framework_id)
+        : undefined,
       auditor_emails: formQuestionnaire.auditors.map((a) => a.email),
     };
 
-    console.log("Updating questionnaire:", adjustedFormQuestionnaire);
-    console.log("File:", guidelineFile);
-    console.log("Remove guideline:", removeGuideline);
-    console.log("User ID:", user.id);
-
-    // Call update with file and user ID
     const success = await updateQuestionnaire(
       formQuestionnaire?.id,
       adjustedFormQuestionnaire,
       guidelineFile,
       removeGuideline,
       dispatch,
-      user.id
+      user.id,
     );
 
     if (success) {
       toast.success("Questionnaire updated successfully");
-
       onClose();
+    } else {
+      toast.error("Failed to update questionnaire");
     }
   };
 

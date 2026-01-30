@@ -165,6 +165,9 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     (completedPage - 1) * completedPageSize,
     completedPage * completedPageSize,
   );
+  const [previewingReports, setPreviewingReports] = useState<{
+    [auditId: number]: boolean;
+  }>({});
   // ------------------------ Report Actions ------------------------
   const handlePreviewPDF = async (audit: Audit) => {
     if (!canHaveReport(audit)) {
@@ -179,6 +182,24 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       return;
     }
 
+    const auditId = audit.id;
+
+    // ✅ Set loading state
+    setPreviewingReports((prev) => ({ ...prev, [auditId]: true }));
+
+    // ✅ Show loading toast
+    const loadingToast = toast.loading(
+      `📄 Loading preview for ${audit.audit_number}...`,
+      {
+        style: {
+          borderRadius: "16px",
+          background: "#1e293b",
+          color: "#fff",
+          padding: "16px",
+        },
+      },
+    );
+
     try {
       const response = await axiosInstance.get(
         `/reports/${audit.id}/preview-pdf`,
@@ -189,9 +210,29 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       setPreviewPdfUrl(url);
       setCurrentPreviewAudit(audit);
       setPdfPreviewOpen(true);
+
+      // ✅ Success feedback
+      toast.success("📄 Preview loaded!", {
+        id: loadingToast,
+        duration: 2000,
+        style: {
+          borderRadius: "16px",
+          background: "#059669",
+          color: "#fff",
+          padding: "16px",
+        },
+      });
     } catch (error: any) {
       console.error("Error loading PDF preview:", error);
-      toast.error("Failed to load PDF preview", {
+
+      // ✅ Better error message
+      const errorMessage =
+        error.response?.status === 404
+          ? "Report not found. Please generate the report first."
+          : "Failed to load PDF preview. Please try again.";
+
+      toast.error(errorMessage, {
+        id: loadingToast,
         style: {
           borderRadius: "16px",
           background: "#dc2626",
@@ -199,11 +240,22 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           padding: "16px",
         },
       });
+    } finally {
+      // ✅ Clear loading state
+      setPreviewingReports((prev) => ({ ...prev, [auditId]: false }));
     }
   };
 
   const handleDownloadFromPreview = async () => {
     if (currentPreviewAudit) {
+      toast.loading("📄 Downloading report...", {
+        style: {
+          borderRadius: "16px",
+          background: "#1e293b",
+          color: "#fff",
+          padding: "16px",
+        },
+      });
       await downloadReport(
         currentPreviewAudit.id,
         currentPreviewAudit.audit_number,
@@ -226,6 +278,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
     const auditId = audit.id;
 
+    // Show generating state
     setGeneratingReports((prev) => ({ ...prev, [auditId]: true }));
 
     const loadingToast = toast.loading(
@@ -241,23 +294,19 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     );
 
     try {
+      // ✅ WAIT for completion - backend returns only when ready
       const response = await axiosInstance.post(
         `/reports/${auditId}/generate-report`,
       );
 
-      if (response.data.success) {
+      if (response.data.success && response.data.report_ready) {
+        // ✅ Report is ready immediately!
         setLocalReportStatus((prev) => ({
           ...prev,
           [auditId]: {
             report_exists: true,
-            report_url: response.data.report_url,
-            download_url:
-              response.data.download_url ||
-              `/reports/${auditId}/download-report`,
           },
         }));
-
-        setGeneratingReports((prev) => ({ ...prev, [auditId]: false }));
 
         toast.success("🎉 Report generated successfully!", {
           id: loadingToast,
@@ -268,16 +317,11 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             padding: "16px",
           },
         });
-
-        await sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }
     } catch (error: any) {
       console.error("Error generating report:", error);
-
-      setGeneratingReports((prev) => ({ ...prev, [auditId]: false }));
-
       toast.error(
         error.response?.data?.detail || "❌ Failed to generate report",
         {
@@ -290,6 +334,9 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           },
         },
       );
+    } finally {
+      // Clear generating state
+      setGeneratingReports((prev) => ({ ...prev, [auditId]: false }));
     }
   };
   const sendEmailAutomatically = async (audit: Audit) => {
@@ -372,6 +419,14 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   };
   const downloadReport = async (auditId: number, auditNumber: string) => {
     try {
+      toast.loading("📄 Downloading report...", {
+        style: {
+          borderRadius: "16px",
+          background: "#1e293b",
+          color: "#fff",
+          padding: "16px",
+        },
+      });
       const response = await axiosInstance.get(
         `/reports/${auditId}/download-report`,
         { responseType: "blob" },
@@ -551,6 +606,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     const auditId = audit.id;
 
     const isGenerating = generatingReports[auditId] || false;
+
     const reportExists =
       localReportStatus[auditId]?.report_exists ?? audit.report_exists ?? false;
     const isSendingEmail = sendingEmails[auditId] || false;
