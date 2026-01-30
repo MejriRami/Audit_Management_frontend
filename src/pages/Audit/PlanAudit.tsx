@@ -1,4 +1,4 @@
-// ✅ FULL FILE: PlanAudit.tsx (with supervisor_email support + clean typings)
+// ✅ FULL FILE: PlanAudit.tsx (timezone-safe planning + supervisor_email support + clean typings)
 
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,8 +20,8 @@ import toast from "react-hot-toast";
 
 /**
  * ✅ date-fns-tz compatibility:
- * - old versions: have formatInTimeZone, utcToZonedTime, zonedTimeToUtc
- * - newer versions: have formatInTimeZone, toZonedTime, fromZonedTime
+ * - old versions: formatInTimeZone, utcToZonedTime, zonedTimeToUtc
+ * - newer versions: formatInTimeZone, toZonedTime, fromZonedTime
  */
 import * as tz from "date-fns-tz";
 
@@ -58,7 +58,9 @@ export default function PlanAudit({
     (state: RootState) => state.audit.planningLoading
   );
 
-  const [questionnaires, setQuestionnaires] = useState<QuestionnairesNames[]>();
+  const [questionnaires, setQuestionnaires] = useState<QuestionnairesNames[]>(
+    []
+  );
   const [errorMessage, setErrorMessage] = useState("");
 
   /** Plant timezone (anchor) */
@@ -104,54 +106,18 @@ export default function PlanAudit({
   ];
 
   const glasses = [
-    {
-      value: "RemoteEye.CN-Anhui@avocarbon.com",
-      label: "RemoteEye.CN-Anhui@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.CN-Tianjin@avocarbon.com",
-      label: "RemoteEye.CN-Tianjin@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.DE-Frankfort@avocarbon.com",
-      label: "RemoteEye.DE-Frankfort@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.FR-Cyclam@avocarbon.com",
-      label: "RemoteEye.FR-Cyclam@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.FR-Poitiers@avocarbon.com",
-      label: "RemoteEye.FR-Poitiers@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.IN-Chennai@avocarbon.com",
-      label: "RemoteEye.IN-Chennai@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.MX-Galeana@avocarbon.com",
-      label: "RemoteEye.MX-Galeana@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.MX-Monterrey@avocarbon.com",
-      label: "RemoteEye.MX-Monterrey@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.MX-Rayones@avocarbon.com",
-      label: "RemoteEye.MX-Rayones@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.TN-Nadhour@avocarbon.com",
-      label: "RemoteEye.TN-Nadhour@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.TN-SameTunisie@avocarbon.com",
-      label: "RemoteEye.TN-SameTunisie@avocarbon.com",
-    },
-    {
-      value: "RemoteEye.TN-SCEET@avocarbon.com",
-      label: "RemoteEye.TN-SCEET@avocarbon.com",
-    },
+    { value: "RemoteEye.CN-Anhui@avocarbon.com", label: "RemoteEye.CN-Anhui@avocarbon.com" },
+    { value: "RemoteEye.CN-Tianjin@avocarbon.com", label: "RemoteEye.CN-Tianjin@avocarbon.com" },
+    { value: "RemoteEye.DE-Frankfort@avocarbon.com", label: "RemoteEye.DE-Frankfort@avocarbon.com" },
+    { value: "RemoteEye.FR-Cyclam@avocarbon.com", label: "RemoteEye.FR-Cyclam@avocarbon.com" },
+    { value: "RemoteEye.FR-Poitiers@avocarbon.com", label: "RemoteEye.FR-Poitiers@avocarbon.com" },
+    { value: "RemoteEye.IN-Chennai@avocarbon.com", label: "RemoteEye.IN-Chennai@avocarbon.com" },
+    { value: "RemoteEye.MX-Galeana@avocarbon.com", label: "RemoteEye.MX-Galeana@avocarbon.com" },
+    { value: "RemoteEye.MX-Monterrey@avocarbon.com", label: "RemoteEye.MX-Monterrey@avocarbon.com" },
+    { value: "RemoteEye.MX-Rayones@avocarbon.com", label: "RemoteEye.MX-Rayones@avocarbon.com" },
+    { value: "RemoteEye.TN-Nadhour@avocarbon.com", label: "RemoteEye.TN-Nadhour@avocarbon.com" },
+    { value: "RemoteEye.TN-SameTunisie@avocarbon.com", label: "RemoteEye.TN-SameTunisie@avocarbon.com" },
+    { value: "RemoteEye.TN-SCEET@avocarbon.com", label: "RemoteEye.TN-SCEET@avocarbon.com" },
     { value: "RemoteEye.TN-STS@avocarbon.com", label: "RemoteEye.TN-STS@avocarbon.com" },
     { value: "RemoteEye.KR-Daegu@avocarbon.com", label: "RemoteEye.KR-Daegu@avocarbon.com" },
   ];
@@ -193,7 +159,7 @@ export default function PlanAudit({
   }, [dispatch]);
 
   useEffect(() => {
-    setQuestionnaires(questionnaireListName);
+    setQuestionnaires(questionnaireListName || []);
   }, [questionnaireListName]);
 
   /** update plant timezone when plant changes */
@@ -205,7 +171,7 @@ export default function PlanAudit({
   // ---- Validate end time > start time ----
   useEffect(() => {
     if (form.startTime && form.endTime && form.endTime <= form.startTime) {
-      alert("End time must be AFTER start time.");
+      toast.error("End time must be AFTER start time.");
       setForm((prev) => ({ ...prev, endTime: null }));
     }
   }, [form.startTime, form.endTime]);
@@ -217,7 +183,10 @@ export default function PlanAudit({
       .map((e) => e.trim())
       .filter((e) => e !== "");
 
-    const isValid = list.every((email) => /^[^\s@]+@avocarbon\.com$/i.test(email));
+    const isValid = list.every((email) =>
+      /^[^\s@]+@avocarbon\.com$/i.test(email)
+    );
+
     return { isValid, list };
   };
 
@@ -256,6 +225,12 @@ export default function PlanAudit({
     );
   };
 
+  /**
+   * ✅ Convert Plant "wall-clock" selection to an absolute Date (UTC instant)
+   * Works with BOTH old and new date-fns-tz versions:
+   * - new: fromZonedTime(localDate, tz)
+   * - old: zonedTimeToUtc(localDate, tz)
+   */
   const toUtcInstantFromPlantLocal = (plantLocalDate: Date, tzName: string) => {
     const fromZonedTime = (tz as any).fromZonedTime as
       | ((d: Date, tz: string) => Date)
@@ -268,9 +243,14 @@ export default function PlanAudit({
     if (fromZonedTime) return fromZonedTime(plantLocalDate, tzName);
     if (zonedTimeToUtc) return zonedTimeToUtc(plantLocalDate, tzName);
 
+    // last resort fallback: treat given Date as already UTC (not ideal)
     return plantLocalDate;
   };
 
+  /**
+   * Build a Date representing "auditDate + time" in Plant local wall-clock,
+   * then convert it to a UTC instant.
+   */
   const combineDateAndTimeInPlantTz = (date: Date, time: Date, tzName: string) => {
     const y = date.getFullYear();
     const m = date.getMonth();
@@ -318,8 +298,16 @@ export default function PlanAudit({
     }
 
     try {
-      const startUtc = combineDateAndTimeInPlantTz(form.auditDate, form.startTime, plantTz);
-      const endUtc = combineDateAndTimeInPlantTz(form.auditDate, form.endTime, plantTz);
+      const startUtc = combineDateAndTimeInPlantTz(
+        form.auditDate,
+        form.startTime,
+        plantTz
+      );
+      const endUtc = combineDateAndTimeInPlantTz(
+        form.auditDate,
+        form.endTime,
+        plantTz
+      );
 
       const fmt = (tz as any).formatInTimeZone as
         | ((d: Date, tz: string, f: string) => string)
@@ -327,7 +315,7 @@ export default function PlanAudit({
 
       if (!fmt) throw new Error("date-fns-tz formatInTimeZone not available");
 
-      // ✅ Send snake_case keys expected by backend
+      // ✅ send snake_case keys expected by backend
       const payload: AuditPlanCreate & { supervisor_email: string } = {
         auditee_emails: list,
         auditor_id: user.id,
@@ -337,6 +325,7 @@ export default function PlanAudit({
 
         supervisor_email: form.supervisorEmail.trim(),
 
+        // ✅ send Plant-local strings (stable regardless of auditor timezone)
         audit_date: fmt(startUtc, plantTz, "yyyy-MM-dd"),
         start_time: fmt(startUtc, plantTz, "HH:mm:ss"),
         end_time: fmt(endUtc, plantTz, "HH:mm:ss"),
@@ -404,7 +393,10 @@ export default function PlanAudit({
                   placeholder="user1@avocarbon.com, user2@avocarbon.com"
                   value={form.auditeeEmails}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, auditeeEmails: e.target.value }))
+                    setForm((prev) => ({
+                      ...prev,
+                      auditeeEmails: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -419,7 +411,10 @@ export default function PlanAudit({
                   placeholder="supervisor@avocarbon.com"
                   value={form.supervisorEmail}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, supervisorEmail: e.target.value }))
+                    setForm((prev) => ({
+                      ...prev,
+                      supervisorEmail: e.target.value,
+                    }))
                   }
                 />
                 <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -435,7 +430,10 @@ export default function PlanAudit({
                 <Select
                   options={plantOptions}
                   placeholder="Select a plant"
-                  onChange={(value) => setForm((prev) => ({ ...prev, plant: value }))}
+                  defaultValue={form.plant || ""}
+                  onChange={(value) =>
+                    setForm((prev) => ({ ...prev, plant: value }))
+                  }
                   className="dark:bg-dark-900"
                 />
                 <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -468,6 +466,7 @@ export default function PlanAudit({
                     })) || []
                   }
                   placeholder="Select a questionnaire"
+                  defaultValue={form.questionnaireId ? String(form.questionnaireId) : ""}
                   onChange={(value) =>
                     setForm((prev) => ({ ...prev, questionnaireId: value }))
                   }
@@ -480,6 +479,7 @@ export default function PlanAudit({
                 <Select
                   options={glasses}
                   placeholder="Select a hardware email"
+                  defaultValue={form.hardwareEmail || ""}
                   onChange={(value) =>
                     setForm((prev) => ({ ...prev, hardwareEmail: value }))
                   }
@@ -494,13 +494,17 @@ export default function PlanAudit({
                 id="auditDate"
                 label="Audit Date (Plant)"
                 value={form.auditDate}
-                onChange={(date) => setForm((prev) => ({ ...prev, auditDate: date }))}
+                onChange={(date) =>
+                  setForm((prev) => ({ ...prev, auditDate: date }))
+                }
               />
 
               <TimePicker
                 label="Start Time (Plant)"
                 value={form.startTime}
-                onChange={(time) => setForm((prev) => ({ ...prev, startTime: time }))}
+                onChange={(time) =>
+                  setForm((prev) => ({ ...prev, startTime: time }))
+                }
                 selectedDate={form.auditDate}
                 blockedSlots={blockedSlots}
                 compareTime={form.endTime}
@@ -510,7 +514,9 @@ export default function PlanAudit({
               <TimePicker
                 label="End Time (Plant)"
                 value={form.endTime}
-                onChange={(time) => setForm((prev) => ({ ...prev, endTime: time }))}
+                onChange={(time) =>
+                  setForm((prev) => ({ ...prev, endTime: time }))
+                }
                 selectedDate={form.auditDate}
                 blockedSlots={blockedSlots}
                 compareTime={form.startTime}
@@ -550,7 +556,9 @@ export default function PlanAudit({
           {/* RIGHT: Time synchronization / timezone previews */}
           <div className="space-y-4">
             <div className="rounded-lg border p-4 dark:border-gray-700">
-              <div className="font-semibold mb-2 dark:text-gray-100">Live clocks</div>
+              <div className="font-semibold mb-2 dark:text-gray-100">
+                Live clocks
+              </div>
               <div className="space-y-2 text-sm">
                 {renderPreview("🏭 Plant", plantTz, new Date())}
                 {renderPreview("🧑‍💼 You", auditorTz, new Date())}
@@ -559,7 +567,9 @@ export default function PlanAudit({
             </div>
 
             <div className="rounded-lg border p-4 dark:border-gray-700">
-              <div className="font-semibold mb-2 dark:text-gray-100">Selected start time</div>
+              <div className="font-semibold mb-2 dark:text-gray-100">
+                Selected start time
+              </div>
               <div className="space-y-2">
                 {renderPreview("🏭 Plant", plantTz, form.startTime)}
                 {renderPreview("🧑‍💼 You", auditorTz, form.startTime)}
@@ -569,7 +579,9 @@ export default function PlanAudit({
 
             {form.endTime && (
               <div className="rounded-lg border p-4 dark:border-gray-700">
-                <div className="font-semibold mb-2 dark:text-gray-100">Selected end time</div>
+                <div className="font-semibold mb-2 dark:text-gray-100">
+                  Selected end time
+                </div>
                 <div className="space-y-2">
                   {renderPreview("🏭 Plant", plantTz, form.endTime)}
                   {renderPreview("🧑‍💼 You", auditorTz, form.endTime)}

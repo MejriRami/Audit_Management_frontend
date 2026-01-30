@@ -86,7 +86,7 @@ export default function AuditUnavailabilityForm() {
 
   return (
     <div className="min-h-screen relative overflow-hidden ">
-      <div className="absolute inset-0 bg-[url('images/form-image.jpg')] bg-cover bg-center"></div>
+      <div className="absolute inset-0 bg-[url('assets/images/form-image.jpg')] bg-cover bg-center"></div>
 
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full opacity-20 blur-3xl"></div>

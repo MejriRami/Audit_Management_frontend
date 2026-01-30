@@ -30,7 +30,7 @@ export const apiRescheduleAudit= async(  auditId: number,payload:AuditReschedule
 }
 // Fetch all audits
 export const apiGetAudits = async (): Promise<Audit[]> => {
-    let url='/audits';
+    let url='/audits/all';
   try {
     const res = await axiosInstance.get(url);
     if (res.status != 200) throw new Error("Failed to fetch audits");

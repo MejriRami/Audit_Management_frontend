@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,7 +15,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import Pagination from "../../ui/pagination/pagination";
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import CompactReportActions from "../../report/CompactReportActions";
 import PDFPreviewModal from "../../report/PDFPreviewModal";
 import SendReportEmailModal from "../../report/SendReportEmailModal";
@@ -31,16 +30,14 @@ import {
   XCircle,
 } from "lucide-react";
 import { Audit } from "../../../redux/audit/audit-types";
+import axiosInstance from "../../../services/axiosInstance";
+
 interface TableAuditsProps {
   audits: Audit[];
 }
 
-interface ReportStatus {
-  [auditId: number]: {
-    generating: boolean;
-    available: boolean;
-    error?: string;
-  };
+interface GeneratingStatus {
+  [auditId: number]: boolean;
 }
 
 export default function TableAudits({ audits = [] }: TableAuditsProps) {
@@ -50,27 +47,28 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [showOngoing, setShowOngoing] = useState(true);
 
-  const [reportStatus, setReportStatus] = useState<ReportStatus>({});
+  const [generatingReports, setGeneratingReports] = useState<GeneratingStatus>(
+    {},
+  );
 
   // PDF Preview State
   const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
   const [previewPdfUrl, setPreviewPdfUrl] = useState("");
   const [currentPreviewAudit, setCurrentPreviewAudit] = useState<Audit | null>(
-    null
+    null,
   );
 
   // Email modal / state
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [currentEmailAudit, setCurrentEmailAudit] = useState<Audit | null>(
-    null
+    null,
   );
   const [sendingEmails, setSendingEmails] = useState<{
     [auditId: number]: boolean;
   }>({});
   const [emailsSent, setEmailsSent] = useState<{ [auditId: number]: boolean }>(
-    {}
+    {},
   );
-
   const user = useSelector((state: any) => state.auth.user);
 
   const normalizedStatus = (s?: string) => (s ?? "").toLowerCase();
@@ -142,10 +140,10 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   // Separate ongoing and completed audits
   const ongoingAudits = audits.filter(
-    (a) => normalizedStatus(a.status) !== "completed"
+    (a) => normalizedStatus(a.status) !== "completed",
   );
   const completedAudits = audits.filter(
-    (a) => normalizedStatus(a.status) === "completed"
+    (a) => normalizedStatus(a.status) === "completed",
   );
 
   // Pagination state
@@ -157,86 +155,16 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   const totalPagesOngoing = Math.ceil(ongoingAudits.length / ongoingPageSize);
   const paginatedOngoing = ongoingAudits.slice(
     (ongoingPage - 1) * ongoingPageSize,
-    ongoingPage * ongoingPageSize
+    ongoingPage * ongoingPageSize,
   );
 
   const totalPagesCompleted = Math.ceil(
-    completedAudits.length / completedPageSize
+    completedAudits.length / completedPageSize,
   );
   const paginatedCompleted = completedAudits.slice(
     (completedPage - 1) * completedPageSize,
-    completedPage * completedPageSize
+    completedPage * completedPageSize,
   );
-
-  // ------------------------ Report + Email Status ------------------------
-
-  const checkAllReportsExistence = async (list: Audit[]) => {
-    const statusUpdates: ReportStatus = {};
-
-    await Promise.all(
-      list.map(async (audit) => {
-        // ✅ Skip planned/rescheduled (no report by definition)
-        if (!canHaveReport(audit)) {
-          statusUpdates[audit.id] = { generating: false, available: false };
-          return;
-        }
-
-        try {
-          const response = await axios.get(
-            `/api/reports/${audit.id}/report-status`
-          );
-          statusUpdates[audit.id] = {
-            generating: false,
-            available: response.data.report_exists || false,
-          };
-        } catch {
-          statusUpdates[audit.id] = { generating: false, available: false };
-        }
-      })
-    );
-
-    setReportStatus((prev) => ({ ...prev, ...statusUpdates }));
-  };
-
-  // const checkEmailStatus = async (list: Audit[]) => {
-  //   const statusUpdates: { [auditId: number]: boolean } = {};
-
-  //   await Promise.all(
-  //     list.map(async (audit) => {
-  //       // ✅ If no report possible, email is also not possible
-  //       if (!canHaveReport(audit)) {
-  //         statusUpdates[audit.id] = false;
-  //         return;
-  //       }
-
-  //       try {
-  //         const response = await axios.get(
-  //           `/api/reports/${audit.id}/email-status`
-  //         );
-  //         statusUpdates[audit.id] = response.data.email_sent || false;
-  //       } catch {
-  //         statusUpdates[audit.id] = false;
-  //       }
-  //     })
-  //   );
-
-  //   setEmailsSent((prev) => ({ ...prev, ...statusUpdates }));
-  // };
-
-  useEffect(() => {
-    if (showCompleted && completedAudits.length > 0) {
-      checkAllReportsExistence(completedAudits);
-      // checkEmailStatus(completedAudits);
-    }
-  }, [showCompleted, completedAudits.length]);
-
-  useEffect(() => {
-    if (showOngoing && ongoingAudits.length > 0) {
-      checkAllReportsExistence(ongoingAudits);
-      // checkEmailStatus(ongoingAudits);
-    }
-  }, [showOngoing, ongoingAudits.length]);
-
   // ------------------------ Report Actions ------------------------
   const handlePreviewPDF = async (audit: Audit) => {
     if (!canHaveReport(audit)) {
@@ -252,27 +180,17 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     }
 
     try {
-      const statusResponse = await axios.get(
-        `/api/reports/${audit.id}/report-status`
+      const response = await axiosInstance.get(
+        `/reports/${audit.id}/preview-pdf`,
+        { responseType: "blob" },
       );
 
-      if (!statusResponse.data.report_exists) {
-        toast.error("Report not generated yet. Please generate it first.", {
-          style: {
-            borderRadius: "16px",
-            background: "#dc2626",
-            color: "#fff",
-            padding: "16px",
-          },
-        });
-        return;
-      }
-
-      setPreviewPdfUrl(`/api/reports/${audit.id}/preview-pdf`);
+      const url = URL.createObjectURL(response.data);
+      setPreviewPdfUrl(url);
       setCurrentPreviewAudit(audit);
       setPdfPreviewOpen(true);
     } catch (error: any) {
-      console.error("Error checking report status:", error);
+      console.error("Error loading PDF preview:", error);
       toast.error("Failed to load PDF preview", {
         style: {
           borderRadius: "16px",
@@ -288,7 +206,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     if (currentPreviewAudit) {
       await downloadReport(
         currentPreviewAudit.id,
-        currentPreviewAudit.audit_number
+        currentPreviewAudit.audit_number,
       );
     }
   };
@@ -307,10 +225,8 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     }
 
     const auditId = audit.id;
-    setReportStatus((prev) => ({
-      ...prev,
-      [auditId]: { generating: true, available: false },
-    }));
+
+    setGeneratingReports((prev) => ({ ...prev, [auditId]: true }));
 
     const loadingToast = toast.loading(
       `✨ Generating report for ${audit.audit_number}...`,
@@ -321,19 +237,27 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           color: "#fff",
           padding: "16px",
         },
-      }
+      },
     );
 
     try {
-      const response = await axios.post(
-        `/api/reports/${auditId}/generate-report`
+      const response = await axiosInstance.post(
+        `/reports/${auditId}/generate-report`,
       );
 
       if (response.data.success) {
-        setReportStatus((prev) => ({
+        setLocalReportStatus((prev) => ({
           ...prev,
-          [auditId]: { generating: false, available: true },
+          [auditId]: {
+            report_exists: true,
+            report_url: response.data.report_url,
+            download_url:
+              response.data.download_url ||
+              `/reports/${auditId}/download-report`,
+          },
         }));
+
+        setGeneratingReports((prev) => ({ ...prev, [auditId]: false }));
 
         toast.success("🎉 Report generated successfully!", {
           id: loadingToast,
@@ -345,21 +269,14 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           },
         });
 
-        // ✅ NEW: Automatically send email after successful report generation
         await sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }
     } catch (error: any) {
       console.error("Error generating report:", error);
-      setReportStatus((prev) => ({
-        ...prev,
-        [auditId]: {
-          generating: false,
-          available: false,
-          error: error.response?.data?.detail || "Failed to generate report",
-        },
-      }));
+
+      setGeneratingReports((prev) => ({ ...prev, [auditId]: false }));
 
       toast.error(
         error.response?.data?.detail || "❌ Failed to generate report",
@@ -371,12 +288,10 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             color: "#fff",
             padding: "16px",
           },
-        }
+        },
       );
     }
   };
-
-  // ✅ NEW FUNCTION: Automatically send email after report generation
   const sendEmailAutomatically = async (audit: Audit) => {
     const auditId = audit.id;
 
@@ -406,14 +321,17 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           color: "#fff",
           padding: "16px",
         },
-      }
+      },
     );
 
     try {
-      const response = await axios.post(`/api/reports/${auditId}/send-email`, {
-        recipients,
-        include_auditor: true, // Always include auditor in automatic emails
-      });
+      const response = await axiosInstance.post(
+        `/reports/${auditId}/send-email`,
+        {
+          recipients,
+          include_auditor: true, // Always include auditor in automatic emails
+        },
+      );
 
       if (response.data.success) {
         setEmailsSent((prev) => ({ ...prev, [auditId]: true }));
@@ -429,7 +347,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               color: "#fff",
               padding: "16px",
             },
-          }
+          },
         );
       } else {
         throw new Error("Failed to send email");
@@ -446,18 +364,17 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             color: "#fff",
             padding: "16px",
           },
-        }
+        },
       );
     } finally {
       setSendingEmails((prev) => ({ ...prev, [auditId]: false }));
     }
   };
-
   const downloadReport = async (auditId: number, auditNumber: string) => {
     try {
-      const response = await axios.get(
-        `/api/reports/${auditId}/download-report`,
-        { responseType: "blob" }
+      const response = await axiosInstance.get(
+        `/reports/${auditId}/download-report`,
+        { responseType: "blob" },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -503,13 +420,26 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
       return;
     }
 
+    // Check if report exists before opening modal
+    if (!audit.report_exists) {
+      toast.error("Please generate the report first before sending.", {
+        style: {
+          borderRadius: "16px",
+          background: "#dc2626",
+          color: "#fff",
+          padding: "16px",
+        },
+      });
+      return;
+    }
+
     setCurrentEmailAudit(audit);
     setEmailModalOpen(true);
   };
 
   const handleSendEmail = async (
     recipients: string[],
-    includeAuditor: boolean
+    includeAuditor: boolean,
   ) => {
     if (!currentEmailAudit) return;
 
@@ -527,17 +457,19 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
           color: "#fff",
           padding: "16px",
         },
-      }
+      },
     );
 
     try {
-      const response = await axios.post(`/api/reports/${auditId}/send-email`, {
-        recipients,
-        include_auditor: includeAuditor,
-      });
+      const response = await axiosInstance.post(
+        `/reports/${auditId}/send-email`,
+        {
+          recipients,
+          include_auditor: includeAuditor,
+        },
+      );
 
       if (response.data.success) {
-        setEmailsSent((prev) => ({ ...prev, [auditId]: true }));
         toast.success(
           `✅ Report sent successfully to ${
             response.data.sent_to?.length || 0
@@ -550,7 +482,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               color: "#fff",
               padding: "16px",
             },
-          }
+          },
         );
 
         setEmailModalOpen(false);
@@ -570,12 +502,13 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             color: "#fff",
             padding: "16px",
           },
-        }
+        },
       );
     } finally {
       setSendingEmails((prev) => ({ ...prev, [auditId]: false }));
     }
   };
+
   // ------------------------ Headers ------------------------
   const ONGOING_HEADERS: string[] = [
     "#Audit Identifier",
@@ -591,10 +524,15 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     "Event Created",
     "Action",
     "History",
-    // "Details",
     "Report",
   ];
-
+  const [localReportStatus, setLocalReportStatus] = useState<{
+    [auditId: number]: {
+      report_exists: boolean;
+      report_url?: string;
+      download_url?: string;
+    };
+  }>({});
   const COMPLETED_HEADERS: string[] = [
     "#Audit ID",
     "Type",
@@ -611,12 +549,12 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
   // ------------------------ Rows ------------------------
   const renderOngoingRow = (audit: Audit) => {
     const auditId = audit.id;
-    const status = reportStatus[auditId];
-    const isGenerating = status?.generating || false;
-    const reportExists = status?.available || false;
+
+    const isGenerating = generatingReports[auditId] || false;
+    const reportExists =
+      localReportStatus[auditId]?.report_exists ?? audit.report_exists ?? false;
     const isSendingEmail = sendingEmails[auditId] || false;
     const emailSent = emailsSent[auditId] || false;
-
     const reportAllowed = canHaveReport(audit);
 
     return (
@@ -648,11 +586,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               </span>
             </div>
 
-            {/* Tooltip */}
             <div className="invisible group-hover:visible absolute left-0 top-full mt-2 z-10 w-max max-w-xs px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
-              {/* <div className="font-medium">
-                {audit.auditor?.first_name} {audit.auditor?.last_name}
-              </div> */}
               <div className="text-gray-300 dark:text-gray-400 mt-0.5">
                 {audit.auditor?.email}
               </div>
@@ -671,7 +605,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
                   </span>
                 </div>
 
-                {/* Tooltip */}
                 <div className="invisible group-hover:visible absolute left-0 top-full mt-2 z-10 w-max px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
                   {email}
                   <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>
@@ -679,7 +612,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               </div>
             ))}
 
-            {/* Show +N more badge if there are additional auditees */}
             {audit.auditees && audit.auditees.length > 2 && (
               <div className="group relative">
                 <div className="flex items-center px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-300 dark:border-gray-700 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -688,7 +620,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
                   </span>
                 </div>
 
-                {/* Tooltip showing all remaining emails */}
                 <div className="invisible group-hover:visible absolute left-0 top-full mt-2 z-10 w-max max-w-xs px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
                   {audit.auditees.slice(2).map((email, i) => (
                     <div key={i} className="py-0.5">
@@ -757,14 +688,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             History
           </button>
         </TableCell>
-        {/* <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
-          <button
-            onClick={() => handleViewAuditDetails(audit.id)}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
-          >
-            View
-          </button>
-        </TableCell> */}
         <TableCell className="px-5 py-4">
           {reportAllowed ? (
             <CompactReportActions
@@ -789,9 +712,10 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
 
   const renderCompletedRow = (audit: Audit) => {
     const auditId = audit.id;
-    const status = reportStatus[auditId];
-    const isGenerating = status?.generating || false;
-    const reportExists = status?.available || false;
+
+    const isGenerating = generatingReports[auditId] || false;
+    const reportExists =
+      localReportStatus[auditId]?.report_exists ?? audit.report_exists ?? false;
     const isSendingEmail = sendingEmails[auditId] || false;
     const emailSent = emailsSent[auditId] || false;
 
@@ -824,11 +748,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               </span>
             </div>
 
-            {/* Tooltip */}
             <div className="invisible group-hover:visible absolute left-0 top-full mt-2 z-10 w-max max-w-xs px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
-              {/* <div className="font-medium">
-                {audit.auditor?.first_name} {audit.auditor?.last_name}
-              </div> */}
               <div className="text-gray-300 dark:text-gray-400 mt-0.5">
                 {audit.auditor?.email}
               </div>
@@ -847,7 +767,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
                   </span>
                 </div>
 
-                {/* Tooltip */}
                 <div className="invisible group-hover:visible absolute left-0 top-full mt-2 z-10 w-max px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
                   {email}
                   <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>
@@ -855,7 +774,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
               </div>
             ))}
 
-            {/* Show +N more badge if there are additional auditees */}
             {audit.auditees && audit.auditees.length > 2 && (
               <div className="group relative">
                 <div className="flex items-center px-2.5 py-1 bg-gray-100 dark:bg-gray-800 rounded-full border border-gray-300 dark:border-gray-700 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -864,7 +782,6 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
                   </span>
                 </div>
 
-                {/* Tooltip showing all remaining emails */}
                 <div className="invisible group-hover:visible absolute left-0 top-full mt-2 z-10 w-max max-w-xs px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg">
                   {audit.auditees.slice(2).map((email, i) => (
                     <div key={i} className="py-0.5">
@@ -892,7 +809,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
         <TableCell className="px-5 py-4 border-r border-gray-200 dark:border-white/10">
           <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-300 dark:border-green-700">
             <span className="font-black text-green-700 dark:text-green-300 text-lg">
-              {audit.finalScore ?? "-"}
+              {audit.finalScore ?? audit.total_score ?? "-"}
             </span>
           </div>
         </TableCell>

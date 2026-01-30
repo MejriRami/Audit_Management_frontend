@@ -28,6 +28,10 @@ export interface Audit {
   total_score?: number; 
   weak_points?: string;
   strong_points?: string;
+
+  report_exists: boolean;
+  report_url?: string;
+  download_url?: string;
 }
 
 export interface AuditPlanCreate {

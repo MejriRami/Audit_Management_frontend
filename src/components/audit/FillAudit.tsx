@@ -14,7 +14,10 @@ import {
 import toast from "react-hot-toast";
 import Select from "../form/Select";
 import Enum from "../enum/Enum";
+
 import VdaExecution from "./VdaExecution";
+import IATFNonConformityManager from "./IatfNonConformityManager";
+
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import {
@@ -79,7 +82,6 @@ const STANDARD_VALUE_OPTIONS: ValueOption[] = [
   { value: 10, label: "10 - Good practice", color: "text-emerald-700" },
 ];
 
-// ✅ VDA 6.3 VALUE OPTIONS
 const VDA_VALUE_OPTIONS: ValueOption[] = [
   { value: -1, label: "Optional", color: "text-yellow-700" },
   { value: 0, label: "0 - Not fulfilled", color: "text-red-700" },
@@ -93,13 +95,9 @@ const VDA_VALUE_OPTIONS: ValueOption[] = [
 const getValueOptions = (questionnaireName: string): ValueOption[] => {
   const name = questionnaireName.toLowerCase();
 
-  // ✅ Check for VDA first
   if (name.includes("vda")) return VDA_VALUE_OPTIONS;
-
-  // IATF / Plant Manager
   if (name.includes("plant manager iatf")) return IATF_PLANT_MANAGER_VALUE_OPTIONS;
 
-  // Default to Standard
   return STANDARD_VALUE_OPTIONS;
 };
 
@@ -108,13 +106,9 @@ const needsDetails = (v: AuditValue, questionnaireName: string): boolean => {
 
   const name = questionnaireName.toLowerCase();
 
-  // VDA: values < 6 need details (0,4)
   if (name.includes("vda")) return v < 6;
-
-  // IATF: values <= 3 need details
   if (name.includes("iatf") || name.includes("plant manager")) return v <= 3;
 
-  // Standard: values <= 5 need details
   return v <= 5;
 };
 
@@ -165,6 +159,12 @@ const getFooterMessage = (questionnaireName: string): string => {
     return "Values ≤3 require findings. Check 'Request CAR' for corrective actions.";
   }
   return "Values ≤5 require findings. Check 'Request CAR' for corrective actions.";
+};
+
+// IATF NC mode: IATF questionnaires except Plant Manager IATF
+const isIATFNCMode = (questionnaireName: string): boolean => {
+  const name = questionnaireName.toLowerCase();
+  return name.includes("iatf") && !name.includes("plant manager");
 };
 
 // ==================== SUB-COMPONENTS ====================
@@ -234,9 +234,7 @@ const AuditHeader = ({
       <div className="p-6 bg-slate-50/50 border-b border-slate-200">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Auditor
-            </label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Auditor</label>
             <div className="relative">
               <Select
                 placeholder="Select an auditor..."
@@ -254,9 +252,7 @@ const AuditHeader = ({
           </div>
 
           <div className="lg:col-span-2">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Planned Audit
-            </label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Planned Audit</label>
             <div className="relative">
               <Select
                 key={`${selectedPlannedAuditId}-${auditOptions.length}`}
@@ -282,7 +278,8 @@ const AuditHeader = ({
         </div>
       </div>
 
-      {hasItems && (
+      {/* Summary + Progress are NOT shown for IATF NC mode */}
+      {hasItems && !isIATFNCMode(questionnaireName) && (
         <div className="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -383,7 +380,7 @@ const AuditHeader = ({
         </div>
       )}
 
-      {hasItems && (
+      {hasItems && !isIATFNCMode(questionnaireName) && (
         <div className="p-5 bg-white border-b border-slate-200">
           <div className="flex items-center gap-4 mb-3">
             <span className="text-sm font-semibold text-slate-700">Progress:</span>
@@ -492,7 +489,11 @@ const AuditRow = ({
       </td>
 
       <td className="px-4 py-4 align-top text-center">
-        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold ${getCriticalClass(item.critical)}`}>
+        <span
+          className={`inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold ${getCriticalClass(
+            item.critical
+          )}`}
+        >
           {item.critical}
         </span>
       </td>
@@ -506,9 +507,7 @@ const AuditRow = ({
           }}
           aria-invalid={!!item.errors?.value}
           className={`w-full p-2.5 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-            item.errors?.value
-              ? "border-red-400 bg-red-50"
-              : "border-slate-300 bg-white hover:border-slate-400"
+            item.errors?.value ? "border-red-400 bg-red-50" : "border-slate-300 bg-white hover:border-slate-400"
           } ${getValueColor(item.value, valueOptions)} font-medium`}
         >
           <option value="">Select value...</option>
@@ -529,9 +528,7 @@ const AuditRow = ({
           placeholder={detailsRequired ? "Required details..." : "Optional notes..."}
           aria-invalid={!!item.errors?.findings}
           className={`w-full p-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-            item.errors?.findings
-              ? "border-red-400 bg-red-50"
-              : "border-slate-300 hover:border-slate-400"
+            item.errors?.findings ? "border-red-400 bg-red-50" : "border-slate-300 hover:border-slate-400"
           }`}
         />
         {item.errors?.findings && <p className="text-xs text-red-600 mt-1 font-medium">{item.errors.findings}</p>}
@@ -571,9 +568,7 @@ const AuditRow = ({
                   placeholder="indicate the issue  (required)..."
                   aria-invalid={!!item.errors?.carReason}
                   className={`w-full p-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all ${
-                    item.errors?.carReason
-                      ? "border-red-400 bg-red-50"
-                      : "border-orange-300 hover:border-orange-400"
+                    item.errors?.carReason ? "border-red-400 bg-red-50" : "border-orange-300 hover:border-orange-400"
                   }`}
                 />
                 {item.errors?.carReason && <p className="text-xs text-red-600 font-medium">{item.errors.carReason}</p>}
@@ -597,12 +592,16 @@ export default function AuditChecklistRefactored() {
   const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
   const [selectedPlannedAuditId, setSelectedPlannedAuditId] = useState<number | "">("");
   const [questionnaireName, setQuestionnaireName] = useState<string>("");
+
+  // IATF NC extras
+  const [auditee_name, setAuditeeName] = useState<string>("");
+
   const [items, setItems] = useState<AuditItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
 
-  // ✅ VDA selection state
+  // VDA selection state
   const [vdaSelectedIds, setVdaSelectedIds] = useState<Set<number>>(new Set());
 
   const [summary, setSummary] = useState<AuditSummary>({
@@ -624,7 +623,9 @@ export default function AuditChecklistRefactored() {
 
   const isVda = useMemo(() => questionnaireName.toLowerCase().includes("vda"), [questionnaireName]);
 
-  // ✅ Use only selected questions for VDA submission/progress
+  const showIATFNCInterface = useMemo(() => isIATFNCMode(questionnaireName), [questionnaireName]);
+
+  // For VDA: only selected questions count
   const effectiveItems = useMemo(() => {
     if (!isVda) return items;
     return items.filter((it) => vdaSelectedIds.has(it.questionId));
@@ -638,6 +639,7 @@ export default function AuditChecklistRefactored() {
       setSubmitted(false);
       setQuestionnaireName("");
       setVdaSelectedIds(new Set());
+      setAuditeeName("");
       return;
     }
 
@@ -647,6 +649,7 @@ export default function AuditChecklistRefactored() {
     setSubmitted(false);
     setQuestionnaireName("");
     setVdaSelectedIds(new Set());
+    setAuditeeName("");
   }, [auditorId, dispatch]);
 
   const handleAuditSelection = async (auditId: number | "") => {
@@ -657,12 +660,23 @@ export default function AuditChecklistRefactored() {
       setItems([]);
       setQuestionnaireName("");
       setVdaSelectedIds(new Set());
+      setAuditeeName("");
       return;
     }
 
     const selectedAudit = pickableAudits.find((a) => a.id === auditId);
     const auditQName = selectedAudit?.questionnaire_name || "";
     setQuestionnaireName(auditQName);
+
+    const auditeeEmail = selectedAudit?.auditees?.[0]?.email || "";
+    setAuditeeName(auditeeEmail);
+
+    // IATF NC mode: do NOT load questions; render NC manager UI
+    if (isIATFNCMode(auditQName)) {
+      setItems([]);
+      setVdaSelectedIds(new Set());
+      return;
+    }
 
     const result = await dispatch(getAuditQuestions(auditId));
 
@@ -688,7 +702,7 @@ export default function AuditChecklistRefactored() {
 
       setItems(newItems);
 
-      // ✅ For VDA, default select all questions
+      // For VDA, default select all questions
       if (auditQName.toLowerCase().includes("vda")) {
         setVdaSelectedIds(new Set(newItems.map((x) => x.questionId)));
       } else {
@@ -699,6 +713,106 @@ export default function AuditChecklistRefactored() {
       setQuestionnaireName("");
       setVdaSelectedIds(new Set());
       toast.error("Failed to load audit questions");
+    }
+  };
+
+  // IATF NC submission (uses NC manager)
+  const handleIATFNCSubmission = async (
+    nonConformities: any[],
+    auditDetails: {
+      actualStartTime: string;
+      actualEndTime: string;
+      strongPoints: string;
+      weakPoints: string;
+    }
+  ) => {
+    if (!selectedPlannedAuditId) {
+      toast.error("No audit selected");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      type NCClassification = "Minor" | "Major" | "Improvement" | "Strong Point";
+
+      const classificationMap: Record<NCClassification, number> = {
+        Minor: 1,
+        Major: 2,
+        Improvement: 3,
+        "Strong Point": 4,
+      };
+
+      const answers = await Promise.all(
+        nonConformities.map(async (nc, index) => {
+          const uploadedEvidence = await Promise.all(
+            (nc.evidence || []).map(async (file: File) => {
+              const uploadResult = await apiUploadFile(file);
+              return {
+                filename: uploadResult.filename,
+                mimetype: uploadResult.mimetype,
+                size: uploadResult.size,
+                file_url: uploadResult.file_url,
+              };
+            })
+          );
+
+          const classificationValue =
+            classificationMap[nc.classification as NCClassification] || 1;
+
+          return {
+            question_id: -(index + 1),
+            value: classificationValue,
+            finding_text: nc.findings,
+            documents: uploadedEvidence,
+            car_reason: nc.observedNonConformity,
+            request_car: nc.requestCAR,
+            critical_value: 0,
+            process: nc.process,
+            standard_paragraph: nc.normParagraph,
+            classification: nc.classification,
+          };
+        })
+      );
+
+      const resultAction = await dispatch(
+        executeAuditThunk({
+          auditId: selectedPlannedAuditId,
+          data: {
+            answers,
+            audit_date: summary.auditDate,
+            start_time: auditDetails.actualStartTime,
+            end_time: auditDetails.actualEndTime,
+            strong_points: auditDetails.strongPoints || "",
+            weak_points: auditDetails.weakPoints || "",
+          },
+        })
+      );
+
+      if (!executeAuditThunk.fulfilled.match(resultAction)) {
+        toast.error(String(resultAction.payload || "Failed to submit non-conformities"));
+        return;
+      }
+
+      const carsCreated = nonConformities.filter((nc) => nc.requestCAR).length;
+
+      toast.success(
+        carsCreated > 0
+          ? `${nonConformities.length} NC(s) submitted. ${carsCreated} CAR(s) created.`
+          : `${nonConformities.length} NC(s) submitted successfully.`
+      );
+
+      dispatch(removePickableAudit(selectedPlannedAuditId));
+      setSubmitted(true);
+      setSelectedPlannedAuditId("");
+      setQuestionnaireName("");
+      setAuditeeName("");
+    } catch (err: any) {
+      console.error("IATF NC submission error:", err);
+      toast.error(err?.message || "Failed to submit non-conformities");
+      throw err;
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -759,9 +873,7 @@ export default function AuditChecklistRefactored() {
   };
 
   const toggleCARRequest = (questionId: number) => {
-    setItems((prev) =>
-      prev.map((item) => (item.questionId === questionId ? { ...item, requestCAR: !item.requestCAR } : item))
-    );
+    setItems((prev) => prev.map((item) => (item.questionId === questionId ? { ...item, requestCAR: !item.requestCAR } : item)));
   };
 
   const addEvidence = (questionId: number, files: FileList | null) => {
@@ -770,25 +882,19 @@ export default function AuditChecklistRefactored() {
     if (imageFiles.length === 0) return;
 
     setItems((prev) =>
-      prev.map((item) =>
-        item.questionId === questionId ? { ...item, evidence: [...item.evidence, ...imageFiles] } : item
-      )
+      prev.map((item) => (item.questionId === questionId ? { ...item, evidence: [...item.evidence, ...imageFiles] } : item))
     );
   };
 
   const removeEvidence = (questionId: number, idx: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.questionId === questionId ? { ...item, evidence: item.evidence.filter((_, i) => i !== idx) } : item
-      )
-    );
+    setItems((prev) => prev.map((item) => (item.questionId === questionId ? { ...item, evidence: item.evidence.filter((_, i) => i !== idx) } : item)));
   };
 
   const handleSummaryChange = (field: keyof AuditSummary, value: string) => {
     setSummary((prev) => ({ ...prev, [field]: value }));
   };
 
-  // ✅ VDA selection handlers
+  // VDA selection handlers
   const toggleVdaSelect = (questionId: number) => {
     setVdaSelectedIds((prev) => {
       const next = new Set(prev);
@@ -833,7 +939,6 @@ export default function AuditChecklistRefactored() {
       return;
     }
 
-    // ✅ validate only effective items for VDA
     const validated = effectiveItems.map((item) => ({
       ...item,
       errors: validateItem(item, questionnaireName),
@@ -917,6 +1022,7 @@ export default function AuditChecklistRefactored() {
       setItems([]);
       setQuestionnaireName("");
       setVdaSelectedIds(new Set());
+      setAuditeeName("");
       setSummary({
         auditDate: today,
         startTime: "",
@@ -989,10 +1095,46 @@ export default function AuditChecklistRefactored() {
 
   const auditOptions = pickableAudits.map((a) => ({
     value: a.id,
-    label: `${a.status === "rescheduled" ? "🔁 RESCHEDULED" : "🗓️ PLANNED"} | ${
-      a.audit_number
-    } | ${a.planned_date} | ${a.planned_start_time}-${a.planned_end_time}`,
+    label: `${a.status === "rescheduled" ? "🔁 RESCHEDULED" : "🗓️ PLANNED"} | ${a.audit_number} | ${a.planned_date} | ${a.planned_start_time}-${a.planned_end_time}`,
   }));
+
+  // ==================== RENDER ====================
+
+  // IATF NC mode view
+  if (showIATFNCInterface && selectedPlannedAuditId) {
+    const selectedAudit = pickableAudits.find((a) => a.id === selectedPlannedAuditId);
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 p-4 md:p-8">
+        <div className="max-w-[1600px] mx-auto mb-6">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedPlannedAuditId("");
+              setQuestionnaireName("");
+              setSubmitted(false);
+              setAuditeeName("");
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            <ChevronDown size={16} className="rotate-90" />
+            Back to Audit Selection
+          </button>
+        </div>
+
+        <IATFNonConformityManager
+          plannedAuditId={selectedPlannedAuditId}
+          questionnaireName={questionnaireName}
+          auditNumber={selectedAudit?.audit_number}
+          auditeeName={auditee_name}
+          auditDate={selectedAudit?.planned_date}
+          plannedStartTime={selectedAudit?.planned_start_time}
+          plannedEndTime={selectedAudit?.planned_end_time}
+          onSubmit={handleIATFNCSubmission}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 p-4 md:p-8">
@@ -1012,7 +1154,7 @@ export default function AuditChecklistRefactored() {
               onAuditChange={handleAuditSelection}
               progress={progress}
               carCount={carCount}
-              hasItems={effectiveItems.length > 0}
+              hasItems={items.length > 0}
               summary={summary}
               onSummaryChange={handleSummaryChange}
               questionnaireName={questionnaireName}
@@ -1022,15 +1164,15 @@ export default function AuditChecklistRefactored() {
           {isVda ? (
             <div className="space-y-4">
               <VdaExecution
-                  items={items}
-                  valueOptions={valueOptions}
-                  questionnaireName={questionnaireName}
-                  selectedIds={vdaSelectedIds}
-                  onToggleSelect={toggleVdaSelect}
-                  onSelectAllInSection={selectAllInSection}
-                  onUpdateField={updateField}
-                  onToggleCAR={toggleCARRequest}
-                />
+                items={items}
+                valueOptions={valueOptions}
+                questionnaireName={questionnaireName}
+                selectedIds={vdaSelectedIds}
+                onToggleSelect={toggleVdaSelect}
+                onSelectAllInSection={selectAllInSection}
+                onUpdateField={updateField}
+                onToggleCAR={toggleCARRequest}
+              />
 
               {effectiveItems.length > 0 && (
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
