@@ -165,7 +165,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
     (completedPage - 1) * completedPageSize,
     completedPage * completedPageSize,
   );
-  const [previewingReports, setPreviewingReports] = useState<{
+  const [_, setPreviewingReports] = useState<{
     [auditId: number]: boolean;
   }>({});
   // ------------------------ Report Actions ------------------------
@@ -317,6 +317,7 @@ export default function TableAudits({ audits = [] }: TableAuditsProps) {
             padding: "16px",
           },
         });
+        sendEmailAutomatically(audit);
       } else {
         throw new Error("Report generation failed");
       }
