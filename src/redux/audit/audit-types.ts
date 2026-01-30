@@ -30,8 +30,6 @@ export interface Audit {
   strong_points?: string;
 
   report_exists: boolean;
-  report_url?: string;
-  download_url?: string;
 }
 
 export interface AuditPlanCreate {

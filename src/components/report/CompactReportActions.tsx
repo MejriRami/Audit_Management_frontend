@@ -150,8 +150,8 @@ export default function CompactReportActions({
             isSendingEmail
               ? "Sending..."
               : emailSent
-              ? "Resend Email"
-              : "Send to Auditees"
+                ? "Resend Email"
+                : "Send to Auditees"
           }
           show={hoveredButton === "email"}
         >
@@ -168,8 +168,8 @@ export default function CompactReportActions({
               isSendingEmail
                 ? "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
                 : reportExists
-                ? "bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700"
-                : "bg-gray-200 dark:bg-gray-600 cursor-not-allowed opacity-50"
+                  ? "bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700"
+                  : "bg-gray-200 dark:bg-gray-600 cursor-not-allowed opacity-50"
             }`}
           >
             {isSendingEmail ? (
@@ -197,8 +197,8 @@ export default function CompactReportActions({
             isGenerating
               ? "Generating..."
               : reportExists
-              ? "Download PDF"
-              : "Generate Report"
+                ? "Download PDF"
+                : "Generate Report"
           }
           show={hoveredButton === "main"}
         >
@@ -213,8 +213,8 @@ export default function CompactReportActions({
               isGenerating
                 ? "bg-gray-300 dark:bg-gray-600 cursor-not-allowed"
                 : reportExists
-                ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
-                : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+                  ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+                  : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
             }`}
           >
             {isGenerating ? (
@@ -332,7 +332,7 @@ function Tooltip({
               </motion.div>
             )}
           </AnimatePresence>,
-          document.body
+          document.body,
         )}
     </div>
   );
