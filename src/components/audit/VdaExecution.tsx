@@ -106,7 +106,7 @@ export default function VdaExecution({
     }
 
     // sort each section by code
-    for (const [k, arr] of map.entries()) arr.sort(sortByCode);
+    for (const [, arr] of map.entries()) arr.sort(sortByCode);
 
     return map;
   }, [metaList]);
