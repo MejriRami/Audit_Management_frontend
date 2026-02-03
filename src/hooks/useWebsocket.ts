@@ -14,20 +14,51 @@ interface WebSocketMessage {
 export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
   const [isConnected, setIsConnected] = useState(false);
   const ws = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<number | undefined>(undefined); 
+  const reconnectTimeout = useRef<number | undefined>(undefined);
   const heartbeatInterval = useRef<number | undefined>(undefined);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 10;
+
+  const getWebSocketUrl = (): string => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
+
+    // Replace http -> ws, https -> wss automatically
+    const wsBase = apiUrl.replace(/^https/, 'wss').replace(/^http/, 'ws');
+
+    // Remove trailing slash so we don't get double slash
+    const cleanBase = wsBase.replace(/\/+$/, '');
+
+    // Final URL:
+    //   ws://localhost:8000/ws/TOKEN
+    //   wss://audit-back.azurewebsites.net/ws/TOKEN
+    return `${cleanBase}/ws/${token}`;
+  };
 
   const connect = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    // Don't open a new connection if one is already open or connecting
+    if (ws.current && (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
 
-    const wsUrl = `wss://audit-back.azurewebsites.net/ws/${token}`;
-    ws.current = new WebSocket(wsUrl);
+    let url: string;
+    try {
+      url = getWebSocketUrl();
+    } catch (e) {
+      console.error('Cannot connect WebSocket:', e);
+      return;
+    }
+
+    console.log('Connecting to:', url);
+    ws.current = new WebSocket(url);
 
     ws.current.onopen = () => {
       console.log('WebSocket connected');
       setIsConnected(true);
-      
+      reconnectAttempts.current = 0; // Reset on successful connection
+
       // Send heartbeat every 30 seconds
       heartbeatInterval.current = window.setInterval(() => {
         if (ws.current?.readyState === WebSocket.OPEN) {
@@ -37,33 +68,53 @@ export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
     };
 
     ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === 'connection' || data.type === 'pong') {
-        return; // Ignore connection/heartbeat messages
+      try {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'connection' || data.type === 'pong') {
+          return; 
+        }
+
+        onMessage(data);
+      } catch (e) {
+        console.error('Failed to parse WebSocket message:', e);
       }
-      
-      onMessage(data);
     };
 
     ws.current.onerror = (error) => {
       console.error('WebSocket error:', error);
+      // Close it so onclose fires and triggers reconnect
+      ws.current?.close();
     };
 
-    ws.current.onclose = () => {
-      console.log('WebSocket disconnected');
+    ws.current.onclose = (event) => {
+      console.log('WebSocket disconnected, code:', event.code, 'reason:', event.reason);
       setIsConnected(false);
-      
-      // Clear heartbeat interval
+
+      // Clear heartbeat
       if (heartbeatInterval.current) {
         window.clearInterval(heartbeatInterval.current);
+        heartbeatInterval.current = undefined;
       }
-      
-      // Attempt to reconnect after 3 seconds
-      reconnectTimeout.current = window.setTimeout(() => {
-        console.log('Attempting to reconnect...');
-        connect();
-      }, 3000);
+
+      // 1008 = token invalid/expired — don't retry
+      if (event.code === 1008) {
+        console.warn('WebSocket closed: invalid or expired token. Not reconnecting.');
+        return;
+      }
+
+      // Exponential backoff reconnect
+      if (reconnectAttempts.current < maxReconnectAttempts) {
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000); // caps at 30s
+        reconnectAttempts.current++;
+        console.log(`Reconnecting in ${delay / 1000}s (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
+
+        reconnectTimeout.current = window.setTimeout(() => {
+          connect();
+        }, delay);
+      } else {
+        console.error('Max reconnection attempts reached.');
+      }
     };
   };
 
@@ -81,7 +132,7 @@ export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
         ws.current.close();
       }
     };
-  }, []); // Empty dependency array
+  }, []);
 
   return { isConnected };
 }
