@@ -21,7 +21,7 @@ export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    const wsUrl = `wss://back.azurewebsites.net/ws/${token}`;
+    const wsUrl = `wss://audit-back.azurewebsites.net/ws/${token}`;
     ws.current = new WebSocket(wsUrl);
 
     ws.current.onopen = () => {
