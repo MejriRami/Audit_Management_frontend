@@ -42,6 +42,8 @@ export interface AuditPlanCreate {
   audit_date: string;  // "YYYY-MM-DD"
   start_time: string;  // "HH:mm:ss"
   end_time: string;    // "HH:mm:ss"
+  supervisor_email: string; // ✅ ADD THIS
+
 }
 
 export interface AuditRescheduleHistory {

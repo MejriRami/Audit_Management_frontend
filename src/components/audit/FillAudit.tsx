@@ -14,6 +14,10 @@ import {
 import toast from "react-hot-toast";
 import Select from "../form/Select";
 import Enum from "../enum/Enum";
+
+import VdaExecution from "./VdaExecution";
+import IATFNonConformityManager from "./IatfNonConformityManager";
+
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import {
@@ -23,7 +27,6 @@ import {
   removePickableAudit,
 } from "../../redux/audit/audit-slice";
 import { apiUploadFile } from "../../redux/audit/audit";
-import IATFNonConformityManager from "./IatfNonConformityManager";
 
 // ==================== TYPES ====================
 type AuditValue = "" | -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
@@ -92,13 +95,8 @@ const VDA_VALUE_OPTIONS: ValueOption[] = [
 const getValueOptions = (questionnaireName: string): ValueOption[] => {
   const name = questionnaireName.toLowerCase();
 
-  if (name.includes("vda")) {
-    return VDA_VALUE_OPTIONS;
-  }
-
-  if (name.includes("plant manager iatf")) {
-    return IATF_PLANT_MANAGER_VALUE_OPTIONS;
-  }
+  if (name.includes("vda")) return VDA_VALUE_OPTIONS;
+  if (name.includes("plant manager iatf")) return IATF_PLANT_MANAGER_VALUE_OPTIONS;
 
   return STANDARD_VALUE_OPTIONS;
 };
@@ -108,13 +106,8 @@ const needsDetails = (v: AuditValue, questionnaireName: string): boolean => {
 
   const name = questionnaireName.toLowerCase();
 
-  if (name.includes("vda")) {
-    return v < 6;
-  }
-
-  if (name.includes("iatf") || name.includes("plant manager")) {
-    return v <= 3;
-  }
+  if (name.includes("vda")) return v < 6;
+  if (name.includes("iatf") || name.includes("plant manager")) return v <= 3;
 
   return v <= 5;
 };
@@ -130,10 +123,7 @@ const getCriticalClass = (critical: number): string => {
   return "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200";
 };
 
-const validateItem = (
-  item: AuditItem,
-  questionnaireName: string
-): AuditItem["errors"] => {
+const validateItem = (item: AuditItem, questionnaireName: string): AuditItem["errors"] => {
   const errors: AuditItem["errors"] = {};
   if (item.value === "") errors.value = "Required";
 
@@ -156,8 +146,7 @@ const getQuestionnaireType = (questionnaireName: string): string => {
 const getScaleDescription = (questionnaireName: string): string => {
   const name = questionnaireName.toLowerCase();
   if (name.includes("vda")) return "VDA (0-10)";
-  if (name.includes("iatf") || name.includes("plant manager"))
-    return "IATF (1-5)";
+  if (name.includes("iatf") || name.includes("plant manager")) return "IATF (1-5)";
   return "Standard (0-10)";
 };
 
@@ -172,14 +161,13 @@ const getFooterMessage = (questionnaireName: string): string => {
   return "Values ≤5 require findings. Check 'Request CAR' for corrective actions.";
 };
 
-// Check if questionnaire is IATF NC mode (not Plant Manager IATF)
+// IATF NC mode: IATF questionnaires except Plant Manager IATF
 const isIATFNCMode = (questionnaireName: string): boolean => {
   const name = questionnaireName.toLowerCase();
   return name.includes("iatf") && !name.includes("plant manager");
 };
 
 // ==================== SUB-COMPONENTS ====================
-
 const AuditHeader = ({
   onExport,
   canExport,
@@ -220,7 +208,6 @@ const AuditHeader = ({
 
   return (
     <div>
-      {/* Header Title */}
       <div className="p-4 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-indigo-600 rounded-lg">
@@ -244,13 +231,10 @@ const AuditHeader = ({
         </button>
       </div>
 
-      {/* Selection Panel */}
       <div className="p-6 bg-slate-50/50 border-b border-slate-200">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Auditor
-            </label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Auditor</label>
             <div className="relative">
               <Select
                 placeholder="Select an auditor..."
@@ -268,9 +252,7 @@ const AuditHeader = ({
           </div>
 
           <div className="lg:col-span-2">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Planned Audit
-            </label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Planned Audit</label>
             <div className="relative">
               <Select
                 key={`${selectedPlannedAuditId}-${auditOptions.length}`}
@@ -296,7 +278,7 @@ const AuditHeader = ({
         </div>
       </div>
 
-      {/* Audit Summary - Only show for non-IATF-NC mode */}
+      {/* Summary + Progress are NOT shown for IATF NC mode */}
       {hasItems && !isIATFNCMode(questionnaireName) && (
         <div className="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
           <div className="flex items-center justify-between mb-4">
@@ -305,12 +287,8 @@ const AuditHeader = ({
                 <FileText className="text-indigo-600" size={18} />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-slate-800">
-                  Audit Summary
-                </h2>
-                <p className="text-xs text-slate-600">
-                  Required before submission
-                </p>
+                <h2 className="text-base font-semibold text-slate-800">Audit Summary</h2>
+                <p className="text-xs text-slate-600">Required before submission</p>
               </div>
             </div>
 
@@ -318,9 +296,7 @@ const AuditHeader = ({
               <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg">
                 <ClipboardList size={16} className="text-indigo-600" />
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-700">
-                    {questionnaireName}
-                  </span>
+                  <span className="text-sm font-medium text-slate-700">{questionnaireName}</span>
                   <span
                     className={`px-2 py-1 text-xs font-semibold rounded ${
                       questionnaireType === "VDA 6.3"
@@ -377,27 +353,21 @@ const AuditHeader = ({
               />
             </div>
 
-            <div className="hidden lg:block"></div>
+            <div className="hidden lg:block" />
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Strong Points
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Strong Points</label>
               <textarea
                 rows={2}
                 value={summary.strongPoints}
-                onChange={(e) =>
-                  onSummaryChange("strongPoints", e.target.value)
-                }
+                onChange={(e) => onSummaryChange("strongPoints", e.target.value)}
                 placeholder="Describe strengths observed..."
                 className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Weak Points
-              </label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Weak Points</label>
               <textarea
                 rows={2}
                 value={summary.weakPoints}
@@ -410,33 +380,24 @@ const AuditHeader = ({
         </div>
       )}
 
-      {/* Progress Bar - Only show for non-IATF-NC mode */}
       {hasItems && !isIATFNCMode(questionnaireName) && (
         <div className="p-5 bg-white border-b border-slate-200">
           <div className="flex items-center gap-4 mb-3">
-            <span className="text-sm font-semibold text-slate-700">
-              Progress:
-            </span>
+            <span className="text-sm font-semibold text-slate-700">Progress:</span>
             <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
               <div
                 className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <span className="text-sm font-bold text-slate-700 min-w-[3rem] text-right">
-              {progress}%
-            </span>
+            <span className="text-sm font-bold text-slate-700 min-w-[3rem] text-right">{progress}%</span>
           </div>
 
           {carCount > 0 && (
             <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
-              <AlertTriangle
-                size={16}
-                className="text-orange-600 flex-shrink-0"
-              />
+              <AlertTriangle size={16} className="text-orange-600 flex-shrink-0" />
               <span className="text-sm text-orange-700 font-medium">
-                {carCount} CAR{carCount > 1 ? "s" : ""} will be requested upon
-                submission
+                {carCount} CAR{carCount > 1 ? "s" : ""} will be requested upon submission
               </span>
             </div>
           )}
@@ -463,13 +424,7 @@ const EvidenceUpload = ({
     <label className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer transition-colors">
       <Upload size={14} className="text-slate-600" />
       <span className="text-slate-700">Upload Image</span>
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={(e) => onAdd(e.target.files)}
-      />
+      <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => onAdd(e.target.files)} />
     </label>
 
     {evidence.length > 0 && (
@@ -477,15 +432,8 @@ const EvidenceUpload = ({
         {evidence.map((file, idx) => {
           const key = `${questionId}-${file.name}-${file.size}`;
           return (
-            <div
-              key={key}
-              className="relative group rounded-lg overflow-hidden border border-slate-200 shadow-sm"
-            >
-              <img
-                src={previews.get(key)}
-                alt={file.name}
-                className="h-16 w-16 object-cover"
-              />
+            <div key={key} className="relative group rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+              <img src={previews.get(key)} alt={file.name} className="h-16 w-16 object-cover" />
               <button
                 type="button"
                 onClick={() => onRemove(idx)}
@@ -515,19 +463,14 @@ const AuditRow = ({
   previews: Map<string, string>;
   valueOptions: ValueOption[];
   questionnaireName: string;
-  onUpdateField: <K extends keyof AuditItem>(
-    questionId: number,
-    field: K,
-    value: AuditItem[K]
-  ) => void;
+  onUpdateField: <K extends keyof AuditItem>(questionId: number, field: K, value: AuditItem[K]) => void;
   onToggleCAR: (questionId: number) => void;
   onAddEvidence: (questionId: number, files: FileList | null) => void;
   onRemoveEvidence: (questionId: number, idx: number) => void;
 }) => {
   const hasErrors = Object.keys(item.errors).length > 0;
   const detailsRequired = needsDetails(item.value, questionnaireName);
-  const canRequestCAR =
-    item.value !== "" && item.value !== -1 && detailsRequired;
+  const canRequestCAR = item.value !== "" && item.value !== -1 && detailsRequired;
 
   return (
     <tr
@@ -537,16 +480,12 @@ const AuditRow = ({
     >
       <td className="px-4 py-4 align-top">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-slate-200 transition-colors">
-          <span className="text-sm font-semibold text-slate-700">
-            {item.row}
-          </span>
+          <span className="text-sm font-semibold text-slate-700">{item.row}</span>
         </div>
       </td>
 
       <td className="px-4 py-4 align-top">
-        <p className="text-sm text-slate-800 leading-relaxed">
-          {item.question}
-        </p>
+        <p className="text-sm text-slate-800 leading-relaxed">{item.question}</p>
       </td>
 
       <td className="px-4 py-4 align-top text-center">
@@ -563,17 +502,12 @@ const AuditRow = ({
         <select
           value={item.value}
           onChange={(e) => {
-            const val =
-              e.target.value === ""
-                ? ""
-                : (Number(e.target.value) as AuditValue);
+            const val = e.target.value === "" ? "" : (Number(e.target.value) as AuditValue);
             onUpdateField(item.questionId, "value", val);
           }}
           aria-invalid={!!item.errors?.value}
           className={`w-full p-2.5 text-sm border rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-            item.errors?.value
-              ? "border-red-400 bg-red-50"
-              : "border-slate-300 bg-white hover:border-slate-400"
+            item.errors?.value ? "border-red-400 bg-red-50" : "border-slate-300 bg-white hover:border-slate-400"
           } ${getValueColor(item.value, valueOptions)} font-medium`}
         >
           <option value="">Select value...</option>
@@ -583,35 +517,21 @@ const AuditRow = ({
             </option>
           ))}
         </select>
-        {item.errors?.value && (
-          <p className="text-xs text-red-600 mt-1 font-medium">
-            {item.errors.value}
-          </p>
-        )}
+        {item.errors?.value && <p className="text-xs text-red-600 mt-1 font-medium">{item.errors.value}</p>}
       </td>
 
       <td className="px-4 py-4 align-top">
         <textarea
           value={item.findings}
-          onChange={(e) =>
-            onUpdateField(item.questionId, "findings", e.target.value)
-          }
+          onChange={(e) => onUpdateField(item.questionId, "findings", e.target.value)}
           rows={3}
-          placeholder={
-            detailsRequired ? "Required details..." : "Optional notes..."
-          }
+          placeholder={detailsRequired ? "Required details..." : "Optional notes..."}
           aria-invalid={!!item.errors?.findings}
           className={`w-full p-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${
-            item.errors?.findings
-              ? "border-red-400 bg-red-50"
-              : "border-slate-300 hover:border-slate-400"
+            item.errors?.findings ? "border-red-400 bg-red-50" : "border-slate-300 hover:border-slate-400"
           }`}
         />
-        {item.errors?.findings && (
-          <p className="text-xs text-red-600 mt-1 font-medium">
-            {item.errors.findings}
-          </p>
-        )}
+        {item.errors?.findings && <p className="text-xs text-red-600 mt-1 font-medium">{item.errors.findings}</p>}
       </td>
 
       <td className="px-4 py-4 align-top">
@@ -643,33 +563,21 @@ const AuditRow = ({
               <>
                 <textarea
                   value={item.carReason}
-                  onChange={(e) =>
-                    onUpdateField(item.questionId, "carReason", e.target.value)
-                  }
+                  onChange={(e) => onUpdateField(item.questionId, "carReason", e.target.value)}
                   rows={3}
                   placeholder="indicate the issue  (required)..."
                   aria-invalid={!!item.errors?.carReason}
                   className={`w-full p-2.5 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all ${
-                    item.errors?.carReason
-                      ? "border-red-400 bg-red-50"
-                      : "border-orange-300 hover:border-orange-400"
+                    item.errors?.carReason ? "border-red-400 bg-red-50" : "border-orange-300 hover:border-orange-400"
                   }`}
                 />
-                {item.errors?.carReason && (
-                  <p className="text-xs text-red-600 font-medium">
-                    {item.errors.carReason}
-                  </p>
-                )}
+                {item.errors?.carReason && <p className="text-xs text-red-600 font-medium">{item.errors.carReason}</p>}
               </>
             )}
           </div>
         ) : (
           <div className="text-xs text-slate-500 italic py-2">
-            {item.value === ""
-              ? "Select a value first"
-              : item.value === -1
-              ? "Optional - No CAR"
-              : "No CAR needed"}
+            {item.value === "" ? "Select a value first" : item.value === -1 ? "Optional - No CAR" : "No CAR needed"}
           </div>
         )}
       </td>
@@ -681,17 +589,21 @@ const AuditRow = ({
 export default function AuditChecklistRefactored() {
   const today = new Date().toISOString().split("T")[0];
 
-  // State
   const [selectedAuditor, setSelectedAuditor] = useState<string | number>("");
-  const [selectedPlannedAuditId, setSelectedPlannedAuditId] = useState<
-    number | ""
-  >("");
+  const [selectedPlannedAuditId, setSelectedPlannedAuditId] = useState<number | "">("");
   const [questionnaireName, setQuestionnaireName] = useState<string>("");
+
+  // IATF NC extras
   const [auditee_name, setAuditeeName] = useState<string>("");
+
   const [items, setItems] = useState<AuditItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [previews, setPreviews] = useState<Map<string, string>>(new Map());
+
+  // VDA selection state
+  const [vdaSelectedIds, setVdaSelectedIds] = useState<Set<number>>(new Set());
+
   const [summary, setSummary] = useState<AuditSummary>({
     auditDate: today,
     startTime: "",
@@ -701,29 +613,23 @@ export default function AuditChecklistRefactored() {
     questionnaireName: "",
   });
 
-  // Redux
   const { auditorOptions } = Enum();
   const dispatch = useDispatch<AppDispatch>();
-  const { pickableAudits, pickableLoading } = useSelector(
-    (state: RootState) => state.audit
-  );
+  const { pickableAudits, pickableLoading } = useSelector((state: RootState) => state.audit);
 
-  const auditorId = useMemo(
-    () => Number(selectedAuditor) || 0,
-    [selectedAuditor]
-  );
+  const auditorId = useMemo(() => Number(selectedAuditor) || 0, [selectedAuditor]);
 
-  // Determine scoring system
-  const valueOptions = useMemo(
-    () => getValueOptions(questionnaireName),
-    [questionnaireName]
-  );
+  const valueOptions = useMemo(() => getValueOptions(questionnaireName), [questionnaireName]);
 
-  // Check if in IATF NC mode
-  const showIATFNCInterface = useMemo(
-    () => isIATFNCMode(questionnaireName),
-    [questionnaireName]
-  );
+  const isVda = useMemo(() => questionnaireName.toLowerCase().includes("vda"), [questionnaireName]);
+
+  const showIATFNCInterface = useMemo(() => isIATFNCMode(questionnaireName), [questionnaireName]);
+
+  // For VDA: only selected questions count
+  const effectiveItems = useMemo(() => {
+    if (!isVda) return items;
+    return items.filter((it) => vdaSelectedIds.has(it.questionId));
+  }, [items, isVda, vdaSelectedIds]);
 
   // Fetch pickable audits when auditor changes
   useEffect(() => {
@@ -732,6 +638,8 @@ export default function AuditChecklistRefactored() {
       setItems([]);
       setSubmitted(false);
       setQuestionnaireName("");
+      setVdaSelectedIds(new Set());
+      setAuditeeName("");
       return;
     }
 
@@ -740,9 +648,10 @@ export default function AuditChecklistRefactored() {
     setItems([]);
     setSubmitted(false);
     setQuestionnaireName("");
+    setVdaSelectedIds(new Set());
+    setAuditeeName("");
   }, [auditorId, dispatch]);
 
-  // Handle audit selection
   const handleAuditSelection = async (auditId: number | "") => {
     setSelectedPlannedAuditId(auditId);
     setSubmitted(false);
@@ -750,22 +659,23 @@ export default function AuditChecklistRefactored() {
     if (auditId === "") {
       setItems([]);
       setQuestionnaireName("");
+      setVdaSelectedIds(new Set());
+      setAuditeeName("");
       return;
     }
 
-    // Extract questionnaire name from selected audit
     const selectedAudit = pickableAudits.find((a) => a.id === auditId);
-    if (selectedAudit) {
-      const name = selectedAudit.questionnaire_name || "";
-      setQuestionnaireName(name);
-      const auditee_name = selectedAudit.auditees[0].email || "";
-      setAuditeeName(auditee_name);
+    const auditQName = selectedAudit?.questionnaire_name || "";
+    setQuestionnaireName(auditQName);
 
-      // If IATF NC mode, don't load questions
-      if (isIATFNCMode(name)) {
-        setItems([]);
-        return;
-      }
+    const auditeeEmail = selectedAudit?.auditees?.[0]?.email || "";
+    setAuditeeName(auditeeEmail);
+
+    // IATF NC mode: do NOT load questions; render NC manager UI
+    if (isIATFNCMode(auditQName)) {
+      setItems([]);
+      setVdaSelectedIds(new Set());
+      return;
     }
 
     const result = await dispatch(getAuditQuestions(auditId));
@@ -777,28 +687,36 @@ export default function AuditChecklistRefactored() {
         critical_value: number;
       }>;
 
-      setItems(
-        questions.map((q, idx) => ({
-          row: idx + 1,
-          questionId: q.id,
-          question: q.description,
-          critical: q.critical_value,
-          value: "",
-          findings: "",
-          carReason: "",
-          evidence: [],
-          requestCAR: false,
-          errors: {},
-        }))
-      );
+      const newItems: AuditItem[] = questions.map((q, idx) => ({
+        row: idx + 1,
+        questionId: q.id,
+        question: q.description,
+        critical: q.critical_value,
+        value: "",
+        findings: "",
+        carReason: "",
+        evidence: [],
+        requestCAR: false,
+        errors: {},
+      }));
+
+      setItems(newItems);
+
+      // For VDA, default select all questions
+      if (auditQName.toLowerCase().includes("vda")) {
+        setVdaSelectedIds(new Set(newItems.map((x) => x.questionId)));
+      } else {
+        setVdaSelectedIds(new Set());
+      }
     } else {
       setItems([]);
       setQuestionnaireName("");
+      setVdaSelectedIds(new Set());
       toast.error("Failed to load audit questions");
     }
   };
 
-  // Handle IATF NC submission
+  // IATF NC submission (uses NC manager)
   const handleIATFNCSubmission = async (
     nonConformities: any[],
     auditDetails: {
@@ -816,14 +734,8 @@ export default function AuditChecklistRefactored() {
     setSubmitting(true);
 
     try {
-      // Define the classification type
-      type NCClassification =
-        | "Minor"
-        | "Major"
-        | "Improvement"
-        | "Strong Point";
+      type NCClassification = "Minor" | "Major" | "Improvement" | "Strong Point";
 
-      // Create a properly typed mapping
       const classificationMap: Record<NCClassification, number> = {
         Minor: 1,
         Major: 2,
@@ -831,11 +743,10 @@ export default function AuditChecklistRefactored() {
         "Strong Point": 4,
       };
 
-      // Upload evidence files for each NC
       const answers = await Promise.all(
         nonConformities.map(async (nc, index) => {
           const uploadedEvidence = await Promise.all(
-            nc.evidence.map(async (file: File) => {
+            (nc.evidence || []).map(async (file: File) => {
               const uploadResult = await apiUploadFile(file);
               return {
                 filename: uploadResult.filename,
@@ -846,19 +757,17 @@ export default function AuditChecklistRefactored() {
             })
           );
 
-          // Map classification to numeric value with type safety
           const classificationValue =
             classificationMap[nc.classification as NCClassification] || 1;
 
           return {
-            question_id: -(index + 1), // Negative ID to distinguish IATF NCs
+            question_id: -(index + 1),
             value: classificationValue,
             finding_text: nc.findings,
             documents: uploadedEvidence,
             car_reason: nc.observedNonConformity,
             request_car: nc.requestCAR,
-            critical_value: 0, // Not applicable for IATF
-            // ✅ IATF NC specific fields
+            critical_value: 0,
             process: nc.process,
             standard_paragraph: nc.normParagraph,
             classification: nc.classification,
@@ -866,7 +775,6 @@ export default function AuditChecklistRefactored() {
         })
       );
 
-      // Submit using existing API
       const resultAction = await dispatch(
         executeAuditThunk({
           auditId: selectedPlannedAuditId,
@@ -882,9 +790,7 @@ export default function AuditChecklistRefactored() {
       );
 
       if (!executeAuditThunk.fulfilled.match(resultAction)) {
-        toast.error(
-          String(resultAction.payload || "Failed to submit non-conformities")
-        );
+        toast.error(String(resultAction.payload || "Failed to submit non-conformities"));
         return;
       }
 
@@ -900,6 +806,7 @@ export default function AuditChecklistRefactored() {
       setSubmitted(true);
       setSelectedPlannedAuditId("");
       setQuestionnaireName("");
+      setAuditeeName("");
     } catch (err: any) {
       console.error("IATF NC submission error:", err);
       toast.error(err?.message || "Failed to submit non-conformities");
@@ -941,12 +848,7 @@ export default function AuditChecklistRefactored() {
     };
   }, []);
 
-  // Field update handler
-  const updateField = <K extends keyof AuditItem>(
-    questionId: number,
-    field: K,
-    value: AuditItem[K]
-  ) => {
+  const updateField = <K extends keyof AuditItem>(questionId: number, field: K, value: AuditItem[K]) => {
     setItems((prev) =>
       prev.map((item) => {
         if (item.questionId !== questionId) return item;
@@ -959,11 +861,7 @@ export default function AuditChecklistRefactored() {
 
         if (field === "value") {
           const newValue = value as AuditValue;
-          if (
-            newValue === "" ||
-            newValue === -1 ||
-            !needsDetails(newValue, questionnaireName)
-          ) {
+          if (newValue === "" || newValue === -1 || !needsDetails(newValue, questionnaireName)) {
             updated.requestCAR = false;
             updated.carReason = "";
           }
@@ -975,46 +873,58 @@ export default function AuditChecklistRefactored() {
   };
 
   const toggleCARRequest = (questionId: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.questionId === questionId
-          ? { ...item, requestCAR: !item.requestCAR }
-          : item
-      )
-    );
+    setItems((prev) => prev.map((item) => (item.questionId === questionId ? { ...item, requestCAR: !item.requestCAR } : item)));
   };
 
   const addEvidence = (questionId: number, files: FileList | null) => {
     if (!files) return;
-    const imageFiles = Array.from(files).filter((f) =>
-      f.type.startsWith("image/")
-    );
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (imageFiles.length === 0) return;
 
     setItems((prev) =>
-      prev.map((item) =>
-        item.questionId === questionId
-          ? { ...item, evidence: [...item.evidence, ...imageFiles] }
-          : item
-      )
+      prev.map((item) => (item.questionId === questionId ? { ...item, evidence: [...item.evidence, ...imageFiles] } : item))
     );
   };
 
   const removeEvidence = (questionId: number, idx: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.questionId === questionId
-          ? { ...item, evidence: item.evidence.filter((_, i) => i !== idx) }
-          : item
-      )
-    );
+    setItems((prev) => prev.map((item) => (item.questionId === questionId ? { ...item, evidence: item.evidence.filter((_, i) => i !== idx) } : item)));
   };
 
   const handleSummaryChange = (field: keyof AuditSummary, value: string) => {
     setSummary((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Submit handler for standard audits
+  // VDA selection handlers
+  const toggleVdaSelect = (questionId: number) => {
+    setVdaSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(questionId)) next.delete(questionId);
+      else next.add(questionId);
+      return next;
+    });
+  };
+
+  const selectAllInSection = (sectionKey: string, checked: boolean) => {
+    const getVdaSectionKey = (questionText: string): string => {
+      const m = questionText.trim().match(/^(\d+)(?:\.\d+)+/);
+      if (!m) return "Other";
+      const major = Number(m[1]);
+      if (major >= 2 && major <= 7) return `P${major}`;
+      return "Other";
+    };
+
+    const idsInSection = items
+      .filter((it) => getVdaSectionKey(it.question) === sectionKey)
+      .map((it) => it.questionId);
+
+    setVdaSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) idsInSection.forEach((id) => next.add(id));
+      else idsInSection.forEach((id) => next.delete(id));
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitted || submitting) return;
@@ -1024,15 +934,25 @@ export default function AuditChecklistRefactored() {
       return;
     }
 
-    const validated = items.map((item) => ({
+    if (isVda && effectiveItems.length === 0) {
+      toast.error("Select at least one VDA question");
+      return;
+    }
+
+    const validated = effectiveItems.map((item) => ({
       ...item,
       errors: validateItem(item, questionnaireName),
     }));
-    setItems(validated);
 
-    const hasErrors = validated.some(
-      (item) => Object.keys(item.errors).length > 0
+    // merge validation errors back into full items state
+    setItems((prev) =>
+      prev.map((it) => {
+        const v = validated.find((x) => x.questionId === it.questionId);
+        return v ? { ...it, errors: v.errors } : it;
+      })
     );
+
+    const hasErrors = validated.some((item) => Object.keys(item.errors).length > 0);
     if (hasErrors) {
       toast.error("Please fix all errors before submitting");
       return;
@@ -1054,6 +974,7 @@ export default function AuditChecklistRefactored() {
               };
             })
           );
+
           return {
             question_id: item.questionId,
             value: item.value === "" ? -1 : (item.value as number),
@@ -1061,13 +982,11 @@ export default function AuditChecklistRefactored() {
             documents,
             critical_value: item.critical,
             request_car: item.requestCAR,
-            car_reason:
-              item.requestCAR && item.carReason?.trim()
-                ? item.carReason.trim()
-                : null,
+            car_reason: item.requestCAR && item.carReason?.trim() ? item.carReason.trim() : null,
           };
         })
       );
+
       const resultAction = await dispatch(
         executeAuditThunk({
           auditId: selectedPlannedAuditId,
@@ -1098,11 +1017,12 @@ export default function AuditChecklistRefactored() {
 
       dispatch(removePickableAudit(selectedPlannedAuditId));
 
-      // Reset
       setSubmitted(true);
       setSelectedPlannedAuditId("");
       setItems([]);
       setQuestionnaireName("");
+      setVdaSelectedIds(new Set());
+      setAuditeeName("");
       setSummary({
         auditDate: today,
         startTime: "",
@@ -1120,20 +1040,10 @@ export default function AuditChecklistRefactored() {
     }
   };
 
-  // CSV Export
   const downloadCSV = () => {
     const rows = [
-      [
-        "#",
-        "Question",
-        "Critical",
-        "Value",
-        "Findings",
-        "CAR Requested",
-        "CAR Reason",
-        "Evidence",
-      ],
-      ...items.map((item) => [
+      ["#", "Question", "Critical", "Value", "Findings", "CAR Requested", "CAR Reason", "Evidence"],
+      ...effectiveItems.map((item) => [
         item.row,
         item.question,
         item.critical,
@@ -1146,9 +1056,7 @@ export default function AuditChecklistRefactored() {
     ];
 
     const csv = rows
-      .map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-      )
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
       .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -1160,30 +1068,23 @@ export default function AuditChecklistRefactored() {
     URL.revokeObjectURL(url);
   };
 
-  // Computed values
-  const progress = items.length
-    ? Math.round(
-        (items.filter((i) => i.value !== "").length / items.length) * 100
-      )
+  // Computed values (use effectiveItems)
+  const progress = effectiveItems.length
+    ? Math.round((effectiveItems.filter((i) => i.value !== "").length / effectiveItems.length) * 100)
     : 0;
 
-  const carCount = items.filter(
-    (item) =>
-      item.requestCAR &&
-      item.value !== "" &&
-      item.value !== -1 &&
-      needsDetails(item.value, questionnaireName)
+  const carCount = effectiveItems.filter(
+    (item) => item.requestCAR && item.value !== "" && item.value !== -1 && needsDetails(item.value, questionnaireName)
   ).length;
 
   const canSubmit =
     selectedPlannedAuditId !== "" &&
     auditorId > 0 &&
-    items.length > 0 &&
-    items.every(
+    effectiveItems.length > 0 &&
+    effectiveItems.every(
       (item) =>
         item.value !== "" &&
-        (!needsDetails(item.value, questionnaireName) ||
-          item.findings.trim()) &&
+        (!needsDetails(item.value, questionnaireName) || item.findings.trim()) &&
         (!item.requestCAR || item.carReason.trim())
     ) &&
     summary.auditDate.trim() !== "" &&
@@ -1194,29 +1095,25 @@ export default function AuditChecklistRefactored() {
 
   const auditOptions = pickableAudits.map((a) => ({
     value: a.id,
-    label: `${a.status === "rescheduled" ? "🔁 RESCHEDULED" : "🗓️ PLANNED"} | ${
-      a.audit_number
-    } | ${a.planned_date} | ${a.planned_start_time}-${a.planned_end_time}`,
+    label: `${a.status === "rescheduled" ? "🔁 RESCHEDULED" : "🗓️ PLANNED"} | ${a.audit_number} | ${a.planned_date} | ${a.planned_start_time}-${a.planned_end_time}`,
   }));
 
   // ==================== RENDER ====================
 
-  // If IATF NC mode is active and audit is selected, show NC manager
+  // IATF NC mode view
   if (showIATFNCInterface && selectedPlannedAuditId) {
-    const selectedAudit = pickableAudits.find(
-      (a) => a.id === selectedPlannedAuditId
-    );
+    const selectedAudit = pickableAudits.find((a) => a.id === selectedPlannedAuditId);
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/30 p-4 md:p-8">
         <div className="max-w-[1600px] mx-auto mb-6">
-          {/* Back button to return to audit selection */}
           <button
             type="button"
             onClick={() => {
               setSelectedPlannedAuditId("");
               setQuestionnaireName("");
               setSubmitted(false);
+              setAuditeeName("");
             }}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
           >
@@ -1264,120 +1161,174 @@ export default function AuditChecklistRefactored() {
             />
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b border-slate-200">
-                    <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-16">
-                      #
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider min-w-[280px]">
-                      Question
-                    </th>
-                    <th className="px-4 py-4 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-24">
-                      Critical
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-52">
-                      Value
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-56">
-                      Findings
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-40">
-                      Evidence
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-56">
-                      CAR Reason
-                    </th>
-                  </tr>
-                </thead>
+          {isVda ? (
+            <div className="space-y-4">
+              <VdaExecution
+                items={items}
+                valueOptions={valueOptions}
+                questionnaireName={questionnaireName}
+                selectedIds={vdaSelectedIds}
+                onToggleSelect={toggleVdaSelect}
+                onSelectAllInSection={selectAllInSection}
+                onUpdateField={updateField}
+                onToggleCAR={toggleCARRequest}
+              />
 
-                <tbody className="divide-y divide-slate-100">
-                  {items.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-20 text-center">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="p-4 bg-slate-100 rounded-full">
-                            <FileText className="text-slate-400" size={40} />
-                          </div>
-                          <div>
-                            <p className="text-base font-medium text-slate-700 mb-1">
-                              No Audit Selected
-                            </p>
-                            <p className="text-sm text-slate-500">
-                              Select a planned audit to load questions
+              {effectiveItems.length > 0 && (
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-slate-100 border-t border-slate-200">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <div className="space-y-1">
+                        <p className="text-sm text-slate-600">{getFooterMessage(questionnaireName)}</p>
+                        {carCount > 0 && (
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle size={14} className="text-orange-600" />
+                            <p className="text-sm text-orange-700 font-medium">
+                              {carCount} CAR{carCount > 1 ? "s" : ""} will be submitted
                             </p>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    items.map((item) => (
-                      <AuditRow
-                        key={item.questionId}
-                        item={item}
-                        previews={previews}
-                        valueOptions={valueOptions}
-                        questionnaireName={questionnaireName}
-                        onUpdateField={updateField}
-                        onToggleCAR={toggleCARRequest}
-                        onAddEvidence={addEvidence}
-                        onRemoveEvidence={removeEvidence}
-                      />
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {items.length > 0 && (
-              <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-slate-100 border-t border-slate-200">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm text-slate-600">
-                      {getFooterMessage(questionnaireName)}
-                    </p>
-                    {carCount > 0 && (
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle size={14} className="text-orange-600" />
-                        <p className="text-sm text-orange-700 font-medium">
-                          {carCount} CAR{carCount > 1 ? "s" : ""} will be
-                          submitted
-                        </p>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <button
-                    type="submit"
-                    disabled={!canSubmit || submitting || submitted}
-                    className={`inline-flex items-center gap-2 px-8 py-3 text-sm font-semibold rounded-lg transition-all shadow-sm ${
-                      submitted
-                        ? "bg-emerald-600 text-white cursor-default"
-                        : canSubmit
-                        ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-md active:scale-95"
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                    }`}
-                  >
-                    {submitted ? (
-                      <>
-                        <CheckCircle2 size={18} />
-                        <span>Submitted</span>
-                      </>
-                    ) : submitting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Submitting...</span>
-                      </>
-                    ) : (
-                      "Submit Audit"
-                    )}
-                  </button>
+                      <button
+                        type="submit"
+                        disabled={!canSubmit || submitting || submitted}
+                        className={`inline-flex items-center gap-2 px-8 py-3 text-sm font-semibold rounded-lg transition-all shadow-sm ${
+                          submitted
+                            ? "bg-emerald-600 text-white cursor-default"
+                            : canSubmit
+                            ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-md active:scale-95"
+                            : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {submitted ? (
+                          <>
+                            <CheckCircle2 size={18} />
+                            <span>Submitted</span>
+                          </>
+                        ) : submitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Submitting...</span>
+                          </>
+                        ) : (
+                          "Submit Audit"
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b border-slate-200">
+                      <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-16">
+                        #
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider min-w-[280px]">
+                        Question
+                      </th>
+                      <th className="px-4 py-4 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-24">
+                        Critical
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-52">
+                        Value
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-56">
+                        Findings
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-40">
+                        Evidence
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-56">
+                        CAR Reason
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-100">
+                    {items.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-4 py-20 text-center">
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="p-4 bg-slate-100 rounded-full">
+                              <FileText className="text-slate-400" size={40} />
+                            </div>
+                            <div>
+                              <p className="text-base font-medium text-slate-700 mb-1">No Audit Selected</p>
+                              <p className="text-sm text-slate-500">Select a planned audit to load questions</p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      items.map((item) => (
+                        <AuditRow
+                          key={item.questionId}
+                          item={item}
+                          previews={previews}
+                          valueOptions={valueOptions}
+                          questionnaireName={questionnaireName}
+                          onUpdateField={updateField}
+                          onToggleCAR={toggleCARRequest}
+                          onAddEvidence={addEvidence}
+                          onRemoveEvidence={removeEvidence}
+                        />
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </div>
+
+              {items.length > 0 && (
+                <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-slate-100 border-t border-slate-200">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-slate-600">{getFooterMessage(questionnaireName)}</p>
+                      {carCount > 0 && (
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle size={14} className="text-orange-600" />
+                          <p className="text-sm text-orange-700 font-medium">
+                            {carCount} CAR{carCount > 1 ? "s" : ""} will be submitted
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={!canSubmit || submitting || submitted}
+                      className={`inline-flex items-center gap-2 px-8 py-3 text-sm font-semibold rounded-lg transition-all shadow-sm ${
+                        submitted
+                          ? "bg-emerald-600 text-white cursor-default"
+                          : canSubmit
+                          ? "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-md active:scale-95"
+                          : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                      }`}
+                    >
+                      {submitted ? (
+                        <>
+                          <CheckCircle2 size={18} />
+                          <span>Submitted</span>
+                        </>
+                      ) : submitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Submitting...</span>
+                        </>
+                      ) : (
+                        "Submit Audit"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       </div>
     </div>

@@ -1,0 +1,2109 @@
+[
+  {
+    "question_id": "VDA63_0001",
+    "element": "P2",
+    "question_code": "P2.1.1",
+    "question_text_en": "A process for project management exists.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0002",
+    "element": "P2",
+    "question_code": "P2.1.2",
+    "question_text_en": "An interdisciplinary project organisation is specified and contacts are defined.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0003",
+    "element": "P2",
+    "question_code": "P2.1.3",
+    "question_text_en": "The responsibilities and authority of the project leader and team members are defined.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0004",
+    "element": "P2",
+    "question_code": "P2.1.4",
+    "question_text_en": "The team members of the project are qualified to carry out their tasks.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0005",
+    "element": "P2",
+    "question_code": "P2.1.5",
+    "question_text_en": "The project organisation meets the customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0006",
+    "element": "P2",
+    "question_code": "P2.1.6",
+    "question_text_en": "Suppliers are involved in project management.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0007",
+    "element": "P2",
+    "question_code": "P2.2.1",
+    "question_text_en": "Resource planning takes the customer requirements into account and is based on the contract covering the project.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0008",
+    "element": "P2",
+    "question_code": "P2.2.2",
+    "question_text_en": "Resource planning for project members is established and implemented. The staff workload has to be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0009",
+    "element": "P2",
+    "question_code": "P2.2.3",
+    "question_text_en": "Review and where necessary adjustment of resource planning is carried out when changes occur (dates, scope of development performance etc.).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0010",
+    "element": "P2",
+    "question_code": "P2.2.5",
+    "question_text_en": "The necessary project budget for personnel an equipment (e.g. test and laboratory equipment) is planned and released.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0011",
+    "element": "P2",
+    "question_code": "P2.2.6",
+    "question_text_en": "Changes in the project organisation (interface with customer) are reported.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0012",
+    "element": "P2",
+    "question_code": "P2.3.1",
+    "question_text_en": "The project plan meets the specific customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0013",
+    "element": "P2",
+    "question_code": "P2.3.2",
+    "question_text_en": "All internal and customer defined milestones are fully incorporated in the project plan.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0014",
+    "element": "P2",
+    "question_code": "P2.3.3",
+    "question_text_en": "A review is carried out at the milestones defined in the project plan to check that all planned activities are carried out and that the level of maturity required is achieved.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0015",
+    "element": "P2",
+    "question_code": "P2.3.4",
+    "question_text_en": "If a statutory authorisation procedure for a product is specifically required, the duration of this procedure is included in the project planning.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0016",
+    "element": "P2",
+    "question_code": "P2.3.5",
+    "question_text_en": "In-house communication is ensured when changes are made to the project plan. Changes made to the project plan which affect the customer are coordinated with the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0017",
+    "element": "P2",
+    "question_code": "P2.3.6",
+    "question_text_en": "The critical path is generated from the project plan and takes account of critical delivery items.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0018",
+    "element": "P2",
+    "question_code": "P2.3.7",
+    "question_text_en": "Detailed quality-related project activities must be part of the project plan. This may be in a separate document (QM-Plan) that is referred to from the project plan.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0019",
+    "element": "P2",
+    "question_code": "P2.3.8",
+    "question_text_en": "The project plan must include the detailed activities concerning procurement. Detail plans may be in a separate document referred to in the project plan.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0020",
+    "element": "P2",
+    "question_code": "P2.4.1",
+    "question_text_en": "Advanced product quality planning activities must meet the specific customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0021",
+    "element": "P2",
+    "question_code": "P2.4.2",
+    "question_text_en": "Both product and process assurance measures are part of the advanced product quality planning.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0022",
+    "element": "P2",
+    "question_code": "P2.4.3",
+    "question_text_en": "Verification and validation of the customer requirements are contained within the planning.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0023",
+    "element": "P2",
+    "question_code": "P2.4.4",
+    "question_text_en": "The planning also addresses critical components an scope of supply (internal and external suppliers).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0024",
+    "element": "P2",
+    "question_code": "P2.4.5",
+    "question_text_en": "The planning is regularly monitored for compliance and for target achievement.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0025",
+    "element": "P2",
+    "question_code": "P2.5.1",
+    "question_text_en": "The activities have to ensure that only approved and quality-capable suppliers are used in production.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0026",
+    "element": "P2",
+    "question_code": "P2.5.2",
+    "question_text_en": "The level of activity depends on the risk classification of procured scope of supplies.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0027",
+    "element": "P2",
+    "question_code": "P2.5.3",
+    "question_text_en": "These include the supplier selection and award criteria, award amount and delivery target date.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0028",
+    "element": "P2",
+    "question_code": "P2.5.4",
+    "question_text_en": "The transfer of customer requirements in the supply chain is ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0029",
+    "element": "P2",
+    "question_code": "P2.5.5",
+    "question_text_en": "The activities also include customer required suppliers (directed suppliers) as stated within the agreement.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0030",
+    "element": "P2",
+    "question_code": "P2.5.6",
+    "question_text_en": "The suppliers for facilities, machinery, tools, test an measurement systems as well as services are integrated.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0031",
+    "element": "P2",
+    "question_code": "P2.5.7",
+    "question_text_en": "The appointment of suppliers must be traceable through appropriate documentation.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0032",
+    "element": "P2",
+    "question_code": "P2.5.8",
+    "question_text_en": "Dates for the assignment, supplier milestones and release have been laid down in the plan and coordinated with the overall schedule and the progress is monitored.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0033",
+    "element": "P2",
+    "question_code": "P2.6.1",
+    "question_text_en": "Change management within the project meets the customer's specific requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0034",
+    "element": "P2",
+    "question_code": "P2.6.2",
+    "question_text_en": "Changes (initiated by the supplier, internally or by the customer) must be evaluated and if necessary the project plan must be adapted. This evaluation must include the risk assessment for the product quality as well as the deadlines.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0035",
+    "element": "P2",
+    "question_code": "P2.6.3",
+    "question_text_en": "Suppliers (critical supplies) are actively involved in change management.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0036",
+    "element": "P2",
+    "question_code": "P2.6.4",
+    "question_text_en": "Changes are reported in a timely manner and are agreed upon with the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0037",
+    "element": "P2",
+    "question_code": "P2.6.5",
+    "question_text_en": "Adherence to defined design freeze steps must be ensured. Exceptions must be agreed upon and documented between the customer and the supplier.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0038",
+    "element": "P2",
+    "question_code": "P2.6.6",
+    "question_text_en": "All changes must be documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0039",
+    "element": "P2",
+    "question_code": "P2.6.7",
+    "question_text_en": "The persons responsible for change management are defined for the customer, internally and to suppliers.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0040",
+    "element": "P2",
+    "question_code": "P2.7.1",
+    "question_text_en": "The escalation process in the project meets the specific customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0041",
+    "element": "P2",
+    "question_code": "P2.7.2",
+    "question_text_en": "An escalation model (risk management) must be available for deviations in the project affecting the overall schedule. Project risks are identified, assessed and reduced through appropriate measures.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0042",
+    "element": "P2",
+    "question_code": "P2.7.3",
+    "question_text_en": "The criteria for escalation are defined, responsibilities and authorities are regulated and measures derived when deviations occur.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0043",
+    "element": "P2",
+    "question_code": "P2.7.4",
+    "question_text_en": "If risks have been identified in technologies, suppliers or supplied countries, these risks have to be considered within the escalation management.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0044",
+    "element": "P3",
+    "question_code": "P3.1.1",
+    "question_text_en": "All requirements regarding the product to be developed are known.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0045",
+    "element": "P3",
+    "question_code": "P3.1.2",
+    "question_text_en": "For products with embedded software, the requirements at interfaces between hardware and software are defined. Requirements management is implemented for this.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0046",
+    "element": "P3",
+    "question_code": "P3.1.3",
+    "question_text_en": "The organisation must determine the logistical requirements and the statutory and regulatory requirements relevant for the product that are necessary to meet specific customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0047",
+    "element": "P3",
+    "question_code": "P3.1.4",
+    "question_text_en": "The organisation must take into account and use requirements on the product and the process known from previous experience.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0048",
+    "element": "P3",
+    "question_code": "P3.1.5",
+    "question_text_en": "Special characteristics must be identified on the basis of their own requirements, customer requirements, legal requirements, manufacturing technology and characteristics that arise from the purpose/use of the product.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0049",
+    "element": "P3",
+    "question_code": "P3.1.6",
+    "question_text_en": "The quality requirements from the customer for the product and the process must be available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0050",
+    "element": "P3",
+    "question_code": "P3.1.7",
+    "question_text_en": "Inquiry and contract documents are checked for completeness.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0051",
+    "element": "P3",
+    "question_code": "P3.1.8",
+    "question_text_en": "If customer requirements cannot be fulfilled the customer must be notified or deviations “allowed”/approved by the customer (if the contract has been awarded).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0052",
+    "element": "P3",
+    "question_code": "P3.1.9",
+    "question_text_en": "Customer requirements regarding the selection of suppliers or purchased materials must be documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0053",
+    "element": "P3",
+    "question_code": "P3.1.10",
+    "question_text_en": "Quality agreements with directed suppliers are available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0054",
+    "element": "P3",
+    "question_code": "P3.2.1",
+    "question_text_en": "An interdisciplinary procedure for evaluating the feasibility must be used.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0055",
+    "element": "P3",
+    "question_code": "P3.2.2",
+    "question_text_en": "All determined product and process specific requirements (technology, function, quality, logistics, software, ...) must be checked for feasibility.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0056",
+    "element": "P3",
+    "question_code": "P3.2.3",
+    "question_text_en": "Material and personnel resources must be considered in the feasibility study.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0057",
+    "element": "P3",
+    "question_code": "P3.2.4",
+    "question_text_en": "The results of the feasibility study must be available before tendering.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0058",
+    "element": "P3",
+    "question_code": "P3.2.5",
+    "question_text_en": "The feasibility of critical purchased parts must be ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0059",
+    "element": "P3",
+    "question_code": "P3.2.6",
+    "question_text_en": "If customer requirements cannot be fulfilled the customer must be notified or deviations “allowed”/approved by the customer (if the contract has been awarded).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0060",
+    "element": "P3",
+    "question_code": "P3.3.1",
+    "question_text_en": "When planning the product development the level of detail is dependent on the component, software and complexity of the process.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0061",
+    "element": "P3",
+    "question_code": "P3.3.2",
+    "question_text_en": "In the development phase, suitable methods must be used to secure the product development so that when the product goes into serial production it fulfils the operational conditions",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0062",
+    "element": "P3",
+    "question_code": "P3.3.4",
+    "question_text_en": "Risk analysis (Product FMEA or similar methods) are part of the planning.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0063",
+    "element": "P3",
+    "question_code": "P3.3.5",
+    "question_text_en": "At the planning stage, the development of new products should take into account the requirements of the product operational conditions.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0064",
+    "element": "P3",
+    "question_code": "P3.3.6",
+    "question_text_en": "The time schedules contain all information for product development (including deadlines and length of time, milestones within the overall project plan, performance testing, PPA-date, Software standards…).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0065",
+    "element": "P3",
+    "question_code": "P3.3.7",
+    "question_text_en": "Methods for development release meet customer requirements and must be clarified with the customer if deviations occur.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0066",
+    "element": "P3",
+    "question_code": "P3.3.8",
+    "question_text_en": "Activities related to the procurement scope are planned and are consistent with the overall schedule.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0067",
+    "element": "P3",
+    "question_code": "P3.4.1",
+    "question_text_en": "The customer requirements for the supply of parts across the product life cycle are taken into account in the planning.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0068",
+    "element": "P3",
+    "question_code": "P3.4.2",
+    "question_text_en": "Concepts to continually ensure series supply including a contingency plan are provided in the planning phase.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0069",
+    "element": "P3",
+    "question_code": "P3.4.3",
+    "question_text_en": "A fallback concept is provided for product and process innovation.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0070",
+    "element": "P3",
+    "question_code": "P3.4.4",
+    "question_text_en": "The analysis process for 0-km and field complaints is planned for delivery. The customer requirements are taken into account for field failure analysis.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0071",
+    "element": "P3",
+    "question_code": "P3.4.5",
+    "question_text_en": "When introducing new technologies and products, employee training and the creation of the necessary infrastructure are provided also in customer service.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0072",
+    "element": "P3",
+    "question_code": "P3.5.1",
+    "question_text_en": "The process for determination of resources is implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0073",
+    "element": "P3",
+    "question_code": "P3.5.2",
+    "question_text_en": "Determination of resources refers to the availability of qualified personnel, budget, infrastructure such as building, test and inspection equipment (hardware and software),",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0074",
+    "element": "P3",
+    "question_code": "P3.5.3",
+    "question_text_en": "Capacity for the implementation of prototypes an prototype construction, pitot-run, performance test and serial production must be planned and considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0075",
+    "element": "P3",
+    "question_code": "P3.5.4",
+    "question_text_en": "The resource planning is regularly adapted to changes in the project and potential bottlenecks are to be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0076",
+    "element": "P4",
+    "question_code": "P4.1.1",
+    "question_text_en": "Methods for the product and process development defined in the development planning are applied an implemented in such a way as to ensure fulfilment of requirements (function, reliability, safety).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0077",
+    "element": "P4",
+    "question_code": "P4.1.2",
+    "question_text_en": "In the development phase a risk analysis (such as FMEA) must be used to ensure that the product and process comply with the requirements of the customer in terms of function, reliability etc.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0078",
+    "element": "P4",
+    "question_code": "P4.1.3",
+    "question_text_en": "Special characteristics are defined and identified in the relevant documents (FMEAs etc.) and necessary action is taken to ensure conformity.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0079",
+    "element": "P4",
+    "question_code": "P4.1.4",
+    "question_text_en": "In the overall plan, a test plan must be included for the components, assemblies, subassemblies, components, software and materials. The overall plan must also include manufacturing processes from prototype and pre-launch phase.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0080",
+    "element": "P4",
+    "question_code": "P4.1.5",
+    "question_text_en": "All purchased products and services are taken into account. The implementation of product and process development is ensured in the supply chain.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0081",
+    "element": "P4",
+    "question_code": "P4.1.6",
+    "question_text_en": "The documentation of lessons learned from the prototype phase and the pre-launch phase are available for reference in the series phase.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0082",
+    "element": "P4",
+    "question_code": "P4.1.7",
+    "question_text_en": "The requirements for test equipment are defined an implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0083",
+    "element": "P4",
+    "question_code": "P4.2.1",
+    "question_text_en": "A staff schedule must be available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0084",
+    "element": "P4",
+    "question_code": "P4.2.2",
+    "question_text_en": "Personnel must be qualified for their respective tasks. This also applies to the staff of external service providers. Appropriate evidence must be available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0085",
+    "element": "P4",
+    "question_code": "P4.2.3",
+    "question_text_en": "Needs assessments will be carried out regularly during product and process development with regard to possible emerging bottlenecks and additional requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0086",
+    "element": "P4",
+    "question_code": "P4.2.4",
+    "question_text_en": "Qualified workforce resources are available for prototype building and sample building.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0087",
+    "element": "P4",
+    "question_code": "P4.2.5",
+    "question_text_en": "Processes that have been outsourced must be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0088",
+    "element": "P4",
+    "question_code": "P4.3.1",
+    "question_text_en": "A process to determine resources has been implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0089",
+    "element": "P4",
+    "question_code": "P4.3.2",
+    "question_text_en": "Resource determination refers to the availability of test equipment, laboratory equipment, machinery, equipment, and the utilization of machinery an equipment. Supporting processes must be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0090",
+    "element": "P4",
+    "question_code": "P4.3.3",
+    "question_text_en": "Within the resource determination the necessary infrastructure is taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0091",
+    "element": "P4",
+    "question_code": "P4.3.4",
+    "question_text_en": "Regular needs assessment must be carried out during product and process development with regard to possible emerging bottlenecks and additional needs.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0092",
+    "element": "P4",
+    "question_code": "P4.3.5",
+    "question_text_en": "Material resources for the realization of prototypes and sample building are available. Material resources for pre-production, series start and serial production is planned and provided in accordance with the project plan.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0093",
+    "element": "P4",
+    "question_code": "P4.3.6",
+    "question_text_en": "Outsourced processes must be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0094",
+    "element": "P4",
+    "question_code": "P4.3.7",
+    "question_text_en": "The resources must be available with a suitable lead time before the start of customer’s serial production.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0095",
+    "element": "P4",
+    "question_code": "P4.4.1",
+    "question_text_en": "The releases and verification of suitability is demonstrated for all the items, assemblies, software versions and purchased products and services in accordance with development schedules.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0096",
+    "element": "P4",
+    "question_code": "P4.4.2",
+    "question_text_en": "The material data is confirmed and released.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0097",
+    "element": "P4",
+    "question_code": "P4.4.3",
+    "question_text_en": "The actions from the risk analysis (for example FMEA) have been implemented and confirmed in their effectiveness.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0098",
+    "element": "P4",
+    "question_code": "P4.4.4",
+    "question_text_en": "The production process and product approval (PPA) must be available on the agreed date. For products with embedded software an additional software test report is available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0099",
+    "element": "P4",
+    "question_code": "P4.4.5",
+    "question_text_en": "Reference parts from sampling must be kept for at least the time laid down in the customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0100",
+    "element": "P4",
+    "question_code": "P4.4.6",
+    "question_text_en": "The verification and validation of the product an process are ensured before the customer SOP.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0101",
+    "element": "P4",
+    "question_code": "P4.5.1",
+    "question_text_en": "The manufacturing and inspection characteristics contain all characteristics from the product and process development (including special characteristics).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0102",
+    "element": "P4",
+    "question_code": "P4.5.2",
+    "question_text_en": "Results of the risk analysis are considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0103",
+    "element": "P4",
+    "question_code": "P4.5.3",
+    "question_text_en": "The specifications include information for product control, manufacturing process control, methods an reaction plans and corrective actions.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0104",
+    "element": "P4",
+    "question_code": "P4.5.4",
+    "question_text_en": "Product audits and layout inspection are defined.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0105",
+    "element": "P4",
+    "question_code": "P4.5.5",
+    "question_text_en": "The specifications must be available for all phases: prototype phase (if required by the customer), prelaunch and series phase.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0106",
+    "element": "P4",
+    "question_code": "P4.6.1",
+    "question_text_en": "A performance test must be carried out in time to assess all production factors and influences and if necessary corrections must be made.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0107",
+    "element": "P4",
+    "question_code": "P4.6.2",
+    "question_text_en": "The performance test has provided evidence that the quality capability of the entire production process is given under serial production conditions",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0108",
+    "element": "P4",
+    "question_code": "P4.6.3",
+    "question_text_en": "Note: Depending on the time of the audit some parts of the relevant production test could still be at the planning stage!",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0109",
+    "element": "P4",
+    "question_code": "P4.7.1",
+    "question_text_en": "The customer requirements for the supply of parts during the product lifecycle are established in the processes.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0110",
+    "element": "P4",
+    "question_code": "P4.7.2",
+    "question_text_en": "The planned processes for the continuous series supply including safety margins for emergencies are available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0111",
+    "element": "P4",
+    "question_code": "P4.7.3",
+    "question_text_en": "The analysis process for 0-km and field complaints is established for the scope of delivery. The customer requirements for field failure analysis are taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0112",
+    "element": "P4",
+    "question_code": "P4.7.4",
+    "question_text_en": "The requirements for the analysis capability at the site have been agreed with the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0113",
+    "element": "P4",
+    "question_code": "P4.7.5",
+    "question_text_en": "If external sites are used for analysis, the interfaces are defined and evidence of the presence of the required equipment and capacity is available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0114",
+    "element": "P4",
+    "question_code": "P4.7.6",
+    "question_text_en": "New technologies and products are also taken into account in customer support.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0115",
+    "element": "P4",
+    "question_code": "P4.7.7",
+    "question_text_en": "The employees designated for these processes are qualified. The infrastructure is available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0116",
+    "element": "P4",
+    "question_code": "P4.8.1",
+    "question_text_en": "A process exists for transferring work results from the project to the production.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0117",
+    "element": "P4",
+    "question_code": "P4.8.2",
+    "question_text_en": "For products with embedded software, the results of the development (including the intermediate results and their documentation) are documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0118",
+    "element": "P4",
+    "question_code": "P4.8.3",
+    "question_text_en": "Prerequisite for project delivery is a successful internal PPA process. Prerequisite for a series delivery release is the successful customer approval.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0119",
+    "element": "P4",
+    "question_code": "P4.8.4",
+    "question_text_en": "Proof of capability can be shown for all special characteristics.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0120",
+    "element": "P4",
+    "question_code": "P4.8.5",
+    "question_text_en": "The personnel resources are available in accordance with the planning and are qualified.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0121",
+    "element": "P4",
+    "question_code": "P4.8.6",
+    "question_text_en": "The material resources include buildings, test facilities, laboratory facilities, equipment, facilities, etc.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0122",
+    "element": "P4",
+    "question_code": "P4.8.7",
+    "question_text_en": "These are available and have been released.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0123",
+    "element": "P4",
+    "question_code": "P4.8.8",
+    "question_text_en": "Releases for procurement volumes are available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0124",
+    "element": "P4",
+    "question_code": "P4.8.9",
+    "question_text_en": "Measures to secure the start-up of production are specified and introduced when necessary.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0125",
+    "element": "P5",
+    "question_code": "P5.1.1",
+    "question_text_en": "In serial production it must be ensured that only approved suppliers are used. An evaluation of suppliers using defined criteria for the qualification capability must be available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0126",
+    "element": "P5",
+    "question_code": "P5.1.2",
+    "question_text_en": "An analysis of the quality performance of existing suppliers has to be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0127",
+    "element": "P5",
+    "question_code": "P5.1.3",
+    "question_text_en": "Risks in the supply chain have been identified, evaluated and reduced using suitable measures (contingency strategy).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0128",
+    "element": "P5",
+    "question_code": "P5.2.1",
+    "question_text_en": "The communication of customer requirements must be regulated and traceable.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0129",
+    "element": "P5",
+    "question_code": "P5.2.2",
+    "question_text_en": "Customer requirements also include requirements from technical drawings, components, software or component specifications, from QM agreements an other valid standards.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0130",
+    "element": "P5",
+    "question_code": "P5.2.3",
+    "question_text_en": "Change management must also be considered during serial production.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0131",
+    "element": "P5",
+    "question_code": "P5.2.4",
+    "question_text_en": "Interfaces are identified and secured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0132",
+    "element": "P5",
+    "question_code": "P5.3.1",
+    "question_text_en": "Target agreements have been made with all suppliers throughout the supply chain for products an processes. These agreements have been agreed upon and implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0133",
+    "element": "P5",
+    "question_code": "P5.3.2",
+    "question_text_en": "Supplier output must be checked and evaluated within defined periods.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0134",
+    "element": "P5",
+    "question_code": "P5.3.3",
+    "question_text_en": "If deviations occur actions must be agreed upon an their implementation including deadlines is to be monitored.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0135",
+    "element": "P5",
+    "question_code": "P5.4.1",
+    "question_text_en": "A release must be available for all purchased products and services before serial production of new/changed products/processes.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0136",
+    "element": "P5",
+    "question_code": "P5.4.2",
+    "question_text_en": "Unless otherwise specified, the supplier for the supply of modules has the full quality control responsibility for all individual components.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0137",
+    "element": "P5",
+    "question_code": "P5.5.1",
+    "question_text_en": "To monitor the quality of purchased products an services, regular checks are carried out, documented and evaluated.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0138",
+    "element": "P5",
+    "question_code": "P5.5.2",
+    "question_text_en": "Deviations from the supplier quality are processed through a standard complaint process.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0139",
+    "element": "P5",
+    "question_code": "P5.5.3",
+    "question_text_en": "Layout inspections are carried out according to customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0140",
+    "element": "P5",
+    "question_code": "P5.5.4",
+    "question_text_en": "Test and measuring equipment must be sufficiently available to check purchased products. The equipment must be stored in an orderly manner and associated work-stations must be laid out appropriately",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0141",
+    "element": "P5",
+    "question_code": "P5.5.5",
+    "question_text_en": "(e.g. climate control, lighting conditions, cleanliness, and protection against damage and contamination).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0142",
+    "element": "P5",
+    "question_code": "P5.6.1",
+    "question_text_en": "Incoming materials and loading equipment must be stored in accordance with their release status so that they cannot be damaged or mixed.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0143",
+    "element": "P5",
+    "question_code": "P5.6.2",
+    "question_text_en": "For materials that could be damaged by temperature, humidity, vibration, etc. and affect the quality of the final product, the transport and storage conditions must be defined and evidence shown.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0144",
+    "element": "P5",
+    "question_code": "P5.6.3",
+    "question_text_en": "Terms of transport should be determined for critical incoming materials.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0145",
+    "element": "P5",
+    "question_code": "P5.6.4",
+    "question_text_en": "“Suspect”/quarantined products must be stored securely to prevent unauthorised access to them.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0146",
+    "element": "P5",
+    "question_code": "P5.6.5",
+    "question_text_en": "FIFO and batch traceability are to be ensured when the materials and goods are further processed.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0147",
+    "element": "P5",
+    "question_code": "P5.6.6",
+    "question_text_en": "Material stock figures in the inventory control agree with the quantities actually in stock.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0148",
+    "element": "P5",
+    "question_code": "P5.6.7",
+    "question_text_en": "Storage conditions conform to the product requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0149",
+    "element": "P5",
+    "question_code": "P5.7.1",
+    "question_text_en": "A description must be given of what responsibilities, tasks and authority the employees have in their relevant work areas (e.g. for incoming inspection, complaint processing, supplier management, supplier audit).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0150",
+    "element": "P5",
+    "question_code": "P5.7.2",
+    "question_text_en": "Qualification requirements must be determined for each employee in relation to their tasks an qualifications carried out accordingly.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0151",
+    "element": "P5",
+    "question_code": "P5.7.3",
+    "question_text_en": "Knowledge of previous complaints is available when appropriate for purchased products an services.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0152",
+    "element": "P6",
+    "question_code": "P6.1.1",
+    "question_text_en": "The project transfer to serial production has been carried out. If necessary, unresolved issues are followed up on and implemented on schedule.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0153",
+    "element": "P6",
+    "question_code": "P6.1.1",
+    "question_text_en": "The correct product (incoming material, part, component etc.) must be provided to the agreed quality, in the correct quantity and the correct packing, with the correct documentation, at the agreed time and at the agreed place.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0154",
+    "element": "P6",
+    "question_code": "P6.1.1",
+    "question_text_en": "Packaging requirements must be consistently taken into account/implemented (also in the production stages).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0155",
+    "element": "P6",
+    "question_code": "P6.1.1",
+    "question_text_en": "Released incoming materials must be clearly identified and recognizable. The release status must be identifiable and the release identification on bundles/ batches/load containers/parts must be defined.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0156",
+    "element": "P6",
+    "question_code": "P6.1.1",
+    "question_text_en": "Change management, meaning from the change request to the implementation, must be clearly documented. Responsibilities must be regulated.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0157",
+    "element": "P6",
+    "question_code": "P6.1.2",
+    "question_text_en": "A complete production process and product release (PPA) including the documentation required must take place before the first production shipment.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0158",
+    "element": "P6",
+    "question_code": "P6.1.2",
+    "question_text_en": "At the workplace, parts and materials are provided as needed, taking into account the order quantity/lot size (for example, KANBAN, Just in time, FIFO). Upstream processes are taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0159",
+    "element": "P6",
+    "question_code": "P6.1.2",
+    "question_text_en": "During manufacture and internal transport and also when being transported to and from service companies,",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0160",
+    "element": "P6",
+    "question_code": "P6.1.2",
+    "question_text_en": "It must be ensured that only released materials/parts are forwarded to production/the next process stage and used.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0161",
+    "element": "P6",
+    "question_code": "P6.1.2",
+    "question_text_en": "According to customer requirements changes to the product and process are to be agreed upon, approved and released by the customer (including software changes).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0162",
+    "element": "P6",
+    "question_code": "P6.1.3",
+    "question_text_en": "Measures are taken to secure the launch of production.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0163",
+    "element": "P6",
+    "question_code": "P6.1.3",
+    "question_text_en": "After order completion, the return of unneeded parts (surplus) including their quantity is regulated.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0164",
+    "element": "P6",
+    "question_code": "P6.1.3",
+    "question_text_en": "Store areas/work-stations/containers must be appropriate for the tidiness and cleanliness required for the parts/products. Cleaning cycles are defined an monitored.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0165",
+    "element": "P6",
+    "question_code": "P6.1.3",
+    "question_text_en": "The traceability of the units produced must be ensured within a reasonable framework (e.g., documentation, batch installation).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0166",
+    "element": "P6",
+    "question_code": "P6.1.3",
+    "question_text_en": "It must be ensured that, at all times, the correct design level of the incoming materials or software is used and the correct design level of the finished product is manufactured and shipped to the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0167",
+    "element": "P6",
+    "question_code": "P6.1.4",
+    "question_text_en": "The updating and further development of the risk analysis (e.g. process FMEA/product FMEA) is ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0168",
+    "element": "P6",
+    "question_code": "P6.1.4",
+    "question_text_en": "The supply of parts/materials at the work-station/on the assembly line must allow for safe handling.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0169",
+    "element": "P6",
+    "question_code": "P6.1.4",
+    "question_text_en": "Depending on the product risk, traceability must be guaranteed across the entire process chain, from sub-supplier to the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0170",
+    "element": "P6",
+    "question_code": "P6.1.5",
+    "question_text_en": "Tools, test and measuring equipment are available in the necessary quantities.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0171",
+    "element": "P6",
+    "question_code": "P6.1.5",
+    "question_text_en": "Specified storage times and use-by dates for special materials/parts must be monitored by appropriate methods (maximum and minimum storage times, specified interim storage times).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0172",
+    "element": "P6",
+    "question_code": "P6.1.5",
+    "question_text_en": "Customer identification and traceability requirements",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0173",
+    "element": "P6",
+    "question_code": "P6.1.6",
+    "question_text_en": "Critical operating and consumable materials for plant and machinery with a direct effect on the product/ product quality must be monitored accordingly.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0174",
+    "element": "P6",
+    "question_code": "P6.1.6",
+    "question_text_en": "Legal and regulatory requirements are taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0175",
+    "element": "P6",
+    "question_code": "P6.1.7",
+    "question_text_en": "Parts/incoming materials/critical operating and consumable materials must be protected against environmental and climatic influences.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0176",
+    "element": "P6",
+    "question_code": "P6.1.7",
+    "question_text_en": "Test results of characteristics with special requirements for documentation and archiving are recorded accordingly.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0177",
+    "element": "P6",
+    "question_code": "P6.2.1",
+    "question_text_en": "The production and test documents are complete and available and based on the control plan. Inspection characteristics, facilities, methods, test frequencies, test cycles and layout inspections must be defined.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0178",
+    "element": "P6",
+    "question_code": "P6.2.1",
+    "question_text_en": "The production repeat release is the order-related approval for production start-up.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0179",
+    "element": "P6",
+    "question_code": "P6.2.1",
+    "question_text_en": "Special product characteristics and process parameters that affect the special characteristics are marked in the control plan and systematically monitored.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0180",
+    "element": "P6",
+    "question_code": "P6.2.1",
+    "question_text_en": "Non-approved parts and/or parts with defective characteristics (scrap and rework parts) must be separated and recorded or when necessary safely removed from the production process.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0181",
+    "element": "P6",
+    "question_code": "P6.2.1",
+    "question_text_en": "A mix of materials or the use of wrong materials, software or components must be ruled out.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0182",
+    "element": "P6",
+    "question_code": "P6.2.2",
+    "question_text_en": "Access to these documents must be available at all times.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0183",
+    "element": "P6",
+    "question_code": "P6.2.2",
+    "question_text_en": "Criteria for triggering a production repeat release must be defined e.g. after an interruption of production.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0184",
+    "element": "P6",
+    "question_code": "P6.2.2",
+    "question_text_en": "Records are maintained of non-compliances and corrective actions. Deviations affecting the characteristics of the product must be approved by the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0185",
+    "element": "P6",
+    "question_code": "P6.2.2",
+    "question_text_en": "These parts are to be either directly marked or marked on their container.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0186",
+    "element": "P6",
+    "question_code": "P6.2.2",
+    "question_text_en": "Appropriate measures and checks must be taken to ensure the early detection and ejection of incorrectly installed items.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0187",
+    "element": "P6",
+    "question_code": "P6.2.3",
+    "question_text_en": "Process parameters influencing product characteristics/ quality must be fully stated. Tolerances must be given for process parameters and inspection characteristics.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0188",
+    "element": "P6",
+    "question_code": "P6.2.3",
+    "question_text_en": "A repeat release is necessary for product and process and must be carried out and documented by authorised employees using acceptance criteria. Deviations and measures taken are to be documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0189",
+    "element": "P6",
+    "question_code": "P6.2.3",
+    "question_text_en": "Quality records are specified for significant characteristics (duration and type of archiving) and are coordinated with the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0190",
+    "element": "P6",
+    "question_code": "P6.2.3",
+    "question_text_en": "Reworking criteria including testing are defined, known and implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0191",
+    "element": "P6",
+    "question_code": "P6.2.3",
+    "question_text_en": "The process and/or inspection status of parts must be clearly visible.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0192",
+    "element": "P6",
+    "question_code": "P6.2.4",
+    "question_text_en": "The control limits in process control charts are defined, identifiable and plausible.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0193",
+    "element": "P6",
+    "question_code": "P6.2.4",
+    "question_text_en": "A repeat release inspection must be carried out using clear inspection instructions (quantity and method).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0194",
+    "element": "P6",
+    "question_code": "P6.2.4",
+    "question_text_en": "Storage areas for blocked stock and restricted areas must be clearly labelled. Accidental use of restricted parts must be excluded.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0195",
+    "element": "P6",
+    "question_code": "P6.2.4",
+    "question_text_en": "The reuse of residual quantities, separated parts, reworked parts, reusable parts from product audits, inspected items etc. must be clearly defined",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0196",
+    "element": "P6",
+    "question_code": "P6.2.5",
+    "question_text_en": "Deviations and actions taken regarding process requirements and inspection characteristics are to be documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0197",
+    "element": "P6",
+    "question_code": "P6.2.5",
+    "question_text_en": "If production is continued after collection of samples, parts should be isolated until the samples are approved.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0198",
+    "element": "P6",
+    "question_code": "P6.2.5",
+    "question_text_en": "Setting masters, setup and reference parts must be labelled and protected against accidental use.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0199",
+    "element": "P6",
+    "question_code": "P6.2.5",
+    "question_text_en": "Regulations for reintroducing parts of outsourced processes (e.g. sorting service) must be available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0200",
+    "element": "P6",
+    "question_code": "P6.2.6",
+    "question_text_en": "Required measures (response plan) for process disturbances are known and initiated and documented by the responsible employees.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0201",
+    "element": "P6",
+    "question_code": "P6.2.6",
+    "question_text_en": "At the time of release the necessary reference and tolerance samples must be available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0202",
+    "element": "P6",
+    "question_code": "P6.2.7",
+    "question_text_en": "For products with specific requirements on the manufacturing process the appropriate data about machinery/ tools/resources",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0203",
+    "element": "P6",
+    "question_code": "P6.2.8",
+    "question_text_en": "Conditions governing rework are specified and secured within the process (parts identification; rechecking/ inspection etc.).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0204",
+    "element": "P6",
+    "question_code": "P6.3.1",
+    "question_text_en": "A description of tasks with an appropriate job profile must be available for employees. A qualification programme (if necessary) is derived from this profile.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0205",
+    "element": "P6",
+    "question_code": "P6.3.1",
+    "question_text_en": "Responsibilities, duties and authority of the employees in their task areas are described and implemented",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0206",
+    "element": "P6",
+    "question_code": "P6.3.1",
+    "question_text_en": "The required number of qualified employees is available for all shifts. Employee qualifications need to be considered when scheduling staff (e.g. qualification matrix).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0207",
+    "element": "P6",
+    "question_code": "P6.3.2",
+    "question_text_en": "Who is qualified for each task and activity must be documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0208",
+    "element": "P6",
+    "question_code": "P6.3.2",
+    "question_text_en": "The employees know the consequences of faulty workmanship (which tasks/functions the product has and what happens when they are no longer guaranteed due to faulty installation etc.).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0209",
+    "element": "P6",
+    "question_code": "P6.3.2",
+    "question_text_en": "Rules exist for supporting areas that are not continually in use (e.g. laboratory, measurement room).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0210",
+    "element": "P6",
+    "question_code": "P6.3.3",
+    "question_text_en": "Trainings, instruction, briefings/proof of qualifications that have been performed must be documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0211",
+    "element": "P6",
+    "question_code": "P6.3.3",
+    "question_text_en": "Employees receive regular information on the current standard of quality reached, both internally and with the customer (complaints).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0212",
+    "element": "P6",
+    "question_code": "P6.3.3",
+    "question_text_en": "Fluctuations in customer orders and workforce absences (e.g. illness, holidays, training) are taken into account in the workforce schedule.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0213",
+    "element": "P6",
+    "question_code": "P6.3.4",
+    "question_text_en": "Employees must be instructed in the handling an treatment of products with special characteristics.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0214",
+    "element": "P6",
+    "question_code": "P6.3.4",
+    "question_text_en": "The requirements apply to both internal and external temporary employees.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0215",
+    "element": "P6",
+    "question_code": "P6.3.4",
+    "question_text_en": "The requirements also apply to internal and external temporary employees.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0216",
+    "element": "P6",
+    "question_code": "P6.3.5",
+    "question_text_en": "Suitable evidence of qualification for each activity must be present (e.g. forklift driving license, welding certificate, soldering certificate, vision test, hearingtest).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0217",
+    "element": "P6",
+    "question_code": "P6.3.6",
+    "question_text_en": "Employees responsible for measuring and testing must be trained in the correct use of measuring equipment.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0218",
+    "element": "P6",
+    "question_code": "P6.3.7",
+    "question_text_en": "Trainings/instructions are given at changes to the product/process and these are documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0219",
+    "element": "P6",
+    "question_code": "P6.3.8",
+    "question_text_en": "The requirements apply to both internal and external temporary employees.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0220",
+    "element": "P6",
+    "question_code": "P6.4.1",
+    "question_text_en": "Evidence must be shown that the processes are implemented in accordance with the customer requirements using the existing production facilities and that the resulting products meet the customer specifications.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0221",
+    "element": "P6",
+    "question_code": "P6.4.1",
+    "question_text_en": "Maintenance activities (maintenance, inspection an repair) are determined and implemented for all installations, equipment, machines and tools.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0222",
+    "element": "P6",
+    "question_code": "P6.4.1",
+    "question_text_en": "Test and measuring equipment/facilities used are suitable for the planned purpose and handling in production. They are included in the control plan.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0223",
+    "element": "P6",
+    "question_code": "P6.4.1",
+    "question_text_en": "Conditions for the workplaces and their surroundings are appropriate for the products and the work carried out, in order to prevent or eliminate contamination, damage, mixing-up of parts and misinterpretations.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0224",
+    "element": "P6",
+    "question_code": "P6.4.1",
+    "question_text_en": "Tools, equipment and test equipment (including gauges) must be stored and managed properly. This also applies for tools, equipment and test equipment not in use or not yet released.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0225",
+    "element": "P6",
+    "question_code": "P6.4.2",
+    "question_text_en": "The production facilities, machinery and equipment must be able to comply with the specified tolerances for the respective product and process characteristics.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0226",
+    "element": "P6",
+    "question_code": "P6.4.2",
+    "question_text_en": "Maintenance activities that have been carried out (scheduled and unplanned) are documented and analysed for improvement measures.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0227",
+    "element": "P6",
+    "question_code": "P6.4.2",
+    "question_text_en": "Capability studies are carried out on the test an measuring equipment/facilities employed. There is an identification system for test and measuring equipment.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0228",
+    "element": "P6",
+    "question_code": "P6.4.2",
+    "question_text_en": "This also applies to permanent and temporary established rework, sorting and inspection stations.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0229",
+    "element": "P6",
+    "question_code": "P6.4.2",
+    "question_text_en": "All tools, equipment and test equipment are identified with their current status and all changes are documented (change history).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0230",
+    "element": "P6",
+    "question_code": "P6.4.3",
+    "question_text_en": "Process capability must be determined for selected product and process characteristics and their performance verified.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0231",
+    "element": "P6",
+    "question_code": "P6.4.3",
+    "question_text_en": "A process for the analysis and optimization of downtime, machine utilization and tool life is implemented effectively.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0232",
+    "element": "P6",
+    "question_code": "P6.4.3",
+    "question_text_en": "A process for the periodic monitoring of measurement and inspection equipment is installed and implemented (responsibility for collection and return is defined).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0233",
+    "element": "P6",
+    "question_code": "P6.4.3",
+    "question_text_en": "In addition, the workplace layout is adapted ergonomically to the work to be carried out.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0234",
+    "element": "P6",
+    "question_code": "P6.4.3",
+    "question_text_en": "Storage is provided where the equipment is protected against damage and environmental effects. Cleanliness and tidiness are ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0235",
+    "element": "P6",
+    "question_code": "P6.4.4",
+    "question_text_en": "The process capability must meet the customer requirements. For long term process capability the minimum requirement of Cpk ≥ 1,33 must be met.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0236",
+    "element": "P6",
+    "question_code": "P6.4.4",
+    "question_text_en": "The key processes and bottleneck machines are identified and appropriate maintenance activities (preventative or predictive) are carried out and documented in terms of a risk-based maintenance programme.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0237",
+    "element": "P6",
+    "question_code": "P6.4.4",
+    "question_text_en": "Auxiliary equipment for measuring and test equipment that have an influence the measurement result are monitored in the same way.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0238",
+    "element": "P6",
+    "question_code": "P6.4.4",
+    "question_text_en": "The issue and use of this equipment is controlled and documented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0239",
+    "element": "P6",
+    "question_code": "P6.4.5",
+    "question_text_en": "Layout and condition of the equipment, tools, fixtures and handling facilities meet the requirements under real production conditions.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0240",
+    "element": "P6",
+    "question_code": "P6.4.5",
+    "question_text_en": "The availability of replacement parts must be ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0241",
+    "element": "P6",
+    "question_code": "P6.4.6",
+    "question_text_en": "Resources needed to carry out necessary maintenance measures are available.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0242",
+    "element": "P6",
+    "question_code": "P6.4.7",
+    "question_text_en": "Tools undergo a tool management which includes the following:",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0243",
+    "element": "P6",
+    "question_code": "P6.5.1",
+    "question_text_en": "Process-specific targets are defined, monitored an communicated (e.g. quantities produced; quality metrics/ failure rates, audit results, throughput times, defect costs and process effectiveness figures/Cpk).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0244",
+    "element": "P6",
+    "question_code": "P6.5.1",
+    "question_text_en": "To demonstrate compliance with the requirements and objectives which are needed for the evidence of product conformity, it is necessary to define and document quality and process parameters (target values) and record the actual data.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0245",
+    "element": "P6",
+    "question_code": "P6.5.1",
+    "question_text_en": "If deviations from product and process requirements occur, immediate containment actions must be taken to comply with the requirements,",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0246",
+    "element": "P6",
+    "question_code": "P6.5.1",
+    "question_text_en": "The audit programmes for process and product audits are available and implemented. Customer requirements are taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0247",
+    "element": "P6",
+    "question_code": "P6.5.2",
+    "question_text_en": "Target requirements are agreed upon and achievable; they are guaranteed to be up to date.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0248",
+    "element": "P6",
+    "question_code": "P6.5.2",
+    "question_text_en": "It must be ensured that data can be evaluated.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0249",
+    "element": "P6",
+    "question_code": "P6.5.2",
+    "question_text_en": "Suitable methods for root cause analysis are in use.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0250",
+    "element": "P6",
+    "question_code": "P6.5.2",
+    "question_text_en": "The process and product audits carried out are suitable to identify specific risks and weak points an implement corrective action.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0251",
+    "element": "P6",
+    "question_code": "P6.5.3",
+    "question_text_en": "Customer requirements are taken into account when setting targets.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0252",
+    "element": "P6",
+    "question_code": "P6.5.3",
+    "question_text_en": "Special incidents are documented (shift/equipment book).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0253",
+    "element": "P6",
+    "question_code": "P6.5.3",
+    "question_text_en": "Corrective actions are derived, their implementation is monitored and the effectiveness verified.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0254",
+    "element": "P6",
+    "question_code": "P6.5.3",
+    "question_text_en": "A root cause analysis is carried out when deviations occur. Corrective actions are derived, their implementation is monitored and the effectiveness is verified.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0255",
+    "element": "P6",
+    "question_code": "P6.5.4",
+    "question_text_en": "A regular comparison is made between specified an actual results.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0256",
+    "element": "P6",
+    "question_code": "P6.5.4",
+    "question_text_en": "The recorded data can be related to a product an process, the data is available, legible, accessible an archived as specified. Requirements for traceability are respected.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0257",
+    "element": "P6",
+    "question_code": "P6.5.4",
+    "question_text_en": "Control plan and risk analysis (e.g. FMEA) are updated as needed.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0258",
+    "element": "P6",
+    "question_code": "P6.5.4",
+    "question_text_en": "Product audits are periodically carried out and documented. Scope of the audit is the end product an where necessary intermediate products.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0259",
+    "element": "P6",
+    "question_code": "P6.5.5",
+    "question_text_en": "The collected data is analysed and appropriate action for improvement is initiated.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0260",
+    "element": "P6",
+    "question_code": "P6.5.5",
+    "question_text_en": "Non-conformities that affect the properties of the delivered product are communicated to the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0261",
+    "element": "P6",
+    "question_code": "P6.5.5",
+    "question_text_en": "Non-conformities that affect the properties of the delivered product are communicated to the customer.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0262",
+    "element": "P6",
+    "question_code": "P6.5.6",
+    "question_text_en": "The potential for improvement must be continuously determined from findings on quality, costs, and services.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0263",
+    "element": "P6",
+    "question_code": "P6.5.7",
+    "question_text_en": "Events that result in a change to the process or to the product must be documented in the appropriate risk analysis (e.g. FMEA) and the respective measures taken are recorded.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0264",
+    "element": "P6",
+    "question_code": "P6.6.1",
+    "question_text_en": "Parts/components must be forwarded to defined storage/holding points using suitable means of transport.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0265",
+    "element": "P6",
+    "question_code": "P6.6.1",
+    "question_text_en": "The products/components must be protected from damage by suitable storage and packing.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0266",
+    "element": "P6",
+    "question_code": "P6.6.1",
+    "question_text_en": "The labelling of the release status on containers/ batches/carriers/components must be specified.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0267",
+    "element": "P6",
+    "question_code": "P6.6.1",
+    "question_text_en": "The customer specific requirements of the final product (delivery reliability, quality goals, quality performance etc.) are known and monitored.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0268",
+    "element": "P6",
+    "question_code": "P6.6.2",
+    "question_text_en": "Attention must be given to the order quantity/batch size so that only the required quantity of parts/materials is moved to the stipulated workstation.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0269",
+    "element": "P6",
+    "question_code": "P6.6.2",
+    "question_text_en": "Internal and customer-specific packing instructions are known and implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0270",
+    "element": "P6",
+    "question_code": "P6.6.2",
+    "question_text_en": "Released products/components must be clearly marked and the release status must be visible.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0271",
+    "element": "P6",
+    "question_code": "P6.6.2",
+    "question_text_en": "If deviations occur, corrective actions are defined an implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0272",
+    "element": "P6",
+    "question_code": "P6.6.3",
+    "question_text_en": "The current state of the component (OK parts, reworked parts, scrap etc.) must be evident from the labelling (component, container).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0273",
+    "element": "P6",
+    "question_code": "P6.6.3",
+    "question_text_en": "Storage points/containers must meet requirements for cleanliness.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0274",
+    "element": "P6",
+    "question_code": "P6.6.3",
+    "question_text_en": "Concessions/deviation approvals must be traceable by appropriate identification and documentation. The documentation must cover the period and/or quantity of parts involved.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0275",
+    "element": "P6",
+    "question_code": "P6.6.3",
+    "question_text_en": "Final products are shipped in accordance with the customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0276",
+    "element": "P6",
+    "question_code": "P6.6.4",
+    "question_text_en": "Varying change statuses of the component must be taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0277",
+    "element": "P6",
+    "question_code": "P6.6.4",
+    "question_text_en": "Specified storage times must be monitored (specified maximum, minimum and interim storage times).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0278",
+    "element": "P6",
+    "question_code": "P6.6.4",
+    "question_text_en": "Internal specifications and customer requirements for the labelling of reworked parts must be implemented and documented (e.g. amount/quantity/labelling/part history/use).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0279",
+    "element": "P6",
+    "question_code": "P6.6.4",
+    "question_text_en": "The handling of supplied products is regulated an implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0280",
+    "element": "P6",
+    "question_code": "P6.6.5",
+    "question_text_en": "It is ensured that a further processing/forwarding of NOK parts is not possible.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0281",
+    "element": "P6",
+    "question_code": "P6.6.5",
+    "question_text_en": "Parts must be protected against environmental an climatic influences during storage and processing.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0282",
+    "element": "P6",
+    "question_code": "P6.6.5",
+    "question_text_en": "The traceability of units produced must be ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0283",
+    "element": "P6",
+    "question_code": "P6.6.5",
+    "question_text_en": "Customers should be informed of delivery stops which affect them and further procedure should be coordinated with them.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0284",
+    "element": "P6",
+    "question_code": "P6.6.6",
+    "question_text_en": "These requirements are valid for the handling within the production process as well as the delivery.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0285",
+    "element": "P6",
+    "question_code": "P6.6.6",
+    "question_text_en": "For archiving requirements and duration, the customer requirements are taken into account.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0286",
+    "element": "P6",
+    "question_code": "P6.6.7",
+    "question_text_en": "Test results of characteristics with special requirements for documentation and archiving are recorded accordingly.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0287",
+    "element": "P7",
+    "question_code": "P7.1.1",
+    "question_text_en": "The internal and customer specific requirements on the quality management system are fulfilled.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0288",
+    "element": "P7",
+    "question_code": "P7.1.2",
+    "question_text_en": "Layout inspection and a functional verification checks are carried out according to the customer requirements.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0289",
+    "element": "P7",
+    "question_code": "P7.1.3",
+    "question_text_en": "The customer requirements for the supply of spare parts during and after the production phase must be implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0290",
+    "element": "P7",
+    "question_code": "P7.1.4",
+    "question_text_en": "Customer requirements for the return of parts an their recycling must be implemented.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0291",
+    "element": "P7",
+    "question_code": "P7.2.1",
+    "question_text_en": "It must be ensured that competent contact personnel are available for the various areas in the customer's organisation. Communication is ensured in accordance with the customer specifications.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0292",
+    "element": "P7",
+    "question_code": "P7.2.2",
+    "question_text_en": "The monitoring of the product in the field is ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0293",
+    "element": "P7",
+    "question_code": "P7.2.3",
+    "question_text_en": "Access to customer portals in accordance with the customer specific agreement is ensured.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0294",
+    "element": "P7",
+    "question_code": "P7.3.1",
+    "question_text_en": "Contingency concepts and concepts to ensure supplies are available and up to date. Not only internal processes but also the processes of suppliers are to be considered.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0295",
+    "element": "P7",
+    "question_code": "P7.3.2",
+    "question_text_en": "Procedures must be in place which guarantees that the organisation informs the customer immediately when supply shortages are detected.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0296",
+    "element": "P7",
+    "question_code": "P7.4.1",
+    "question_text_en": "A complaint process that meets the customer requirements (e.g. 8D) is used for 0-km and field complaints.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0297",
+    "element": "P7",
+    "question_code": "P7.4.2",
+    "question_text_en": "Procedures for failure analysis are defined. The necessary personnel and material resources are available to ensure punctual processing.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0298",
+    "element": "P7",
+    "question_code": "P7.4.3",
+    "question_text_en": "In the case of field complaints a failure analysis is to be carried out according to customer requirements (e.g. VDA Volume Field Failure Analysis).",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0299",
+    "element": "P7",
+    "question_code": "P7.5.1",
+    "question_text_en": "It must be determined which responsibilities, duties and authorisations each employee has in their respective area of responsibility.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0300",
+    "element": "P7",
+    "question_code": "P7.5.2",
+    "question_text_en": "Training needs must be determined individually an implemented for each person, depending on their tasks.",
+    "is_asterisk": false
+  },
+  {
+    "question_id": "VDA63_0301",
+    "element": "P7",
+    "question_code": "P7.5.3",
+    "question_text_en": "The employees know the product and the consequences of faulty workmanship for the supply of parts and the quality of the final product.",
+    "is_asterisk": false
+  }
+]
