@@ -1,34 +1,119 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { useSSENotifications } from "../../hooks/useSSENotifications";
 import { NotificationItem } from "../../types";
+import { useWebSocket } from "../../hooks/useWebsocket";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const {
-    notifications,
-    unreadCount,
-    isConnected,
-    isReconnecting,
-    error,
-    markAsRead,
-    markAllAsRead,
-    fetchNotifications,
-    reconnect,
-  } = useSSENotifications({
-    apiBaseUrl: import.meta.env.VITE_API_URL || "http://localhost:8000/",
-    authToken: localStorage.getItem("token") || "",
-    onNotification: (notification) => {
-      console.log("New notification received:", notification);
-    },
-    onError: (error) => {
-      console.error("SSE Error:", error);
-    },
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const token = localStorage.getItem("token") || "";
+
+  // WebSocket connection for real-time notifications
+  const { isConnected } = useWebSocket((newNotification) => {
+    console.log("New real-time notification:", newNotification);
+
+    // Add new notification to the top of the list
+    setNotifications((prev) => [newNotification, ...prev]);
+
+    // Increment unread count
+    if (!newNotification.read) {
+      setUnreadCount((prev) => prev + 1);
+    }
+
+    // Optional: Show browser notification
+    if (Notification.permission === "granted") {
+      new Notification(newNotification.title, {
+        body: newNotification.message,
+        icon: "/notification-icon.png",
+      });
+    }
   });
+
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/notifications/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unread_count || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch unread count
+
+  // Mark notification as read
+  const markAsRead = async (notificationId: number) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/notifications/${notificationId}/read`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Mark all notifications as read
+  const markAllAsRead = async () => {
+    try {
+      const response = await fetch(`${API_URL}/notifications/read-all`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  // Request browser notification permission
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   async function toggleDropdown() {
     setIsOpen((prev) => !prev);
@@ -50,20 +135,14 @@ export default function NotificationDropdown() {
     const params = new URLSearchParams();
     params.set("tab", "corrective_actions");
 
-    // ✅ Best: navigate by car_id (CorrectiveAction id)
     if (notification.metadata?.car_id) {
       params.set("car_id", String(notification.metadata.car_id));
-    }
-    // ✅ Next best: navigate by audit_id (audit group)
-    else if (notification.metadata?.audit_id) {
+    } else if (notification.metadata?.audit_id) {
       params.set("audit_id", String(notification.metadata.audit_id));
-    }
-    // ✅ Fallback: search text (audit_number)
-    else if (notification.metadata?.audit_number) {
+    } else if (notification.metadata?.audit_number) {
       params.set("search", notification.metadata.audit_number);
     }
 
-    // ✅ Your BasicTables route is /audits (from App.tsx)
     navigate(`/audits?${params.toString()}`);
   };
 
@@ -155,11 +234,11 @@ export default function NotificationDropdown() {
           />
         </svg>
 
+        {/* WebSocket connection status indicator */}
         {!isConnected && (
           <span
-            className="absolute bottom-0 right-0 w-2 h-2 border border-white rounded-full dark:border-gray-900"
-            style={{ backgroundColor: isReconnecting ? "#f59e0b" : "#ef4444" }}
-            title={isReconnecting ? "Reconnecting..." : "Disconnected"}
+            className="absolute bottom-0 right-0 w-2 h-2 bg-red-500 border border-white rounded-full dark:border-gray-900"
+            title="Disconnected"
           />
         )}
         {isConnected && (
@@ -195,19 +274,23 @@ export default function NotificationDropdown() {
                 Mark all read
               </button>
             )}
-            {error && (
+            {!isConnected && (
               <button
-                onClick={reconnect}
+                onClick={() => window.location.reload()}
                 className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
               >
-                Retry
+                Reconnect
               </button>
             )}
           </div>
         </div>
 
         <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <li className="flex items-center justify-center py-8 text-gray-500 dark:text-gray-400">
+              Loading...
+            </li>
+          ) : notifications.length === 0 ? (
             <li className="flex items-center justify-center py-8 text-gray-500 dark:text-gray-400">
               No notifications yet
             </li>
