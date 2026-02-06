@@ -13,7 +13,7 @@ import { CorrectiveAction, CorrectiveActionStatus } from "../../../types";
 import { ReasonModal } from "../../modals/ReasonModal";
 import Badge from "../../ui/badge/Badge";
 
-const API_BASE = "http://localhost:8000"; // adjust if needed
+const API_BASE = import.meta.env.VITE_API_URL;
 
 interface TableCorrectiveActionsProps {
   correctiveActions: CorrectiveAction[];
