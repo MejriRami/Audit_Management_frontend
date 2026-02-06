@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import { api } from "../../../lib/api"; // ✅ uses src/lib/api.ts (adjust path if needed)
 import {
   Table,
   TableBody,
@@ -12,8 +12,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CorrectiveAction, CorrectiveActionStatus } from "../../../types";
 import { ReasonModal } from "../../modals/ReasonModal";
 import Badge from "../../ui/badge/Badge";
-
-const API_BASE = import.meta.env.VITE_API_URL;
 
 interface TableCorrectiveActionsProps {
   correctiveActions: CorrectiveAction[];
@@ -34,7 +32,7 @@ export default function TableCorrectiveActions({
 }: TableCorrectiveActionsProps) {
   const [actions, setActions] = useState<CorrectiveAction[]>(correctiveActions);
 
-  // ✅ IMPORTANT: keep local state in sync with incoming props
+  // ✅ keep local state in sync with incoming props
   useEffect(() => {
     setActions(correctiveActions ?? []);
   }, [correctiveActions]);
@@ -60,6 +58,7 @@ export default function TableCorrectiveActions({
     setExpandedStatus((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Keep your existing auth header logic (works fine)
   const authHeaders = useMemo(() => {
     const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : undefined;
@@ -73,12 +72,11 @@ export default function TableCorrectiveActions({
     );
 
     try {
-      await axios.post(
-        `${API_BASE}/car/admin/${id}/review`,
+      await api.post(
+        `/car/admin/${id}/review`,
         { decision: "ACCEPT" },
         { headers: authHeaders }
       );
-      // backend sets ACCEPTED; if you want to show Completed only later, keep Accepted
       onRefresh?.();
     } catch (e) {
       // rollback if error
@@ -100,8 +98,8 @@ export default function TableCorrectiveActions({
     );
 
     try {
-      await axios.post(
-        `${API_BASE}/car/admin/${id}/review`,
+      await api.post(
+        `/car/admin/${id}/review`,
         { decision: "REJECT", comment: reason },
         { headers: authHeaders }
       );
@@ -158,7 +156,9 @@ export default function TableCorrectiveActions({
             >
               <span className="font-semibold text-gray-700 dark:text-gray-300 text-lg">
                 Audit ID: {auditId}{" "}
-                {auditActions[0]?.due_date ? `| Due: ${auditActions[0].due_date}` : ""}
+                {auditActions[0]?.due_date
+                  ? `| Due: ${auditActions[0].due_date}`
+                  : ""}
               </span>
               <motion.div
                 animate={{ rotate: isAuditExpanded ? 180 : 0 }}
@@ -180,7 +180,8 @@ export default function TableCorrectiveActions({
                   {Object.entries(groupedByStatus).map(
                     ([status, actionsByStatus]) => {
                       const statusKey = `${auditNum}-${status}`;
-                      const isStatusExpanded = expandedStatus[statusKey] || false;
+                      const isStatusExpanded =
+                        expandedStatus[statusKey] || false;
 
                       return (
                         <div key={status}>
@@ -199,7 +200,9 @@ export default function TableCorrectiveActions({
                             </span>
                             <span
                               className={`px-2 py-1 rounded text-xs font-semibold ${
-                                statusColorMap[status as CorrectiveActionStatus]
+                                statusColorMap[
+                                  status as CorrectiveActionStatus
+                                ]
                               }`}
                             >
                               {status}
@@ -295,7 +298,9 @@ export default function TableCorrectiveActions({
                                             <div className="flex items-center space-x-2">
                                               <button
                                                 className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                                                onClick={() => handleAccept(c.id)}
+                                                onClick={() =>
+                                                  handleAccept(c.id)
+                                                }
                                               >
                                                 Accept
                                               </button>
@@ -313,21 +318,22 @@ export default function TableCorrectiveActions({
                                             </div>
                                           )}
 
-                                          {c.status === "Rejected" && c.reason_why && (
-                                            <div className="mt-1 border-l-4 border-red-500 pl-2 text-xs text-black-600">
-                                              <div className="flex items-center gap-2">
-                                                <Badge size="sm" color="error">
-                                                  Rejected
-                                                </Badge>
+                                          {c.status === "Rejected" &&
+                                            c.reason_why && (
+                                              <div className="mt-1 border-l-4 border-red-500 pl-2 text-xs text-black-600">
+                                                <div className="flex items-center gap-2">
+                                                  <Badge size="sm" color="error">
+                                                    Rejected
+                                                  </Badge>
+                                                </div>
+                                                <p className="mt-1">
+                                                  <span className="font-semibold">
+                                                    Reason:
+                                                  </span>{" "}
+                                                  {c.reason_why}
+                                                </p>
                                               </div>
-                                              <p className="mt-1">
-                                                <span className="font-semibold">
-                                                  Reason:
-                                                </span>{" "}
-                                                {c.reason_why}
-                                              </p>
-                                            </div>
-                                          )}
+                                            )}
                                         </TableCell>
                                       </TableRow>
                                     ))}
@@ -361,3 +367,4 @@ export default function TableCorrectiveActions({
     </div>
   );
 }
+
