@@ -87,22 +87,49 @@ export interface Audit {
 
 
 // -------------------- Corrective Actions Table --------------------
-export interface CorrectiveAction {
-  reject_reason: string;
-  description: string;
+export interface EvidenceFile {
   id: number;
+  filename?: string;
+  file_url: string;
+}
+
+export interface CorrectiveAction {
+  id: number;
+
+  // IDs
   auditId: number;
-  auditAnswerId: number;
+  auditAnswerId?: number;
+
+  // Audit info (new columns)
+  auditNumber?: string;
+  plant?: string;
+  sector?: string;
+
+  // Text content (new columns)
+  auditQuestion?: string;     // questions.description
+  carDescription?: string;    // audit_answers.finding_text ✅
+  implementedSolution?: string; // corrective_actions.implemented_solution
+  rootCause?: string;           // corrective_actions.root_cause
+
+  // Fail / Evidence column
+  finding_type?: string;        // backend will send "FAIL"
+  evidenceFiles?: EvidenceFile[]; // documents linked to corrective_action_id
+
+  // Existing fields
   auditee: string;
-  pilotUser: string;
-  auditFramework: string;
-  finding_type: string;
-  corrective_action?: string;
+  pilotUser?: string;
   reason_why?: string;
   due_date?: string; // ISO date string
   status: CorrectiveActionStatus;
   escalated: boolean;
+
+  // Keep old fields OPTIONAL (so nothing else breaks if referenced somewhere)
+  corrective_action?: string;
+  reject_reason?: string;
+  description?: string;
+  auditFramework?: string;
 }
+
 
 
 export interface ScheduleHistoryEntry {
