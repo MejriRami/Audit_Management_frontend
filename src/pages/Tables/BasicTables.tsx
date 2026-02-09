@@ -34,7 +34,7 @@ type EntityFilters = {
   parent: string;
 };
 
-const API_BASE = "http://localhost:8000"; // adjust if needed
+const API_BASE = "https://audit-backend-kbgea.ondigitalocean.app"; // adjust if needed
 
 export default function BasicTables() {
   const dispatch = useAppDispatch();
