@@ -787,6 +787,76 @@ export default function KpiAuditsD3() {
     })();
   }, [qs]);
 
+  // ---------------------------
+  // FILTERING LOGIC FOR PLANT SELECTION
+  // ---------------------------
+  const filteredAuditHours = useMemo(() => {
+    if (!auditHours || plant === "all") return auditHours;
+    
+    return {
+      ...auditHours,
+      keys: auditHours.keys.filter(key => key === plant),
+      data: auditHours.data
+    };
+  }, [auditHours, plant]);
+
+  const filteredCarCount = useMemo(() => {
+    if (!carCount || plant === "all") return carCount;
+    
+    return {
+      ...carCount,
+      keys: carCount.keys.filter(key => key === plant),
+      data: carCount.data
+    };
+  }, [carCount, plant]);
+
+  const filteredLateCar = useMemo(() => {
+    if (!lateCar || plant === "all") return lateCar;
+    
+    return {
+      ...lateCar,
+      keys: lateCar.keys.filter(key => key === plant),
+      data: lateCar.data
+    };
+  }, [lateCar, plant]);
+
+  const filteredTypePerPlant = useMemo(() => {
+    if (!typePerPlant || plant === "all") return typePerPlant;
+    
+    return {
+      ...typePerPlant,
+      keys: typePerPlant.keys.filter(key => key === plant),
+      data: typePerPlant.data
+    };
+  }, [typePerPlant, plant]);
+
+  const filteredWorkingDaysByPlant = useMemo(() => {
+    if (!workingDaysByPlant || plant === "all") return workingDaysByPlant;
+    
+    return {
+      ...workingDaysByPlant,
+      data: workingDaysByPlant.data.filter(d => d.group.toLowerCase() === plant)
+    };
+  }, [workingDaysByPlant, plant]);
+
+  const filteredOpenCarByPlant = useMemo(() => {
+    if (!openCarByPlant || plant === "all") return openCarByPlant;
+    
+    return {
+      ...openCarByPlant,
+      data: openCarByPlant.data.filter(d => d.group.toLowerCase() === plant)
+    };
+  }, [openCarByPlant, plant]);
+
+  const filteredLateOpenCarByPlant = useMemo(() => {
+    if (!lateOpenCarByPlant || plant === "all") return lateOpenCarByPlant;
+    
+    return {
+      ...lateOpenCarByPlant,
+      data: lateOpenCarByPlant.data.filter(d => d.group.toLowerCase() === plant)
+    };
+  }, [lateOpenCarByPlant, plant]);
+
   return (
     <div className="p-6 space-y-6">
       <PageMeta title="KPI – Audits" description="KPI dashboard (D3)" />
@@ -846,12 +916,12 @@ export default function KpiAuditsD3() {
           Monday layout order (as close as possible)
          ----------------------- */}
       <ComponentCard title="Hours of Audits by date (all plants / all type)">
-        {auditHours?.data?.length ? (
+        {filteredAuditHours?.data?.length ? (
           <StackedBarD3
-            data={auditHours.data}
-            keys={auditHours.keys}
+            data={filteredAuditHours.data}
+            keys={filteredAuditHours.keys}
             unit="hours"
-            referenceLines={auditHours.referenceLines ?? []}
+            referenceLines={filteredAuditHours.referenceLines ?? []}
           />
         ) : (
           <div className="text-sm text-gray-500">No data.</div>
@@ -872,19 +942,19 @@ export default function KpiAuditsD3() {
       </ComponentCard>
 
       <ComponentCard title="Number of CAR by date">
-        {carCount?.data?.length ? (
-          <StackedBarD3 data={carCount.data} keys={carCount.keys} unit="count" />
+        {filteredCarCount?.data?.length ? (
+          <StackedBarD3 data={filteredCarCount.data} keys={filteredCarCount.keys} unit="count" />
         ) : (
           <div className="text-sm text-gray-500">No data.</div>
         )}
       </ComponentCard>
 
       <ComponentCard title="Number of Working days for closing actions by plants">
-        {workingDaysByPlant?.data?.length ? (
+        {filteredWorkingDaysByPlant?.data?.length ? (
           <CategoryBarD3
-            data={workingDaysByPlant.data}
+            data={filteredWorkingDaysByPlant.data}
             unit="days"
-            referenceLines={workingDaysByPlant.referenceLines ?? []}
+            referenceLines={filteredWorkingDaysByPlant.referenceLines ?? []}
             colorByGroup={true}
           />
         ) : (
@@ -893,9 +963,9 @@ export default function KpiAuditsD3() {
       </ComponentCard>
 
       <ComponentCard title="Number of open CAR by plant">
-        {openCarByPlant?.data?.length ? (
+        {filteredOpenCarByPlant?.data?.length ? (
           <CategoryBarD3
-            data={openCarByPlant.data}
+            data={filteredOpenCarByPlant.data}
             unit="count"
             colorByGroup={true}
           />
@@ -905,9 +975,9 @@ export default function KpiAuditsD3() {
       </ComponentCard>
 
       <ComponentCard title="Number of Late open CAR by plant">
-        {lateOpenCarByPlant?.data?.length ? (
+        {filteredLateOpenCarByPlant?.data?.length ? (
           <CategoryBarD3
-            data={lateOpenCarByPlant.data}
+            data={filteredLateOpenCarByPlant.data}
             unit="count"
             colorByGroup={true}
           />
@@ -929,8 +999,8 @@ export default function KpiAuditsD3() {
       </ComponentCard>
 
       <ComponentCard title="Late CAR by week by plant">
-        {lateCar?.data?.length ? (
-          <StackedBarD3 data={lateCar.data} keys={lateCar.keys} unit="count" />
+        {filteredLateCar?.data?.length ? (
+          <StackedBarD3 data={filteredLateCar.data} keys={filteredLateCar.keys} unit="count" />
         ) : (
           <div className="text-sm text-gray-500">No data.</div>
         )}
@@ -949,10 +1019,10 @@ export default function KpiAuditsD3() {
       </ComponentCard>
 
       <ComponentCard title="Audits per type per plant">
-        {typePerPlant?.data?.length ? (
+        {filteredTypePerPlant?.data?.length ? (
           <StackedBarD3
-            data={typePerPlant.data}
-            keys={typePerPlant.keys}
+            data={filteredTypePerPlant.data}
+            keys={filteredTypePerPlant.keys}
             unit="count"
           />
         ) : (
