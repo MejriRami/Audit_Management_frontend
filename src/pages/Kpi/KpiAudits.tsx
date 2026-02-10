@@ -913,122 +913,137 @@ export default function KpiAuditsD3() {
       {error && <div className="text-sm text-red-600">{error}</div>}
 
       {/* -----------------------
-          Monday layout order (as close as possible)
+          Charts in 2-column grid layout
          ----------------------- */}
-      <ComponentCard title="Hours of Audits by date (all plants / all type)">
-        {filteredAuditHours?.data?.length ? (
-          <StackedBarD3
-            data={filteredAuditHours.data}
-            keys={filteredAuditHours.keys}
-            unit="hours"
-            referenceLines={filteredAuditHours.referenceLines ?? []}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+      
+      {/* Row 1: Audit Hours + Average Days */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ComponentCard title="Hours of Audits by date (all plants / all type)">
+          {filteredAuditHours?.data?.length ? (
+            <StackedBarD3
+              data={filteredAuditHours.data}
+              keys={filteredAuditHours.keys}
+              unit="hours"
+              referenceLines={filteredAuditHours.referenceLines ?? []}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
 
-      <ComponentCard title="Average Days for closing Actions by date">
-        {avgDaysClose?.data?.length ? (
-          <SimpleBarD3
-            data={avgDaysClose.data}
-            unit="days"
-            referenceLines={avgDaysClose.referenceLines ?? []}
-            valueFormat={(v) => `${v.toFixed(2)}`}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+        <ComponentCard title="Average Days for closing Actions by date">
+          {avgDaysClose?.data?.length ? (
+            <SimpleBarD3
+              data={avgDaysClose.data}
+              unit="days"
+              referenceLines={avgDaysClose.referenceLines ?? []}
+              valueFormat={(v) => `${v.toFixed(2)}`}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
+      </div>
 
-      <ComponentCard title="Number of CAR by date">
-        {filteredCarCount?.data?.length ? (
-          <StackedBarD3 data={filteredCarCount.data} keys={filteredCarCount.keys} unit="count" />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+      {/* Row 2: Number of CAR + Working Days */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ComponentCard title="Number of CAR by date">
+          {filteredCarCount?.data?.length ? (
+            <StackedBarD3 data={filteredCarCount.data} keys={filteredCarCount.keys} unit="count" />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
 
-      <ComponentCard title="Number of Working days for closing actions by plants">
-        {filteredWorkingDaysByPlant?.data?.length ? (
-          <CategoryBarD3
-            data={filteredWorkingDaysByPlant.data}
-            unit="days"
-            referenceLines={filteredWorkingDaysByPlant.referenceLines ?? []}
-            colorByGroup={true}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+        <ComponentCard title="Number of Working days for closing actions by plants">
+          {filteredWorkingDaysByPlant?.data?.length ? (
+            <CategoryBarD3
+              data={filteredWorkingDaysByPlant.data}
+              unit="days"
+              referenceLines={filteredWorkingDaysByPlant.referenceLines ?? []}
+              colorByGroup={true}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
+      </div>
 
-      <ComponentCard title="Number of open CAR by plant">
-        {filteredOpenCarByPlant?.data?.length ? (
-          <CategoryBarD3
-            data={filteredOpenCarByPlant.data}
-            unit="count"
-            colorByGroup={true}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+      {/* Row 3: Open CAR by Plant + Late Open CAR */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ComponentCard title="Number of open CAR by plant">
+          {filteredOpenCarByPlant?.data?.length ? (
+            <CategoryBarD3
+              data={filteredOpenCarByPlant.data}
+              unit="count"
+              colorByGroup={true}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
 
-      <ComponentCard title="Number of Late open CAR by plant">
-        {filteredLateOpenCarByPlant?.data?.length ? (
-          <CategoryBarD3
-            data={filteredLateOpenCarByPlant.data}
-            unit="count"
-            colorByGroup={true}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+        <ComponentCard title="Number of Late open CAR by plant">
+          {filteredLateOpenCarByPlant?.data?.length ? (
+            <CategoryBarD3
+              data={filteredLateOpenCarByPlant.data}
+              unit="count"
+              colorByGroup={true}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
+      </div>
 
-      <ComponentCard title="Number of open CAR by Audit">
-        {openCarByAudit?.data?.length ? (
-          <CategoryBarD3
-            data={openCarByAudit.data}
-            unit="count"
-            colorByGroup={false}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+      {/* Row 4: Open CAR by Audit + Late CAR by Week */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ComponentCard title="Number of open CAR by Audit">
+          {openCarByAudit?.data?.length ? (
+            <CategoryBarD3
+              data={openCarByAudit.data}
+              unit="count"
+              colorByGroup={false}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
 
-      <ComponentCard title="Late CAR by week by plant">
-        {filteredLateCar?.data?.length ? (
-          <StackedBarD3 data={filteredLateCar.data} keys={filteredLateCar.keys} unit="count" />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+        <ComponentCard title="Late CAR by week by plant">
+          {filteredLateCar?.data?.length ? (
+            <StackedBarD3 data={filteredLateCar.data} keys={filteredLateCar.keys} unit="count" />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
+      </div>
 
-      {/* Keep existing non-Monday charts (optional) */}
-      <ComponentCard title="Number of audits and score">
-        {countScore?.data?.length ? (
-          <ComboBarLineD3
-            data={countScore.data}
-            gradeLines={countScore.gradeLines}
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+      {/* Row 5: Count/Score + Audits per Type */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ComponentCard title="Number of audits and score">
+          {countScore?.data?.length ? (
+            <ComboBarLineD3
+              data={countScore.data}
+              gradeLines={countScore.gradeLines}
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
 
-      <ComponentCard title="Audits per type per plant">
-        {filteredTypePerPlant?.data?.length ? (
-          <StackedBarD3
-            data={filteredTypePerPlant.data}
-            keys={filteredTypePerPlant.keys}
-            unit="count"
-          />
-        ) : (
-          <div className="text-sm text-gray-500">No data.</div>
-        )}
-      </ComponentCard>
+        <ComponentCard title="Audits per type per plant">
+          {filteredTypePerPlant?.data?.length ? (
+            <StackedBarD3
+              data={filteredTypePerPlant.data}
+              keys={filteredTypePerPlant.keys}
+              unit="count"
+            />
+          ) : (
+            <div className="text-sm text-gray-500">No data.</div>
+          )}
+        </ComponentCard>
+      </div>
     </div>
   );
 }
